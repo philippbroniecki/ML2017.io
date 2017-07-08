@@ -286,17 +286,8 @@ world.data[ 1:10 , ]</code></pre>
 </table>
 <p>Remember, to use any of the <code>dplyr</code> functions, you must first load package with <code>library(dplyr)</code>.</p>
 <p>We want to rename the variable <code>h_j</code> which is a categorical variable, where <code>1</code> means that an independent judiciary exists and the other category means that the executive branch has some control over the judiciary. In order to save your new variable name in the dataset <code>world.data</code>, we have to assign our renamed variable to the dataset using the <code>&lt;-</code> symbol. We will now rename <code>h_j</code> into <code>judiciary</code>.</p>
-<pre class="r"><code>library(dplyr)</code></pre>
-<pre><code>## Warning: package &#39;dplyr&#39; was built under R version 3.4.1</code></pre>
-<pre><code>## 
-## Attaching package: &#39;dplyr&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:stats&#39;:
-## 
-##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code># dataset.name &lt;- rename(argument1, argument2 = argument3)
+<pre class="r"><code>library(dplyr)
+# dataset.name &lt;- rename(argument1, argument2 = argument3)
 # h_j = 1 means there is an independent judiciary
 # rename h_j to judiciary
 
@@ -314,17 +305,9 @@ names(world.data)</code></pre>
 <pre class="r"><code>install.packages(&quot;Zelig&quot;)
 install.packages(&quot;texreg&quot;)</code></pre>
 <p>Now, let’s load Zelig, textreg, and dplyr.</p>
-<pre class="r"><code>library(texreg)</code></pre>
-<pre><code>## Warning: package &#39;texreg&#39; was built under R version 3.4.1</code></pre>
-<pre><code>## Version:  1.36.23
-## Date:     2017-03-03
-## Author:   Philip Leifeld (University of Glasgow)
-## 
-## Please cite the JSS article in your publications -- see citation(&quot;texreg&quot;).</code></pre>
-<pre class="r"><code>library(Zelig)</code></pre>
-<pre><code>## Warning: package &#39;Zelig&#39; was built under R version 3.4.1</code></pre>
-<pre><code>## Loading required package: survival</code></pre>
-<pre class="r"><code>library(dplyr)</code></pre>
+<pre class="r"><code>library(texreg)
+library(Zelig)
+library(dplyr)</code></pre>
 <p>Let’s load 2 datasets into R using read.csv() and confirm that the state and communityname are present in each dataset.</p>
 <pre class="r"><code># load the communities datasets
 communities &lt;- read.csv(&quot;./data/communities.csv&quot;)
@@ -561,11 +544,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean         sd       50%      2.5%    97.5%
-## 1 0.6868094 0.01242613 0.6866979 0.6624288 0.711324
+##        mean         sd       50%      2.5%     97.5%
+## 1 0.6867609 0.01233739 0.6866577 0.6628117 0.7100178
 ## pv
-##           mean        sd       50%      2.5%    97.5%
-## [1,] 0.6847814 0.1704247 0.6806818 0.3369224 1.018585
+##           mean        sd      50%      2.5%    97.5%
+## [1,] 0.6937506 0.1679998 0.700379 0.3652367 1.006028
 ## 
 ## 
 ## [1] 0.3
@@ -575,10 +558,10 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##        mean          sd       50%      2.5%     97.5%
-## 1 0.5581507 0.008134793 0.5583519 0.5416602 0.5734094
+## 1 0.5581063 0.008027457 0.5580565 0.5431685 0.5738967
 ## pv
-##           mean        sd       50%      2.5%     97.5%
-## [1,] 0.5579127 0.1752203 0.5580786 0.2118646 0.9038805
+##           mean        sd      50%      2.5%     97.5%
+## [1,] 0.5572607 0.1726848 0.563243 0.2210372 0.8840529
 ## 
 ## 
 ## [1] 0.6
@@ -587,11 +570,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean          sd       50%      2.5%     97.5%
-## 1 0.4294919 0.004661483 0.4294931 0.4203128 0.4380751
+##        mean          sd      50%      2.5%     97.5%
+## 1 0.4294518 0.004524251 0.429404 0.4207919 0.4381629
 ## pv
 ##           mean        sd       50%       2.5%     97.5%
-## [1,] 0.4355914 0.1729393 0.4319982 0.08132997 0.7765353
+## [1,] 0.4233217 0.1733869 0.4278312 0.07084734 0.7512603
 ## 
 ## 
 ## [1] 0.9
@@ -601,10 +584,10 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##        mean          sd       50%      2.5%     97.5%
-## 1 0.3008332 0.004590471 0.3007801 0.2916547 0.3100065
+## 1 0.3007972 0.004505281 0.3006127 0.2919614 0.3096668
 ## pv
 ##           mean        sd       50%        2.5%     97.5%
-## [1,] 0.2933203 0.1683414 0.3023235 -0.03576052 0.6174457</code></pre>
+## [1,] 0.2981898 0.1664617 0.2961835 -0.01849106 0.6312903</code></pre>
 <pre class="r"><code>ci.plot(s.out, xlab = &quot;Majority population (%)&quot;, ci = 95)</code></pre>
 <p><img src="day2_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
 </div>
