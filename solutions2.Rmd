@@ -1,0 +1,69 @@
+---
+title: "Lab 2  -- Solutions"
+author: "Philipp Broniecki and Lucas Leemann -- Machine Learning 1K"
+---
+
+
+```{r}
+rm(list=ls())
+
+library(texreg)
+library(Zelig)
+library(dplyr)
+
+
+# read in various datasets and combine them 
+communities <- read.csv("./data/communities.csv")
+communities_employment <- read.csv("http://uclspp.github.io/PUBLG100/data/communities_employment.csv")
+communities_immigration <- read.csv("http://uclspp.github.io/PUBLG100/data/communities_immig.csv")
+
+```
+
+
+```{r}
+communities <- merge(communities, communities_employment, by = c("state", "communityname"))
+communities <- merge(communities, communities_immigration, by = c("state", "communityname"))
+```
+
+
+```{r}
+## ------------------------------------------------------------------------
+communities <- select(communities, 
+                      state, 
+                      Community = communityname, 
+                      UnemploymentRate = PctUnemployed.y, 
+                      NoHighSchool = PctNotHSGrad,
+                      White = racePctWhite,
+                      RecentImmigration5 = PctImmigRec5)
+
+## ------------------------------------------------------------------------
+model_immigration <- lm(UnemploymentRate ~ RecentImmigration5, data = communities)
+summary(model_immigration)
+
+
+## ------------------------------------------------------------------------
+plot(communities$RecentImmigration5, communities$UnemploymentRate,
+     xlab = "Recent Immigration",
+     ylab = "Unemployment Rate")
+
+abline(model_immigration, col = "red")
+
+## ------------------------------------------------------------------------
+model_education <- lm(UnemploymentRate ~ NoHighSchool, data = communities)
+
+communities$Minority <- 1 - communities$White
+model_minority <- lm(UnemploymentRate ~ Minority, data = communities)
+
+screenreg(list(model_education, model_minority, model_immigration))
+
+## ------------------------------------------------------------------------
+htmlreg(list(model_education, model_minority, model_immigration), file = "solutions_Lab2_model_comparison.doc")
+
+## ------------------------------------------------------------------------
+z.out <- zelig(UnemploymentRate ~ RecentImmigration5, data = communities, model = "ls")
+x.out <- setx(z.out, RecentImmigration5 = seq(0, 1, 0.1))
+s.out <- sim(z.out, x = x.out, n=10000)
+
+ci.plot(s.out, xlab = "Recent Immigration (last 5 years)", ci = 95)
+
+```

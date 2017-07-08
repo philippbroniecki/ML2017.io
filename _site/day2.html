@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Philipp Broniecki and Lucas Leemann – Machine Learning 1K" />
+
+
+<title>Lab 2 – Linear Regression</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Essex 2017 Machine Learning</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="day1.html">Day 1</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 2
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day2.html">Lab</a>
+    </li>
+    <li>
+      <a href="solutions2.html">Solutions 2</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Lab 2 – Linear Regression</h1>
+<h4 class="author"><em>Philipp Broniecki and Lucas Leemann – Machine Learning 1K</em></h4>
+
+</div>
+
+
+<div id="the-linear-model-based-on-leemann-and-mykhaylov-publg100" class="section level5">
+<h5>The Linear Model (based on Leemann and Mykhaylov, PUBLG100)</h5>
+<p>When starting a new R session it is good practice to ensure that the working space is empty. We can do so by deleting all existing objects with the <code>rm()</code> command:</p>
+<pre class="r"><code>rm(list=ls()) # clear workspace</code></pre>
+</div>
+<div id="loading-dataset-in-stata-format" class="section level3">
+<h3>Loading Dataset in Stata Format</h3>
+<p>We will load a data set in Stata format. One of the core packages that comes pre-installed with R allows us to directly read a file saved in Stata format. The package is called <code>foreign</code> and it’s designed to provide support for non-native (or “foreign”) file formats.</p>
+<p>The function we need to use for loading a file in Stata format is <a href="http://bit.ly/R_read_dta"><code>read.dta()</code></a>. We use data from the Institute for Quality of Governance today. You can download a codebook for the variables <a href="http://www.qogdata.pol.gu.se/dataarchive/qog_bas_jan15.pdf">here</a>.</p>
+<p>Now let’s load the dataset and do our usual routine of getting to know our data.</p>
+<pre class="r"><code>library(foreign) # to work with foreign file formats
+
+# loading a STATA format data set (remember to load the library foreign 1st)
+world.data &lt;- read.dta(&quot;http://uclspp.github.io/PUBLG100/data/QoG2012.dta&quot;)
+
+# the dimensions: rows (observations) and columns (variables) 
+dim(world.data)</code></pre>
+<pre><code>## [1] 194   7</code></pre>
+<pre class="r"><code># the variable names
+names(world.data) </code></pre>
+<pre><code>## [1] &quot;h_j&quot;         &quot;wdi_gdpc&quot;    &quot;undp_hdi&quot;    &quot;wbgi_cce&quot;    &quot;wbgi_pse&quot;   
+## [6] &quot;former_col&quot;  &quot;lp_lat_abst&quot;</code></pre>
+<pre class="r"><code># the top ten rows and all columns
+world.data[ 1:10 , ]</code></pre>
+<pre><code>##    h_j   wdi_gdpc undp_hdi   wbgi_cce   wbgi_pse former_col lp_lat_abst
+## 1   -5   628.4074       NA -1.5453584 -1.9343837          0   0.3666667
+## 2   -5  4954.1982    0.781 -0.8538115 -0.6026081          0   0.4555556
+## 3   -5  6349.7207    0.704 -0.7301510 -1.7336243          1   0.3111111
+## 4   NA         NA       NA  1.3267342  1.1980436          0   0.4700000
+## 5   -5  2856.7517    0.381 -1.2065741 -1.4150945          1   0.1366667
+## 6   NA 13981.9795    0.800  0.8624368  0.7084046          1   0.1892222
+## 7   -5  2980.8616    0.746 -0.9852442 -1.1296966          0   0.4477778
+## 8   -5  8584.8857    0.853 -0.7264611 -1.0361214          1   0.3777778
+## 9    1 32201.2227    0.946  1.8478516  1.2044924          0   0.3000000
+## 10   1 32082.7168    0.934  1.9580450  1.3096740          0   0.5244445</code></pre>
+</div>
+<div id="dplyr-package" class="section level3">
+<h3>Dplyr Package</h3>
+<p>Today we introduce another package called <code>dplyr</code>. It is a package that makes it easier for you to work with data sets. It includes functions that let you rename variables, pick out observations that fulfill certain conditions, like <code>gender==female</code>, lets you select certain variables and many more things. From now on, we will introduce a set of new function of <code>dplyr</code> every week. But first we will install the package with <code>install.packages(&quot;dplyr&quot;)</code>. Each time you want to use the package you have to load it with <code>library(dplyr)</code>.</p>
+<pre class="r"><code>install.packages(&quot;dplyr&quot;)</code></pre>
+</div>
+<div id="dplyr-rename" class="section level3">
+<h3>Dplyr <code>rename()</code></h3>
+<p>The first function from the <code>dplyr</code> package that will make your life easier is <code>rename()</code>. You may have noticed that the variable names in our data are quite cryptic. With the help of the codebook we understand what is going on but we may want to use more intuitive variable names instead. The <code>rename()</code> function lets you do that.</p>
+<p>Here’s a list of arguments we need to provide to the <code>rename()</code> function and their descriptions.</p>
+<pre><code>rename(dataset, expression)</code></pre>
+<table style="width:96%;">
+<colgroup>
+<col width="12%" />
+<col width="83%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>dataset</td>
+<td>The first argument is the name of your dataset (we have called it <code>world.data</code>).</td>
+</tr>
+<tr class="even">
+<td>expression</td>
+<td>The second argument is the expression that assigns a new variable name to an existing variable in our dataset. For example: <br>• <code>new.variable = existing.variable</code></td>
+</tr>
+</tbody>
+</table>
+<p>Remember, to use any of the <code>dplyr</code> functions, you must first load package with <code>library(dplyr)</code>.</p>
+<p>We want to rename the variable <code>h_j</code> which is a categorical variable, where <code>1</code> means that an independent judiciary exists and the other category means that the executive branch has some control over the judiciary. In order to save your new variable name in the dataset <code>world.data</code>, we have to assign our renamed variable to the dataset using the <code>&lt;-</code> symbol. We will now rename <code>h_j</code> into <code>judiciary</code>.</p>
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## Warning: package &#39;dplyr&#39; was built under R version 3.4.1</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code># dataset.name &lt;- rename(argument1, argument2 = argument3)
+# h_j = 1 means there is an independent judiciary
+# rename h_j to judiciary
+
+# rename a variable and save the result in our data frame
+world.data &lt;- rename(world.data, judiciary = h_j)
+
+# check the result
+names(world.data)</code></pre>
+<pre><code>## [1] &quot;judiciary&quot;   &quot;wdi_gdpc&quot;    &quot;undp_hdi&quot;    &quot;wbgi_cce&quot;    &quot;wbgi_pse&quot;   
+## [6] &quot;former_col&quot;  &quot;lp_lat_abst&quot;</code></pre>
+</div>
+<div id="two-new-packages" class="section level3">
+<h3>Two New Packages</h3>
+<p>We’re introducing two new packages in today’s lab. The Zelig package provides functionality that simplifies some regression tasks, while texreg makes it easy to produce publication quality output from our regression models. We’ll discuss these packages in more detail as we go along but for now let’s just install them with the <code>install.packages()</code> function.</p>
+<pre class="r"><code>install.packages(&quot;Zelig&quot;)
+install.packages(&quot;texreg&quot;)</code></pre>
+<p>Now, let’s load Zelig, textreg, and dplyr.</p>
+<pre class="r"><code>library(texreg)</code></pre>
+<pre><code>## Warning: package &#39;texreg&#39; was built under R version 3.4.1</code></pre>
+<pre><code>## Version:  1.36.23
+## Date:     2017-03-03
+## Author:   Philip Leifeld (University of Glasgow)
+## 
+## Please cite the JSS article in your publications -- see citation(&quot;texreg&quot;).</code></pre>
+<pre class="r"><code>library(Zelig)</code></pre>
+<pre><code>## Warning: package &#39;Zelig&#39; was built under R version 3.4.1</code></pre>
+<pre><code>## Loading required package: survival</code></pre>
+<pre class="r"><code>library(dplyr)</code></pre>
+<p>Let’s load 2 datasets into R using read.csv() and confirm that the state and communityname are present in each dataset.</p>
+<pre class="r"><code># load the communities datasets
+communities &lt;- read.csv(&quot;./data/communities.csv&quot;)
+communities_employment &lt;- read.csv(&quot;http://uclspp.github.io/PUBLG100/data/communities_employment.csv&quot;)</code></pre>
+</div>
+<div id="dplyr-select-function" class="section level3">
+<h3>Dplyr <code>select()</code> Function</h3>
+<p>Since our dataset has more columns than we need, let’s select only the ones we’re interested in and rename them with meaningful names. One approach would be to use either the <code>subset()</code> function or the square bracket [ ] extraction operator for selecting the columns we’re interested in. But the easiest way to accomplish this is with the dplyr <code>select()</code> function that allows us select the columns we need and rename them at the same time.</p>
+<pre class="r"><code>communities &lt;- select(communities, 
+                      state, 
+                      Community = communityname, 
+                      UnemploymentRate = PctUnemployed, 
+                      NoHighSchool = PctNotHSGrad,
+                      White = racePctWhite)</code></pre>
+<p>Now that we’ve merged the dataset and renamed the columns the way we want, let’s try to visualize the data with a simple plot command.</p>
+<p>Is there a correlation between unemployment rate and lack of high school level education?</p>
+<pre class="r"><code>plot(communities$NoHighSchool, communities$UnemploymentRate,
+     xlab = &quot;Adults without High School education (%)&quot;,
+     ylab = &quot;Unemployment Rate&quot;,
+     bty = &quot;n&quot;)</code></pre>
+<p><img src="day2_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>In order to answer that question empirically, we will run linear regression using the <code>lm()</code> function in R. The <code>lm()</code> function needs to know the relationship we’re trying to model and the dataset for our observations. The two arguments we need to provide to the <code>lm()</code> function are described below.</p>
+<table style="width:96%;">
+<colgroup>
+<col width="12%" />
+<col width="83%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>formula</code></td>
+<td>The <code>formula</code> describes the relationship between the dependent and independent variables, for example <code>dependent.variable ~ independent.variable</code> <br> In our case, we’d like to model the relationship using the formula: <code>UnemploymentRate ~ NoHighSchool</code></td>
+</tr>
+<tr class="even">
+<td><code>data</code></td>
+<td>This is simply the name of the dataset that contains the variable of interest. In our case, this is the merged dataset called <code>communities</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>For more information on how the <code>lm()</code> function works, type help(lm) in R.</p>
+<pre class="r"><code>model1 &lt;- lm(UnemploymentRate ~ NoHighSchool, data = communities)</code></pre>
+<p>The <code>lm()</code> function has modeled the relationship between UnemploymentRate and NoHighSchool and we’ve saved it in a variable called model1. Let’s use the <code>summary()</code> function to see what this linear model looks like.</p>
+<pre class="r"><code>summary(model1)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = UnemploymentRate ~ NoHighSchool, data = communities)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.42347 -0.08499 -0.01189  0.07711  0.56470 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  0.078952   0.006483   12.18   &lt;2e-16 ***
+## NoHighSchool 0.742385   0.014955   49.64   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.1352 on 1992 degrees of freedom
+## Multiple R-squared:  0.553,  Adjusted R-squared:  0.5527 
+## F-statistic:  2464 on 1 and 1992 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>The output from <code>lm()</code> might seem overwhelming at first so let’s break it down one item at a time.</p>
+<div class="figure">
+<img src="../img/lm.png" />
+
+</div>
+<table>
+<colgroup>
+<col width="8%" />
+<col width="91%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><img src="../img/circle1.png" /></td>
+<td>The <em>dependent</em> variable, also sometimes called the outcome variable. We are trying to model the effects of <code>NoHighSchool</code> on <code>UnemploymentRate</code> so <code>UnemploymentRate</code> is the <em>dependent</em> variable.</td>
+</tr>
+<tr class="even">
+<td><img src="../img/circle2.png" /></td>
+<td>The <em>independent</em> variable or the predictor variable. In our example, <code>NoHighSchool</code> is the <em>independent</em> variable.</td>
+</tr>
+<tr class="odd">
+<td><img src="../img/circle3.png" /></td>
+<td>The differences between the observed values and the predicted values are called <em>residuals</em>.</td>
+</tr>
+<tr class="even">
+<td><img src="../img/circle4.png" /></td>
+<td>The <em>coefficients</em> for the intercept and the <em>independent</em> variables. Using the <em>coefficients</em> we can write down the relationship between the <em>dependent</em> and the <em>independent</em> variables as: <br><br><code>UnemploymentRate</code> = 0.078952 + ( 0.7423853 * <code>NoHighSchool</code> ) <br><br>This tells us that for each unit increase in the variable <code>NoHighSchool</code>, the <code>UnemploymentRate</code> increases by 0.7423853.</td>
+</tr>
+<tr class="odd">
+<td><img src="../img/circle5.png" /></td>
+<td>The <em>p-value</em> of the model. Recall that according to the null hypotheses, the coefficient of interest is zero. The <em>p-value</em> tells us whether can can reject the null hypotheses or not.</td>
+</tr>
+<tr class="even">
+<td><img src="../img/circle6.png" /></td>
+<td>The <em>standard error</em> estimates the standard deviation of the coefficients in our model. We can think of the <em>standard error</em> as the measure of precision for the estimated coefficients.</td>
+</tr>
+<tr class="odd">
+<td><img src="../img/circle7.png" /></td>
+<td>The <em>t statistic</em> is obtained by dividing the <em>coefficients</em> by the <em>standard error</em>.</td>
+</tr>
+<tr class="even">
+<td><img src="../img/circle8.png" /></td>
+<td>The <em>R-squared</em> and <em>adjusted R-squared</em> tell us how much of the variance in our model is accounted for by the <em>independent</em> variable. The <em>adjusted R-squared</em> is always smaller than <em>R-squared</em> as it takes into account the number of <em>independent</em> variables and degrees of freedom.</td>
+</tr>
+</tbody>
+</table>
+<p>Now let’s plot the regression line with our observations using the <code>abline()</code> function.</p>
+<pre class="r"><code>plot(communities$NoHighSchool, communities$UnemploymentRate,
+     xlab = &quot;Adults without High School education (%)&quot;,
+     ylab = &quot;Unemployment Rate&quot;)
+abline(model1, col = &quot;red&quot;)</code></pre>
+<p><img src="day2_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>While the <code>summary()</code> function provides a slew of information about a fitted regression model, we often need to present our findings in easy to read tables similar to what you see in journal publications. The texreg package we installed earlier allows us to do just that.</p>
+<p>Let’s take a look at how to display the output of a regression model on the screen using the <code>screenreg()</code> function from texreg.</p>
+<pre class="r"><code>screenreg(model1)</code></pre>
+<pre><code>## 
+## =========================
+##               Model 1    
+## -------------------------
+## (Intercept)      0.08 ***
+##                 (0.01)   
+## NoHighSchool     0.74 ***
+##                 (0.01)   
+## -------------------------
+## R^2              0.55    
+## Adj. R^2         0.55    
+## Num. obs.     1994       
+## RMSE             0.14    
+## =========================
+## *** p &lt; 0.001, ** p &lt; 0.01, * p &lt; 0.05</code></pre>
+<p>Returning to our example, are there other variables that might explain unemployment rates in our communities dataset? For example, is unemployment rate higher or lower in communities with different levels of minority population?</p>
+<p>We first create a new variable called <code>Minority</code> by subtracting the percent of <code>White</code> population from 1. Alternatively, we could have added up the percent of Black, Hispanic and Asians to get the percentage of minority population since our census data also has those variables.</p>
+<pre class="r"><code>communities$Minority &lt;- 1 - communities$White</code></pre>
+<p>Next we fit a linear model using <code>Minority</code> as the independent variable.</p>
+<pre class="r"><code>model2 &lt;- lm(UnemploymentRate ~ Minority, data = communities)
+summary(model2)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = UnemploymentRate ~ Minority, data = communities)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.45521 -0.12189 -0.02369  0.10162  0.68203 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 0.257948   0.005506   46.85   &lt;2e-16 ***
+## Minority    0.428702   0.015883   26.99   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.173 on 1992 degrees of freedom
+## Multiple R-squared:  0.2678, Adjusted R-squared:  0.2674 
+## F-statistic: 728.5 on 1 and 1992 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Now let’s see how this model compares to our first model. We can show regression line from <code>model2</code> just like we did with our first model.</p>
+<pre class="r"><code>plot(communities$Minority, communities$UnemploymentRate,
+     xlab = &quot;Minority population (%)&quot;,
+     ylab = &quot;Unemployment Rate&quot;)
+abline(model2, col = &quot;blue&quot;)</code></pre>
+<p><img src="day2_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p>Does <code>model2</code> offer a better fit than <code>model1</code>? Maybe we can answer that question by looking at the regression tables instead. Let’s print the two models side-by-side in a single table with <code>screenreg()</code>.</p>
+<pre class="r"><code>screenreg(list(model1, model2))</code></pre>
+<pre><code>## 
+## ======================================
+##               Model 1      Model 2    
+## --------------------------------------
+## (Intercept)      0.08 ***     0.26 ***
+##                 (0.01)       (0.01)   
+## NoHighSchool     0.74 ***             
+##                 (0.01)                
+## Minority                      0.43 ***
+##                              (0.02)   
+## --------------------------------------
+## R^2              0.55         0.27    
+## Adj. R^2         0.55         0.27    
+## Num. obs.     1994         1994       
+## RMSE             0.14         0.17    
+## ======================================
+## *** p &lt; 0.001, ** p &lt; 0.01, * p &lt; 0.05</code></pre>
+<p>Finally, let’s save the same output as a Microsoft Word document using <code>htmlreg()</code>.</p>
+<pre class="r"><code>htmlreg(list(model1, model2), file = &quot;lab4_model_comparison.doc&quot;)</code></pre>
+<pre><code>## The table was written to the file &#39;lab4_model_comparison.doc&#39;.</code></pre>
+</div>
+<div id="predictions-and-confidence-interval" class="section level3">
+<h3>Predictions and Confidence Interval</h3>
+<p>We will use the Zelig package since it provides convenient functions for making predictions and plotting confidence intervals. First, let’s go back to our last model where we used <code>Minority</code> as the independent variable but this time estimate the model using the Zelig package. The arguments for the <code>zelig()</code> function are very similar to what we used with <code>lm()</code>. The only difference is that we need to tell Zelig what type of model we’re trying to estimate.</p>
+<pre class="r"><code>z.out &lt;- zelig(UnemploymentRate ~ White, data = communities, model = &quot;ls&quot;)</code></pre>
+<pre><code>## How to cite this model in Zelig:
+##   R Core Team. 2007.
+##   ls: Least Squares Regression for Continuous Dependent Variables
+##   in Christine Choirat, Christopher Gandrud, James Honaker, Kosuke Imai, Gary King, and Olivia Lau,
+##   &quot;Zelig: Everyone&#39;s Statistical Software,&quot; http://zeligproject.org/</code></pre>
+<p>The model estimated with <code>zelig()</code> is saved in a variable called <code>z.out</code>. We can use the <code>summary()</code> function exactly the same way as we used it with <code>lm()</code> to print out the estimated model.</p>
+<pre class="r"><code>summary(z.out)</code></pre>
+<pre><code>## Model: 
+## 
+## Call:
+## z5$zelig(formula = UnemploymentRate ~ White, data = communities)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.45521 -0.12189 -0.02369  0.10162  0.68203 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept)  0.68665    0.01258   54.57   &lt;2e-16
+## White       -0.42870    0.01588  -26.99   &lt;2e-16
+## 
+## Residual standard error: 0.173 on 1992 degrees of freedom
+## Multiple R-squared:  0.2678, Adjusted R-squared:  0.2674 
+## F-statistic: 728.5 on 1 and 1992 DF,  p-value: &lt; 2.2e-16
+## 
+## Next step: Use &#39;setx&#39; method</code></pre>
+<p>Next, let’s use Zelig’s <code>setx()</code> and <code>sim()</code> functions for making predictions and plotting confidence intervals.</p>
+<pre class="r"><code>x.out &lt;- setx(z.out, White = seq(0, .9, 0.3))
+s.out &lt;- sim(z.out, x = x.out)
+
+summary(s.out)</code></pre>
+<pre><code>## 
+## [1] 0
+## 
+## 
+##  sim range :
+##  -----
+## ev
+##        mean         sd       50%      2.5%     97.5%
+## 1 0.6868306 0.01276576 0.6869185 0.6615123 0.7104786
+## pv
+##           mean        sd       50%      2.5%   97.5%
+## [1,] 0.6835259 0.1736091 0.6866662 0.3388033 1.05393
+## 
+## 
+## [1] 0.3
+## 
+## 
+##  sim range :
+##  -----
+## ev
+##        mean          sd       50%      2.5%     97.5%
+## 1 0.5581786 0.008317619 0.5579341 0.5418343 0.5737929
+## pv
+##           mean       sd       50%      2.5%     97.5%
+## [1,] 0.5656095 0.172296 0.5626431 0.2200453 0.8944371
+## 
+## 
+## [1] 0.6
+## 
+## 
+##  sim range :
+##  -----
+## ev
+##        mean          sd       50%      2.5%     97.5%
+## 1 0.4295266 0.004635731 0.4294199 0.4205393 0.4379549
+## pv
+##           mean        sd       50%       2.5%     97.5%
+## [1,] 0.4260216 0.1744286 0.4281902 0.07296277 0.7710105
+## 
+## 
+## [1] 0.9
+## 
+## 
+##  sim range :
+##  -----
+## ev
+##        mean          sd       50%     2.5%     97.5%
+## 1 0.3008746 0.004459412 0.3008951 0.292029 0.3093635
+## pv
+##           mean        sd       50%        2.5%     97.5%
+## [1,] 0.2958136 0.1729828 0.2975736 -0.05906695 0.6385663</code></pre>
+<pre class="r"><code>ci.plot(s.out, xlab = &quot;Majority population (%)&quot;, ci = 95)</code></pre>
+<p><img src="day2_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+</div>
+<div id="additional-resources" class="section level3">
+<h3>Additional Resources</h3>
+<div class="container btn-container">
+<p><a href="http://altaf.shinyapps.io/linear-regression" type="button" class="btn btn-primary">Linear Regression Interactive App</a></p>
+</div>
+</div>
+<div id="exercises" class="section level3">
+<h3>Exercises</h3>
+<ol style="list-style-type: decimal">
+<li>Load the immigration dataset <a href="http://uclspp.github.io/PUBLG100/data/communities_immig.csv">dataset</a></li>
+<li>Rename the <code>PctImmigRec5</code> variable to <code>RecentImmigration5</code>.</li>
+<li>Estimate a model explaining the relationship between unemployment rate and recent immigration over the past 5 years using the variable <code>RecentImmigration5</code>.</li>
+<li>Plot the regression line of the model.</li>
+<li>How does this model compare to the models we estimated in the seminar with <code>NoHighSchool</code> and <code>Minority</code> as independent variables? Present your findings by comparing the output of all three models in side-by-side tables using the <code>texreg</code> package.</li>
+<li>Save your model comparison table to a Microsoft Word document (or another format if you don’t use Word).</li>
+<li>Generate predicted values from the fitted model with <code>RecentImmigration5</code> and plot the confidence interval using Zelig.</li>
+<li>Save all the plots as graphics files.
+<ul>
+<li>Hint: Look at the Plot window in RStudio for an option to save your plot. Alternatively, you can use the <code>png()</code> function for saving the graphics file directly from your R script.</li>
+</ul></li>
+</ol>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Philipp Broniecki and Lucas Leemann – Machine Learning 1K" />
+
+
+<title>Lab 1 – Introduction to R</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Essex 2017 Machine Learning</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="day1.html">Day 1</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 2
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day2.html">Lab</a>
+    </li>
+    <li>
+      <a href="solutions2.html">Solutions 2</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Lab 1 – Introduction to R</h1>
+<h4 class="author"><em>Philipp Broniecki and Lucas Leemann – Machine Learning 1K</em></h4>
+
+</div>
+
+
+<div id="r-introduction-based-on-leemann-and-mykhaylov-publg100" class="section level5">
+<h5>R Introduction (based on Leemann and Mykhaylov, PUBLG100)</h5>
+<p>Let’s get acquainted with R.</p>
+<p>Take a look at R Studio. See the 4 windows:</p>
+<ul>
+<li>Upper-Left : R-script.</li>
+<li>Lower-Left : Console.</li>
+<li>Upper-Right : Environment (data, variables, …)</li>
+<li>Lower-Right : Plots, help file, packages etc.</li>
+</ul>
+<p>We begin by walking through the steps for creating and saving an R script.</p>
+<ul>
+<li>Create a new R script and save it as lab1.R to your <code>StatisticalLearning</code> directory.</li>
+<li>Now type the following commands in the new file you just created:</li>
+</ul>
+<pre class="r"><code># check working directory
+getwd()</code></pre>
+<pre><code>## [1] &quot;C:/Users/phili/Documents/ML2017.io&quot;</code></pre>
+<p>Save your script, and re-open it to make sure your changes are still there. Then check your workspace.</p>
+<pre class="r"><code># check workspace
+ls()
+# delete variable &#39;a&#39; from workspace
+rm(a)
+# delete everything from workspace
+rm( list = ls() )
+
+# to clear console window press Crtl+l on Win or Command+l on Mac</code></pre>
+</div>
+<div id="creating-and-manipulating-variables-vectors-data-frames" class="section level3">
+<h3>Creating and manipulating variables, vectors, data frames</h3>
+<pre class="r"><code># Create a numeric and a character variable
+a &lt;- 5 
+typeof(a) # a is a numeric variable</code></pre>
+<pre><code>## [1] &quot;double&quot;</code></pre>
+<pre class="r"><code>a</code></pre>
+<pre><code>## [1] 5</code></pre>
+<pre class="r"><code>b &lt;- &quot;Yay stats class&quot;
+typeof(b) # b is a string variable</code></pre>
+<pre><code>## [1] &quot;character&quot;</code></pre>
+<pre class="r"><code>b</code></pre>
+<pre><code>## [1] &quot;Yay stats class&quot;</code></pre>
+<pre class="r"><code># Create a vector
+my.vector &lt;- c(10,7,99,34,0,5) # a vector
+my.vector</code></pre>
+<pre><code>## [1] 10  7 99 34  0  5</code></pre>
+<pre class="r"><code>length(my.vector) # how many elements?</code></pre>
+<pre><code>## [1] 6</code></pre>
+<pre class="r"><code># subsetting
+my.vector[1] # 1st vector element</code></pre>
+<pre><code>## [1] 10</code></pre>
+<pre class="r"><code>my.vector[-1] # all elements but the 1st</code></pre>
+<pre><code>## [1]  7 99 34  0  5</code></pre>
+<pre class="r"><code>my.vector[2:4] # the 2nd to the 4th elements</code></pre>
+<pre><code>## [1]  7 99 34</code></pre>
+<pre class="r"><code>my.vector[c(2,5)] # 2nd and 5th element</code></pre>
+<pre><code>## [1] 7 0</code></pre>
+<pre class="r"><code>my.vector[length(my.vector)] # the last element</code></pre>
+<pre><code>## [1] 5</code></pre>
+<pre class="r"><code># calculating in R
+# element-wise operations
+my.vector + 2 </code></pre>
+<pre><code>## [1]  12   9 101  36   2   7</code></pre>
+<pre class="r"><code>my.vector * 2</code></pre>
+<pre><code>## [1]  20  14 198  68   0  10</code></pre>
+<pre class="r"><code>my.vector / 2</code></pre>
+<pre><code>## [1]  5.0  3.5 49.5 17.0  0.0  2.5</code></pre>
+<pre class="r"><code>my.vector ^2</code></pre>
+<pre><code>## [1]  100   49 9801 1156    0   25</code></pre>
+<pre class="r"><code>sqrt(my.vector)</code></pre>
+<pre><code>## [1] 3.162278 2.645751 9.949874 5.830952 0.000000 2.236068</code></pre>
+<pre class="r"><code>log(my.vector)</code></pre>
+<pre><code>## [1] 2.302585 1.945910 4.595120 3.526361     -Inf 1.609438</code></pre>
+<p>Use the ? to get help on R functions. E.g. ?rep will open the help for the rep() function.</p>
+<pre class="r"><code># creating longer vectors and sequences
+na.vector &lt;- rep(NA, 10)
+na.vector</code></pre>
+<pre><code>##  [1] NA NA NA NA NA NA NA NA NA NA</code></pre>
+<pre class="r"><code>id.var &lt;- seq(from = 1, to = length(na.vector), by = 1)
+# combine vectors to data frame
+my.df &lt;- data.frame(id.var, na.vector)
+my.df</code></pre>
+<pre><code>##    id.var na.vector
+## 1       1        NA
+## 2       2        NA
+## 3       3        NA
+## 4       4        NA
+## 5       5        NA
+## 6       6        NA
+## 7       7        NA
+## 8       8        NA
+## 9       9        NA
+## 10     10        NA</code></pre>
+<pre class="r"><code># create a matrix
+my.matrix1 &lt;- matrix(data = c(1,2,30,40,500,600), nrow = 3, ncol = 2, byrow = FALSE,
+                     dimnames = NULL)
+my.matrix1</code></pre>
+<pre><code>##      [,1] [,2]
+## [1,]    1   40
+## [2,]    2  500
+## [3,]   30  600</code></pre>
+<pre class="r"><code># subsetting a matrix
+my.matrix1[1,2] # element in row 1 and column 2</code></pre>
+<pre><code>## [1] 40</code></pre>
+<pre class="r"><code>my.matrix1[2,1] # element in row 2 and column 1</code></pre>
+<pre><code>## [1] 2</code></pre>
+<pre class="r"><code>my.matrix1[,1] # 1st column only</code></pre>
+<pre><code>## [1]  1  2 30</code></pre>
+<pre class="r"><code>my.matrix1[1:2,] # rows 1 to 2</code></pre>
+<pre><code>##      [,1] [,2]
+## [1,]    1   40
+## [2,]    2  500</code></pre>
+<pre class="r"><code>my.matrix1[c(1,3),] # rows 1 and 3 </code></pre>
+<pre><code>##      [,1] [,2]
+## [1,]    1   40
+## [2,]   30  600</code></pre>
+<pre class="r"><code># load, inspect, and manipulate data set
+load(&quot;./data/BSAS_manip.RData&quot;)
+# variable names
+names(data2)</code></pre>
+<pre><code>##  [1] &quot;IMMBRIT&quot;       &quot;over.estimate&quot; &quot;RSex&quot;          &quot;RAge&quot;         
+##  [5] &quot;Househld&quot;      &quot;Cons&quot;          &quot;Lab&quot;           &quot;SNP&quot;          
+##  [9] &quot;Ukip&quot;          &quot;BNP&quot;           &quot;GP&quot;            &quot;party.other&quot;  
+## [13] &quot;paper&quot;         &quot;WWWhourspW&quot;    &quot;religious&quot;     &quot;employMonths&quot; 
+## [17] &quot;urban&quot;         &quot;health.good&quot;   &quot;HHInc&quot;</code></pre>
+<pre class="r"><code># summary stats of all variables
+summary(data2)</code></pre>
+<pre><code>##     IMMBRIT       over.estimate         RSex            RAge      
+##  Min.   :  0.00   Min.   :0.0000   Min.   :1.000   Min.   :17.00  
+##  1st Qu.: 10.00   1st Qu.:0.0000   1st Qu.:1.000   1st Qu.:36.00  
+##  Median : 25.00   Median :1.0000   Median :2.000   Median :49.00  
+##  Mean   : 29.03   Mean   :0.7235   Mean   :1.544   Mean   :49.75  
+##  3rd Qu.: 40.00   3rd Qu.:1.0000   3rd Qu.:2.000   3rd Qu.:62.00  
+##  Max.   :100.00   Max.   :1.0000   Max.   :2.000   Max.   :99.00  
+##     Househld          Cons             Lab              SNP         
+##  Min.   :1.000   Min.   :0.0000   Min.   :0.0000   Min.   :0.00000  
+##  1st Qu.:1.000   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.00000  
+##  Median :2.000   Median :0.0000   Median :0.0000   Median :0.00000  
+##  Mean   :2.392   Mean   :0.2707   Mean   :0.2669   Mean   :0.01525  
+##  3rd Qu.:3.000   3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:0.00000  
+##  Max.   :8.000   Max.   :1.0000   Max.   :1.0000   Max.   :1.00000  
+##       Ukip              BNP                GP           party.other    
+##  Min.   :0.00000   Min.   :0.00000   Min.   :0.00000   Min.   :0.0000  
+##  1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.0000  
+##  Median :0.00000   Median :0.00000   Median :0.00000   Median :0.0000  
+##  Mean   :0.02955   Mean   :0.03051   Mean   :0.02193   Mean   :0.3651  
+##  3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:1.0000  
+##  Max.   :1.00000   Max.   :1.00000   Max.   :1.00000   Max.   :1.0000  
+##      paper          WWWhourspW        religious       employMonths   
+##  Min.   :0.0000   Min.   :  0.000   Min.   :0.0000   Min.   :  1.00  
+##  1st Qu.:0.0000   1st Qu.:  0.000   1st Qu.:0.0000   1st Qu.: 72.00  
+##  Median :0.0000   Median :  2.000   Median :0.0000   Median : 72.00  
+##  Mean   :0.4538   Mean   :  5.251   Mean   :0.4929   Mean   : 86.56  
+##  3rd Qu.:1.0000   3rd Qu.:  7.000   3rd Qu.:1.0000   3rd Qu.: 72.00  
+##  Max.   :1.0000   Max.   :100.000   Max.   :1.0000   Max.   :600.00  
+##      urban        health.good        HHInc       
+##  Min.   :1.000   Min.   :0.000   Min.   : 1.000  
+##  1st Qu.:2.000   1st Qu.:2.000   1st Qu.: 6.000  
+##  Median :3.000   Median :2.000   Median : 9.000  
+##  Mean   :2.568   Mean   :2.044   Mean   : 9.586  
+##  3rd Qu.:3.000   3rd Qu.:3.000   3rd Qu.:13.000  
+##  Max.   :4.000   Max.   :3.000   Max.   :17.000</code></pre>
+<pre class="r"><code># external excel-style explorer
+#fix(data2)
+# variable types in data frame
+str(data2)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    1049 obs. of  19 variables:
+##  $ IMMBRIT      : num  1 50 50 15 20 30 60 7 30 2 ...
+##  $ over.estimate: num  0 1 1 1 1 1 1 0 1 0 ...
+##  $ RSex         : num  1 2 2 2 2 1 2 1 1 1 ...
+##  $ RAge         : num  50 18 60 77 67 30 56 49 40 61 ...
+##  $ Househld     : num  2 3 1 2 1 4 2 1 4 3 ...
+##  $ Cons         : num  0 0 0 0 0 0 0 0 0 1 ...
+##  $ Lab          : num  1 0 0 0 0 0 0 0 0 0 ...
+##  $ SNP          : num  0 0 0 0 0 0 1 0 1 0 ...
+##  $ Ukip         : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ BNP          : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ GP           : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ party.other  : num  0 1 1 1 1 1 0 1 0 0 ...
+##  $ paper        : num  0 0 0 1 0 1 0 1 0 1 ...
+##  $ WWWhourspW   : num  1 4 1 2 1 14 5 8 3 0 ...
+##  $ religious    : num  0 0 0 1 1 0 1 0 1 1 ...
+##  $ employMonths : num  72 72 456 72 72 72 180 156 264 72 ...
+##  $ urban        : num  4 4 3 1 3 1 1 4 2 1 ...
+##  $ health.good  : num  1 2 3 3 3 2 2 2 2 3 ...
+##  $ HHInc        : num  13 3 9 8 9 9 13 14 11 8 ...</code></pre>
+<pre class="r"><code># indexing in data sets
+# first 5 rows and first 4 columns (similar to matrix indexing)
+data2[1:5, 1:4] </code></pre>
+<pre><code>##   IMMBRIT over.estimate RSex RAge
+## 1       1             0    1   50
+## 2      50             1    2   18
+## 3      50             1    2   60
+## 4      15             1    2   77
+## 5      20             1    2   67</code></pre>
+<pre class="r"><code># indexing with names using the $-sign
+data2$RSex[1:5]</code></pre>
+<pre><code>## [1] 1 2 2 2 2</code></pre>
+<pre class="r"><code># indexing with names using square brackets
+data2[1:6, c(&quot;RAge&quot;, &quot;WWWhourspW&quot;)]</code></pre>
+<pre><code>##   RAge WWWhourspW
+## 1   50          1
+## 2   18          4
+## 3   60          1
+## 4   77          2
+## 5   67          1
+## 6   30         14</code></pre>
+<pre class="r"><code># dimension of a data set
+dim(data2)</code></pre>
+<pre><code>## [1] 1049   19</code></pre>
+<pre class="r"><code># number of rows
+nrow(data2)</code></pre>
+<pre><code>## [1] 1049</code></pre>
+<pre class="r"><code># number of columns
+ncol(data2)</code></pre>
+<pre><code>## [1] 19</code></pre>
+<pre class="r"><code># delete a variable
+data2$SNP &lt;- NULL
+# rename a variable
+names(data2)[ names(data2) == &quot;RAge&quot; ] &lt;- &quot;age&quot;
+names(data2)</code></pre>
+<pre><code>##  [1] &quot;IMMBRIT&quot;       &quot;over.estimate&quot; &quot;RSex&quot;          &quot;age&quot;          
+##  [5] &quot;Househld&quot;      &quot;Cons&quot;          &quot;Lab&quot;           &quot;Ukip&quot;         
+##  [9] &quot;BNP&quot;           &quot;GP&quot;            &quot;party.other&quot;   &quot;paper&quot;        
+## [13] &quot;WWWhourspW&quot;    &quot;religious&quot;     &quot;employMonths&quot;  &quot;urban&quot;        
+## [17] &quot;health.good&quot;   &quot;HHInc&quot;</code></pre>
+<pre class="r"><code># creating a new (dummy) variable
+data2$old &lt;- ifelse( data2$age &gt; 30, yes = 1, no = 0)
+# frequency table of new variable
+table(data2$old)</code></pre>
+<pre><code>## 
+##   0   1 
+## 176 873</code></pre>
+<pre class="r"><code># create subesets
+df.cons &lt;- data2[ data2$Cons == 1 , ]
+df.not_cons &lt;- data2[ data2$Cons != 1, ]
+# pick observations randomly
+#?sample
+pick &lt;- sample(nrow(data2), size = as.integer(.33 * nrow(data2)), replace = FALSE)
+df2 &lt;- data2[ pick, ]
+df3 &lt;- data2[ -pick, ]</code></pre>
+</div>
+<div id="plotting" class="section level3">
+<h3>Plotting</h3>
+<pre class="r"><code># scaterplot
+plot(WWWhourspW ~ age, data = data2, 
+     main = &quot;scatterplot&quot;)</code></pre>
+<p><img src="day1_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code># boxplot
+plot(HHInc ~ as.factor(Ukip), data = data2,
+     main = &quot;boxplot&quot;,
+     xlab = &quot;Ukip party affiliation&quot;,
+     ylab = &quot;income&quot;,
+     frame.plot = FALSE)</code></pre>
+<p><img src="day1_files/figure-html/unnamed-chunk-10-2.png" width="672" /></p>
+<pre class="r"><code># density
+plot( density(data2$employMonths), bty = &quot;n&quot;, main = &quot;density plot&quot;)</code></pre>
+<p><img src="day1_files/figure-html/unnamed-chunk-10-3.png" width="672" /></p>
+<pre class="r"><code># histogram
+hist( data2$employMonths, main = &quot;histogram&quot;)</code></pre>
+<p><img src="day1_files/figure-html/unnamed-chunk-10-4.png" width="672" /></p>
+<p>Download a useful cheat-sheet for R if you are not already familiar with the essentials of R. <a href="https://www.rstudio.com/wp-content/uploads/2016/06/r-cheat-sheet.pdf" class="uri">https://www.rstudio.com/wp-content/uploads/2016/06/r-cheat-sheet.pdf</a></p>
+</div>
+<div id="exercises-1" class="section level3">
+<h3>Exercises 1</h3>
+<ol style="list-style-type: decimal">
+<li>Create a new file called “assignment1.R” in your <code>StatisticalLearning</code> folder and write all the solutions in it.</li>
+<li>Clear the workspace and set the working directory to your <code>StatisticalLearning</code> folder.</li>
+<li>Load the <a href="http://uclspp.github.io/PUBLG100/data/hsb2.xlsx">High School and Beyond</a> dataset. Remember to load any necessary packages.</li>
+<li>Calculate the final score for each student by averaging the <code>read</code>, <code>write</code>, <code>math</code>, <code>science</code>, and <code>socst</code> scores and save it in a column called <code>final_score</code>.</li>
+<li>Calculate the mean, median and mode for the <code>final_score</code>.</li>
+<li>Create a factor variable called <code>school_type</code> from <code>schtyp</code> using the following codes:
+<ul>
+<li>1 = Public schools</li>
+<li>2 = Private schools</li>
+</ul></li>
+<li>How many students are from private schools and how many are from public schools?</li>
+<li>Calculate the variance and standard deviation for <code>final_score</code> from each school type.</li>
+<li>Find out the ID of the students with the highest and lowest <code>final_score</code> from each school type.</li>
+<li>Find out the 20th, 40th, 60th and 80th percentiles of <code>final_score</code>.</li>
+<li>Create box plot for <code>final_score</code> grouped by the <code>school_type</code> factor variable to show the difference between <code>final_score</code> at public schools vs. private schools.</li>
+</ol>
+</div>
+<div id="packages" class="section level2">
+<h2>Packages</h2>
+<div id="what-are-packages-and-why-should-i-care" class="section level4">
+<h4>What are packages and why should I care?</h4>
+<p>Packages are bundled pieces of software that extend the functionality of R far beyond what’s available when you install R for the first time. Just as smartphone “apps” add new features or make existing features easier to use, packages add new functionality or provide convenient functions for tasks that otherwise would be cumbersome to do using base R packages. Some R packages are designed to carry out very specific tasks while others are aimed at offering a general purpose set of functions. We will get a chance to work with both specific and generic type of packages over the next several days.</p>
+<p>A small number of core packages come pre-installed with R but thousands of extremely useful packages are available for download with just a few keystrokes within R. The strength of R comes not just from the language itself but from the vast array of packages that you can download at no cost.</p>
+</div>
+<div id="installing-packages" class="section level4">
+<h4>Installing Packages</h4>
+<p>Recall from earlier that we used the <a href="http://bit.ly/R_read_table"><code>read.csv()</code></a> function to read a file in Comma Separated Values (CSV) format. While CSV is an extremely popular format, the dataset we’re using in this seminar is only available in Microsoft Excel format. In order to load this dataset we need a package called <a href="http://bit.ly/R_readxl0"><code>readxl</code></a>.</p>
+<p>We will install the <a href="http://bit.ly/R_readxl0"><code>readxl</code></a> package with the <a href="http://bit.ly/R_install_packages"><code>install.packages()</code></a> function. The <a href="http://bit.ly/R_install_packages"><code>install.packages()</code></a> function downloads the package from a central repository so make sure you’ve internet access before attempting to install it.</p>
+<p><code>install.packages(&quot;readxl&quot;)</code></p>
+<p>Watch out for errors and warning messages when installing or loading packages.</p>
+</div>
+<div id="removing-packages" class="section level4">
+<h4>Removing Packages</h4>
+<p>On rare occasions, you might have to remove a package from R. Although we will not demonstrate removing packages in this seminar, it is worth noting that the <a href="http://bit.ly/R_remove_packages"><code>remove.packages()</code></a> function can be used to remove a package if necessary.</p>
+</div>
+<div id="using-packages" class="section level4">
+<h4>Using Packages</h4>
+<p>Once a package is installed, it must be loaded in R using the <a href="http://bit.ly/R_library"><code>library()</code></a> function. Let’s load the <a href="http://bit.ly/R_readxl0"><code>readxl</code></a> package so we can use the functions it provides for reading a file an Excel file. The <a href="http://bit.ly/R_library"><code>library()</code></a> function takes the name of the package as an argument and makes the functionality from that package available to us in R.</p>
+<pre class="r"><code>library(readxl)</code></pre>
+<pre><code>## Warning: package &#39;readxl&#39; was built under R version 3.4.1</code></pre>
+<p>Now that the <a href="http://bit.ly/R_readxl0"><code>readxl</code></a> package is loaded, we can load our dataset. In this seminar, we’re using a small subset of <a href="https://nces.ed.gov/surveys/hsb">High School and Beyond survey</a> conducted by the National Center of Education Statistics in the U.S. Our dataset includes observations from 200 students with variables including each student’s race, gender, socioeconomic status, school type, and scores in reading, writing, math, science and social studies.</p>
+<p>First, we need to download the dataset and save it to our <code>StatisticalLearning</code> folder. If you haven’t set your working directory yet, make sure to follow the <strong>Getting Started</strong> instructions from the top of this page.</p>
+<p><a href="http://uclspp.github.io/PUBLG100/data/hsb2.xlsx" type="button" class="btn btn-success">Download ‘High School and Beyond’ Dataset</a></p>
+<p>Next we load the dataset using the <a href="http://bit.ly/R_read_excel"><code>read_excel()</code></a> function from the <a href="http://bit.ly/R_readxl0"><code>readxl</code></a> package.</p>
+<pre class="r"><code># make sure you&#39;ve downloaded the dataset from http://uclspp.github.io/PUBLG100/data/hsb2.xlsx 
+# to your StatisticalLearning working directory.
+student_data &lt;- read_excel(&quot;./data/hsb2.xlsx&quot;)</code></pre>
+</div>
+<div id="factor-variables" class="section level3">
+<h3>Factor Variables</h3>
+<p>Categorical (or nominal) variables are variables that take a fixed number of distinct values with no ordering. Some common examples of categorical variables are colors (red, blue, green), occupation (doctor, lawyer, teacher), and countries (UK, France, Germany). In R, when categorical variables are stored as numeric data (e.g. 1 for male, 2 for female), we must convert them to factor variables to ensure that categorical data are handled correctly in functions that implement statistical models, tables and graphs. Datasets from public sources such the U.N, World Bank, etc often encode categorical variables with numerical values so it is important to convert them to factor variable before running any data analysis.</p>
+<p>The High School and Beyond dataset that we’ve been using is one such example where categorical variable such as race, gender and socioeconomic status are coded as numeric data and must be converted to factor variables.</p>
+<p>We’ll use the following code book to create categorical variables for gender, race, and socioeconomic status.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Categorical Variable</th>
+<th>New Factor Variable</th>
+<th>Levels</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>female</td>
+<td>gender</td>
+<td>0 - Male <br> 1 - Female</td>
+</tr>
+<tr class="even">
+<td>ses</td>
+<td>socioeconomic_status</td>
+<td>1 - Low <br> 2 - Middle <br> 3 - High</td>
+</tr>
+<tr class="odd">
+<td>race</td>
+<td>racial_group</td>
+<td>1 - Black <br> 2- Asian <br> 3 - Hispanic <br> 4 - White</td>
+</tr>
+</tbody>
+</table>
+<p>We can convert categorical variables to factor variables using the <a href="http://bit.ly/R_factor"><code>factor()</code></a> function. The <a href="http://bit.ly/R_factor"><code>factor()</code></a> function needs the categorical variable and the distinct labels for each category (such as “Male”, “Female”) as the two arguments for creating factor variables.</p>
+<pre class="r"><code>student_data$gender &lt;- factor(student_data$female, labels = c(&quot;Male&quot;, &quot;Female&quot;)) 
+student_data$socioeconomic_status &lt;- factor(student_data$ses, labels = c(&quot;Low&quot;, &quot;Middle&quot;, &quot;High&quot;)) 
+student_data$racial_group &lt;- factor(student_data$race, labels = c(&quot;Black&quot;, &quot;Asian&quot;, &quot;Hispanic&quot;, &quot;White&quot;)) </code></pre>
+<p>Let’s quickly verify that the factor variables were created correctly.</p>
+<pre class="r"><code>head(student_data)</code></pre>
+<pre><code>## # A tibble: 6 x 14
+##      id female  race   ses schtyp  prog  read write  math science socst
+##   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
+## 1    70      0     4     1      1     1    57    52    41      47    57
+## 2   121      1     4     2      1     3    68    59    53      63    61
+## 3    86      0     4     3      1     1    44    33    54      58    31
+## 4   141      0     4     3      1     3    63    44    47      53    56
+## 5   172      0     4     2      1     2    47    52    57      53    61
+## 6   113      0     4     2      1     2    44    52    51      63    61
+## # ... with 3 more variables: gender &lt;fctr&gt;, socioeconomic_status &lt;fctr&gt;,
+## #   racial_group &lt;fctr&gt;</code></pre>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

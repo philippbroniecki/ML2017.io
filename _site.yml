@@ -1,8 +1,20 @@
 name: "Essex 2017 Machine Learning"
+output_dir: "."
 navbar:
   title: "Essex 2017 Machine Learning"
   left:
     - text: "Home"
       href: index.html
-    - text: "About"
-      href: about.html
+    - text: "Day 1"
+      href: day1.html
+    - text: "Day 2"
+      menu:
+        - text: "Lab"
+          href: day2.html
+        - text: "Solutions 2"
+          href: solutions2.html
+output:
+  html_document:
+    theme: sandstone
+    highlight: textmate
+    css: styles.css

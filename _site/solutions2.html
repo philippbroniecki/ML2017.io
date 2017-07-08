@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Philipp Broniecki and Lucas Leemann – Machine Learning 1K" />
+
+
+<title>Lab 2 – Solutions</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Essex 2017 Machine Learning</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="day1.html">Day 1</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 2
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day2.html">Lab</a>
+    </li>
+    <li>
+      <a href="solutions2.html">Solutions 2</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Lab 2 – Solutions</h1>
+<h4 class="author"><em>Philipp Broniecki and Lucas Leemann – Machine Learning 1K</em></h4>
+
+</div>
+
+
+<pre class="r"><code>rm(list=ls())
+
+library(texreg)
+library(Zelig)
+library(dplyr)
+
+
+# read in various datasets and combine them 
+communities &lt;- read.csv(&quot;./data/communities.csv&quot;)
+communities_employment &lt;- read.csv(&quot;http://uclspp.github.io/PUBLG100/data/communities_employment.csv&quot;)
+communities_immigration &lt;- read.csv(&quot;http://uclspp.github.io/PUBLG100/data/communities_immig.csv&quot;)</code></pre>
+<pre class="r"><code>communities &lt;- merge(communities, communities_employment, by = c(&quot;state&quot;, &quot;communityname&quot;))
+communities &lt;- merge(communities, communities_immigration, by = c(&quot;state&quot;, &quot;communityname&quot;))</code></pre>
+<pre class="r"><code>## ------------------------------------------------------------------------
+communities &lt;- select(communities, 
+                      state, 
+                      Community = communityname, 
+                      UnemploymentRate = PctUnemployed.y, 
+                      NoHighSchool = PctNotHSGrad,
+                      White = racePctWhite,
+                      RecentImmigration5 = PctImmigRec5)
+
+## ------------------------------------------------------------------------
+model_immigration &lt;- lm(UnemploymentRate ~ RecentImmigration5, data = communities)
+summary(model_immigration)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = UnemploymentRate ~ RecentImmigration5, data = communities)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -0.3772 -0.1461 -0.0397  0.1128  0.6746 
+## 
+## Coefficients:
+##                    Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)        0.325347   0.008917  36.488  &lt; 2e-16 ***
+## RecentImmigration5 0.105882   0.021344   4.961 7.62e-07 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.201 on 1992 degrees of freedom
+## Multiple R-squared:  0.0122, Adjusted R-squared:  0.01171 
+## F-statistic: 24.61 on 1 and 1992 DF,  p-value: 7.621e-07</code></pre>
+<pre class="r"><code>## ------------------------------------------------------------------------
+plot(communities$RecentImmigration5, communities$UnemploymentRate,
+     xlab = &quot;Recent Immigration&quot;,
+     ylab = &quot;Unemployment Rate&quot;)
+
+abline(model_immigration, col = &quot;red&quot;)</code></pre>
+<p><img src="solutions2_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code>## ------------------------------------------------------------------------
+model_education &lt;- lm(UnemploymentRate ~ NoHighSchool, data = communities)
+
+communities$Minority &lt;- 1 - communities$White
+model_minority &lt;- lm(UnemploymentRate ~ Minority, data = communities)
+
+screenreg(list(model_education, model_minority, model_immigration))</code></pre>
+<pre><code>## 
+## =========================================================
+##                     Model 1      Model 2      Model 3    
+## ---------------------------------------------------------
+## (Intercept)            0.08 ***     0.26 ***     0.33 ***
+##                       (0.01)       (0.01)       (0.01)   
+## NoHighSchool           0.74 ***                          
+##                       (0.01)                             
+## Minority                            0.43 ***             
+##                                    (0.02)                
+## RecentImmigration5                               0.11 ***
+##                                                 (0.02)   
+## ---------------------------------------------------------
+## R^2                    0.55         0.27         0.01    
+## Adj. R^2               0.55         0.27         0.01    
+## Num. obs.           1994         1994         1994       
+## RMSE                   0.14         0.17         0.20    
+## =========================================================
+## *** p &lt; 0.001, ** p &lt; 0.01, * p &lt; 0.05</code></pre>
+<pre class="r"><code>## ------------------------------------------------------------------------
+htmlreg(list(model_education, model_minority, model_immigration), file = &quot;solutions_Lab2_model_comparison.doc&quot;)</code></pre>
+<pre><code>## The table was written to the file &#39;solutions_Lab2_model_comparison.doc&#39;.</code></pre>
+<pre class="r"><code>## ------------------------------------------------------------------------
+z.out &lt;- zelig(UnemploymentRate ~ RecentImmigration5, data = communities, model = &quot;ls&quot;)</code></pre>
+<pre><code>## How to cite this model in Zelig:
+##   R Core Team. 2007.
+##   ls: Least Squares Regression for Continuous Dependent Variables
+##   in Christine Choirat, Christopher Gandrud, James Honaker, Kosuke Imai, Gary King, and Olivia Lau,
+##   &quot;Zelig: Everyone&#39;s Statistical Software,&quot; http://zeligproject.org/</code></pre>
+<pre class="r"><code>x.out &lt;- setx(z.out, RecentImmigration5 = seq(0, 1, 0.1))
+s.out &lt;- sim(z.out, x = x.out, n=10000)
+
+ci.plot(s.out, xlab = &quot;Recent Immigration (last 5 years)&quot;, ci = 95)</code></pre>
+<p><img src="solutions2_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,269 @@
+---
+title: "Lab 1  -- Introduction to R"
+author: "Philipp Broniecki and Lucas Leemann -- Machine Learning 1K"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##### R Introduction   (based on Leemann and Mykhaylov, PUBLG100)
+
+Let's get acquainted with R.
+
+Take a look at R Studio. See the 4 windows:
+
+- Upper-Left : R-script. 
+- Lower-Left : Console. 
+- Upper-Right : Environment (data, variables, ...)
+- Lower-Right : Plots, help file, packages etc.
+
+We begin by walking through the steps for creating and saving an R script. 
+
+- Create a new R script and save it as lab1.R to your `StatisticalLearning` directory. 
+- Now type the following commands in the new file you just created:
+
+```{r}
+# check working directory
+getwd()
+```
+
+Save your script, and re-open it to make sure your changes are still there. Then check your workspace.
+
+```{r, eval=FALSE}
+# check workspace
+ls()
+# delete variable 'a' from workspace
+rm(a)
+# delete everything from workspace
+rm( list = ls() )
+
+# to clear console window press Crtl+l on Win or Command+l on Mac
+```
+
+### Creating and manipulating variables, vectors, data frames
+```{r}
+# Create a numeric and a character variable
+a <- 5 
+typeof(a) # a is a numeric variable
+a
+b <- "Yay stats class"
+typeof(b) # b is a string variable
+b
+```
+
+```{r}
+# Create a vector
+my.vector <- c(10,7,99,34,0,5) # a vector
+my.vector
+length(my.vector) # how many elements?
+# subsetting
+my.vector[1] # 1st vector element
+my.vector[-1] # all elements but the 1st
+my.vector[2:4] # the 2nd to the 4th elements
+my.vector[c(2,5)] # 2nd and 5th element
+my.vector[length(my.vector)] # the last element
+```
+
+
+
+
+```{r}
+# calculating in R
+# element-wise operations
+my.vector + 2 
+my.vector * 2
+my.vector / 2
+my.vector ^2
+sqrt(my.vector)
+log(my.vector)
+```
+
+Use the ? to get help on R functions. E.g. ?rep will open the help for the rep() function.
+
+```{r}
+# creating longer vectors and sequences
+na.vector <- rep(NA, 10)
+na.vector
+id.var <- seq(from = 1, to = length(na.vector), by = 1)
+# combine vectors to data frame
+my.df <- data.frame(id.var, na.vector)
+my.df
+```
+
+
+
+```{r}
+# create a matrix
+my.matrix1 <- matrix(data = c(1,2,30,40,500,600), nrow = 3, ncol = 2, byrow = FALSE,
+                     dimnames = NULL)
+my.matrix1
+
+# subsetting a matrix
+my.matrix1[1,2] # element in row 1 and column 2
+my.matrix1[2,1] # element in row 2 and column 1
+my.matrix1[,1] # 1st column only
+my.matrix1[1:2,] # rows 1 to 2
+my.matrix1[c(1,3),] # rows 1 and 3 
+```
+
+
+```{r}
+# load, inspect, and manipulate data set
+load("./data/BSAS_manip.RData")
+# variable names
+names(data2)
+# summary stats of all variables
+summary(data2)
+# external excel-style explorer
+#fix(data2)
+# variable types in data frame
+str(data2)
+# indexing in data sets
+# first 5 rows and first 4 columns (similar to matrix indexing)
+data2[1:5, 1:4] 
+# indexing with names using the $-sign
+data2$RSex[1:5]
+# indexing with names using square brackets
+data2[1:6, c("RAge", "WWWhourspW")]
+# dimension of a data set
+dim(data2)
+# number of rows
+nrow(data2)
+# number of columns
+ncol(data2)
+# delete a variable
+data2$SNP <- NULL
+# rename a variable
+names(data2)[ names(data2) == "RAge" ] <- "age"
+names(data2)
+# creating a new (dummy) variable
+data2$old <- ifelse( data2$age > 30, yes = 1, no = 0)
+# frequency table of new variable
+table(data2$old)
+```
+
+
+
+```{r}
+# create subesets
+df.cons <- data2[ data2$Cons == 1 , ]
+df.not_cons <- data2[ data2$Cons != 1, ]
+# pick observations randomly
+#?sample
+pick <- sample(nrow(data2), size = as.integer(.33 * nrow(data2)), replace = FALSE)
+df2 <- data2[ pick, ]
+df3 <- data2[ -pick, ]
+```
+
+
+### Plotting
+```{r}
+# scaterplot
+plot(WWWhourspW ~ age, data = data2, 
+     main = "scatterplot")
+# boxplot
+plot(HHInc ~ as.factor(Ukip), data = data2,
+     main = "boxplot",
+     xlab = "Ukip party affiliation",
+     ylab = "income",
+     frame.plot = FALSE)
+# density
+plot( density(data2$employMonths), bty = "n", main = "density plot")
+# histogram
+hist( data2$employMonths, main = "histogram")
+```
+
+
+Download a useful cheat-sheet for R if you are not already familiar with the essentials of R.
+https://www.rstudio.com/wp-content/uploads/2016/06/r-cheat-sheet.pdf
+
+
+### Exercises 1
+
+1. Create a new file called "assignment1.R" in your `StatisticalLearning` folder and write all the solutions in it.
+1. Clear the workspace and set the working directory to your `StatisticalLearning` folder.
+1. Load the [High School and Beyond](http://uclspp.github.io/PUBLG100/data/hsb2.xlsx) dataset. Remember to load any necessary packages.
+1. Calculate the final score for each student by averaging the `read`, `write`, `math`, `science`, and `socst` scores and save it in a column called `final_score`.
+1. Calculate the mean, median and mode for the `final_score`.
+1. Create a factor variable called `school_type` from `schtyp` using the following codes:
+       - 1 = Public schools
+       - 2 = Private schools
+1. How many students are from private schools and how many are from public schools?
+1. Calculate the variance and standard deviation for `final_score` from each school type.
+1. Find out the ID of the students with the highest and lowest `final_score` from each school type.
+1. Find out the 20th, 40th, 60th and 80th percentiles of `final_score`.
+1. Create box plot for `final_score` grouped by the `school_type` factor variable to show the difference between `final_score` at public schools vs. private schools.
+
+## Packages
+
+####  What are packages and why should I care?
+
+Packages are bundled pieces of software that extend the functionality of R far beyond what's available when you install R for the first time. Just as smartphone "apps" add new features or make existing features easier to use, packages add new functionality or provide convenient functions for tasks that otherwise would be cumbersome to do using base R packages. Some R packages are designed to carry out very specific tasks while others are aimed at offering a general purpose set of functions. We will get a chance to work with both specific and generic type of packages over the next several days.
+
+A small number of core packages come pre-installed with R but thousands of extremely useful packages are available for download with just a few keystrokes within R. The strength of R comes not just from the language itself but from the vast array of packages that you can download at no cost. 
+
+
+#### Installing Packages
+
+Recall from earlier that we used the [`read.csv()`](http://bit.ly/R_read_table) function to read a file in Comma Separated Values (CSV) format. While CSV is an extremely popular format, the dataset we're using in this seminar is only available in Microsoft Excel format. In order to load this dataset we need a package called [`readxl`](http://bit.ly/R_readxl0).
+
+We will install the [`readxl`](http://bit.ly/R_readxl0) package with the [`install.packages()`](http://bit.ly/R_install_packages) function. The [`install.packages()`](http://bit.ly/R_install_packages) function downloads the package from a central repository so make sure you've internet access before attempting to install it.
+
+`install.packages("readxl")`
+
+Watch out for errors and warning messages when installing or loading packages. 
+
+#### Removing Packages
+
+On rare occasions, you might have to remove a package from R. Although we will not demonstrate removing packages in this seminar, it is worth noting that the [`remove.packages()`](http://bit.ly/R_remove_packages) function can be used to remove a package if necessary.
+
+#### Using Packages
+
+Once a package is installed, it must be loaded in R using the [`library()`](http://bit.ly/R_library) function. Let's load the [`readxl`](http://bit.ly/R_readxl0) package so we can use the functions it provides for reading a file an Excel file. The [`library()`](http://bit.ly/R_library) function takes the name of the package as an argument and makes the functionality from that package available to us in R.
+
+```{r}
+library(readxl)
+```
+
+Now that the [`readxl`](http://bit.ly/R_readxl0) package is loaded, we can load our dataset. In this seminar, we're using a small subset of [High School and Beyond survey](https://nces.ed.gov/surveys/hsb) conducted by the National Center of Education Statistics in the U.S. Our dataset includes observations from 200 students with variables including each student's race, gender, socioeconomic status, school type, and scores in reading, writing, math, science and social studies.
+
+First, we need to download the dataset and save it to our `StatisticalLearning` folder. If you haven't set your working directory yet, make sure to follow the **Getting Started** instructions from the top of this page.
+
+<a href="http://uclspp.github.io/PUBLG100/data/hsb2.xlsx" type="button" class="btn btn-success">Download 'High School and Beyond' Dataset</a>
+
+Next we load the dataset using the [`read_excel()`](http://bit.ly/R_read_excel) function from the  [`readxl`](http://bit.ly/R_readxl0) package.
+
+```{r}
+# make sure you've downloaded the dataset from http://uclspp.github.io/PUBLG100/data/hsb2.xlsx 
+# to your StatisticalLearning working directory.
+student_data <- read_excel("./data/hsb2.xlsx")
+```
+
+### Factor Variables
+
+Categorical (or nominal) variables are variables that take a fixed number of distinct values with no ordering. Some common examples of categorical variables are colors (red, blue, green), occupation (doctor, lawyer, teacher), and countries (UK, France, Germany). In R, when categorical variables are stored as numeric data (e.g. 1 for male, 2 for female), we must convert them to factor variables to ensure that categorical data are handled correctly in functions that implement statistical models, tables and graphs. Datasets from public sources such the U.N, World Bank, etc often encode categorical variables with numerical values so it is important to convert them to factor variable before running any data analysis. 
+
+The High School and Beyond dataset that we've been using is one such example where categorical variable such as race, gender and socioeconomic status are coded as numeric data and must be converted to factor variables. 
+
+We'll use the following code book to create categorical variables for gender, race, and socioeconomic status.
+
+|Categorical Variable|New Factor Variable|Levels|
+|-|-------------------|--------------------------------------------|
+|female|gender|0 - Male <br> 1 - Female|
+|ses|socioeconomic_status|1 - Low <br> 2 - Middle <br> 3 - High|
+|race|racial_group|1 - Black <br> 2- Asian <br> 3 - Hispanic <br> 4 - White|
+
+We can convert categorical variables to factor variables using the [`factor()`](http://bit.ly/R_factor) function. The [`factor()`](http://bit.ly/R_factor) function needs the categorical variable and the distinct labels for each category (such as "Male", "Female") as the two arguments for creating factor variables.
+
+```{r}
+student_data$gender <- factor(student_data$female, labels = c("Male", "Female")) 
+student_data$socioeconomic_status <- factor(student_data$ses, labels = c("Low", "Middle", "High")) 
+student_data$racial_group <- factor(student_data$race, labels = c("Black", "Asian", "Hispanic", "White")) 
+```
+
+Let's quickly verify that the factor variables were created correctly.
+
+```{r}
+head(student_data)
+```

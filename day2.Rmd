@@ -1,0 +1,261 @@
+---
+title: "Lab 2  -- Linear Regression"
+author: "Philipp Broniecki and Lucas Leemann -- Machine Learning 1K"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##### The Linear Model    (based on Leemann and Mykhaylov, PUBLG100)
+
+When starting a new R session it is good practice to ensure that the working space is empty. We can do so by deleting all existing objects with the `rm()` command:
+
+```{r}
+rm(list=ls()) # clear workspace
+```
+
+### Loading Dataset in Stata Format
+
+We will load a data set in Stata format. One of the core packages that comes pre-installed with R allows us to directly read a file saved in Stata format. The package is called `foreign` and it's designed to provide support for non-native (or "foreign") file formats.
+
+The function we need to use for loading a file in Stata format is [`read.dta()`](http://bit.ly/R_read_dta). We use data from the Institute for Quality of Governance today. You can download a codebook for the variables [here](http://www.qogdata.pol.gu.se/dataarchive/qog_bas_jan15.pdf). 
+
+Now let's load the dataset and do our usual routine of getting to know our data. 
+
+```{r}
+library(foreign) # to work with foreign file formats
+
+# loading a STATA format data set (remember to load the library foreign 1st)
+world.data <- read.dta("http://uclspp.github.io/PUBLG100/data/QoG2012.dta")
+
+# the dimensions: rows (observations) and columns (variables) 
+dim(world.data)
+
+# the variable names
+names(world.data) 
+
+# the top ten rows and all columns
+world.data[ 1:10 , ]
+```
+
+### Dplyr Package
+Today we introduce another package called `dplyr`. It is a package that makes it easier for you to work with data sets. It includes functions that let you rename variables, pick out observations that fulfill certain conditions, like `gender==female`, lets you select certain variables and many more things. From now on, we will introduce a set of new function of `dplyr` every week. But first we will install the package with `install.packages("dplyr")`. Each time you want to use the package you have to load it with `library(dplyr)`.
+
+```{r, eval=FALSE}
+install.packages("dplyr")
+```
+
+### Dplyr `rename()` 
+
+The first function from the `dplyr` package that will make your life easier is `rename()`. You may have noticed that the variable names in our data are quite cryptic. With the help of the codebook we understand what is going on but we may want to use more intuitive variable names instead. The `rename()` function lets you do that.  
+
+Here's a list of arguments we need to provide to the `rename()` function and their descriptions.
+
+```
+rename(dataset, expression)
+```
+
+|Argument|Description|
+|--------|-----------------------------------------------------------|
+|dataset|The first argument is the name of your dataset (we have called it `world.data`).|
+|expression|The second argument is the expression that assigns a new variable name to an existing variable in our dataset. For example: <br>&bull; `new.variable = existing.variable`|
+
+Remember, to use any of the `dplyr` functions, you must first load package with `library(dplyr)`. 
+
+We want to rename the variable `h_j` which is a categorical variable, where `1` means that an independent judiciary exists and the other category means that the executive branch has some control over the judiciary. In order to save your new variable name in the dataset `world.data`, we have to assign our renamed variable to the dataset using the `<-` symbol. We will now rename `h_j` into `judiciary`. 
+
+```{r}
+library(dplyr)
+# dataset.name <- rename(argument1, argument2 = argument3)
+# h_j = 1 means there is an independent judiciary
+# rename h_j to judiciary
+
+# rename a variable and save the result in our data frame
+world.data <- rename(world.data, judiciary = h_j)
+
+# check the result
+names(world.data)
+```
+
+### Two New Packages
+We're introducing two new packages in today's lab. The Zelig package provides functionality that simplifies some regression tasks, while texreg makes it easy to produce publication quality output from our regression models. We'll discuss these packages in more detail as we go along but for now let's just install them with the `install.packages()` function.
+
+```{r, eval=FALSE}
+install.packages("Zelig")
+install.packages("texreg")
+```
+
+Now, let's load Zelig, textreg, and dplyr.
+
+
+```{r}
+library(texreg)
+library(Zelig)
+library(dplyr)
+```
+
+Let's load 2 datasets into R using read.csv() and confirm that the state and communityname are present in each dataset.
+
+```{r}
+# load the communities datasets
+communities <- read.csv("./data/communities.csv")
+communities_employment <- read.csv("http://uclspp.github.io/PUBLG100/data/communities_employment.csv")
+```
+
+### Dplyr `select()` Function
+Since our dataset has more columns than we need, let's select only the ones we're interested in and rename them with meaningful names. One approach would be to use either the `subset()` function or the square bracket [ ] extraction operator for selecting the columns we're interested in. But the easiest way to accomplish this is with the dplyr `select()` function that allows us select the columns we need and rename them at the same time.
+
+```{r}
+communities <- select(communities, 
+                      state, 
+                      Community = communityname, 
+                      UnemploymentRate = PctUnemployed, 
+                      NoHighSchool = PctNotHSGrad,
+                      White = racePctWhite)
+```
+
+Now that we've merged the dataset and renamed the columns the way we want, let's try to visualize the data with a simple plot command.
+
+Is there a correlation between unemployment rate and lack of high school level education?
+
+```{r}
+plot(communities$NoHighSchool, communities$UnemploymentRate,
+     xlab = "Adults without High School education (%)",
+     ylab = "Unemployment Rate",
+     bty = "n")
+```
+
+In order to answer that question empirically, we will run linear regression using the `lm()` function in R. The `lm()` function needs to know the relationship we're trying to model and the dataset for our observations. The two arguments we need to provide to the `lm()` function are described below.
+
+
+
+|Argument|Description|
+|--------|-----------------------------------------------------------|
+|`formula`|The `formula` describes the relationship between the dependent and independent variables, for example `dependent.variable ~ independent.variable` <br> In our case, we'd like to model the relationship using the formula: `UnemploymentRate ~ NoHighSchool` |
+|`data`|This is simply the name of the dataset that contains the variable of interest. In our case, this is the merged dataset called `communities`.|
+
+For more information on how the `lm()` function works, type help(lm) in R.
+
+```{r}
+model1 <- lm(UnemploymentRate ~ NoHighSchool, data = communities)
+```
+
+The `lm()` function has modeled the relationship between UnemploymentRate and NoHighSchool and we've saved it in a variable called model1. Let's use the `summary()` function to see what this linear model looks like.
+
+```{r}
+summary(model1)
+```
+
+The output from `lm()` might seem overwhelming at first so let's break it down one item at a time.
+
+![](../img/lm.png)
+
+|#|Description|
+|-----|------------------------------------------------------------------|
+|![](../img/circle1.png)|The *dependent* variable, also sometimes called the outcome variable. We are trying to model the effects of `NoHighSchool` on `UnemploymentRate` so `UnemploymentRate` is the *dependent* variable.|
+|![](../img/circle2.png)|The *independent* variable or the predictor variable. In our example, `NoHighSchool` is the *independent* variable.|
+|![](../img/circle3.png)|The differences between the observed values and the predicted values are called *residuals*.|
+|![](../img/circle4.png)|The *coefficients* for the intercept and the *independent* variables. Using the *coefficients* we can write down the relationship between the *dependent* and the *independent* variables as: <br><br>`UnemploymentRate` = `r coef(model1)[1]` + ( `r coef(model1)[2]` * `NoHighSchool` ) <br><br>This tells us that for each unit increase in the variable `NoHighSchool`, the `UnemploymentRate` increases by `r coef(model1)[2]`.|
+|![](../img/circle5.png)|The *p-value* of the model. Recall that according to the null hypotheses, the coefficient of interest is zero. The *p-value* tells us whether can can reject the null hypotheses or not.|
+|![](../img/circle6.png)|The *standard error* estimates the standard deviation of the coefficients in our model. We can think of the *standard error* as the measure of precision for the estimated coefficients.|
+|![](../img/circle7.png)|The *t statistic* is obtained by dividing the *coefficients* by the *standard error*.|
+|![](../img/circle8.png)|The *R-squared* and *adjusted R-squared* tell us how much of the variance in our model is accounted for by the *independent* variable. The *adjusted R-squared* is always smaller than *R-squared* as it takes into account the number of *independent* variables and degrees of freedom.|
+
+Now let's plot the regression line with our observations using the `abline()` function.
+
+```{r}
+plot(communities$NoHighSchool, communities$UnemploymentRate,
+     xlab = "Adults without High School education (%)",
+     ylab = "Unemployment Rate")
+abline(model1, col = "red")
+```
+
+While the `summary()` function provides a slew of information about a fitted regression model, we often need to present our findings in easy to read tables similar to what you see in journal publications. The texreg package we installed earlier allows us to do just that.
+
+Let's take a look at how to display the output of a regression model on the screen using the `screenreg()` function from texreg.
+
+```{r}
+screenreg(model1)
+```
+
+Returning to our example, are there other variables that might explain unemployment rates in our communities dataset? For example, is unemployment rate higher or lower in communities with different levels of minority population?
+
+We first create a new variable called `Minority` by subtracting the percent of `White` population from 1. Alternatively, we could have added up the percent of Black, Hispanic and Asians to get the percentage of minority population since our census data also has those variables.
+
+
+```{r}
+communities$Minority <- 1 - communities$White
+```
+
+Next we fit a linear model using `Minority` as the independent variable.
+
+```{r}
+model2 <- lm(UnemploymentRate ~ Minority, data = communities)
+summary(model2)
+```
+
+Now let's see how this model compares to our first model. We can show regression line from `model2` just like we did with our first model.
+
+```{r}
+plot(communities$Minority, communities$UnemploymentRate,
+     xlab = "Minority population (%)",
+     ylab = "Unemployment Rate")
+abline(model2, col = "blue")
+```
+
+Does `model2` offer a better fit than `model1`? Maybe we can answer that question by looking at the regression tables instead. Let's print the two models side-by-side in a single table with `screenreg()`.
+
+```{r}
+screenreg(list(model1, model2))
+```
+
+Finally, let's save the same output as a Microsoft Word document using `htmlreg()`.
+
+```{r}
+htmlreg(list(model1, model2), file = "lab4_model_comparison.doc")
+```
+
+
+### Predictions and Confidence Interval
+
+We will use the Zelig package since it provides convenient functions for making predictions and plotting confidence intervals. First, let's go back to our last model where we used `Minority` as the independent variable but this time estimate the model using the Zelig package. The arguments for the `zelig()` function are very similar to what we used with `lm()`. The only difference is that we need to tell Zelig what type of model we're trying to estimate.
+
+```{r}
+z.out <- zelig(UnemploymentRate ~ White, data = communities, model = "ls")
+```
+
+The model estimated with `zelig()` is saved in a variable called `z.out`. We can use the `summary()` function exactly the same way as we used it with `lm()` to print out the estimated model.
+
+```{r}
+summary(z.out)
+```
+
+Next, let's use Zelig's `setx()` and `sim()` functions for making predictions and plotting confidence intervals.
+
+```{r}
+x.out <- setx(z.out, White = seq(0, .9, 0.3))
+s.out <- sim(z.out, x = x.out)
+
+summary(s.out)
+ci.plot(s.out, xlab = "Majority population (%)", ci = 95)
+```
+
+### Additional Resources
+
+<div class="container btn-container">
+<a href="http://altaf.shinyapps.io/linear-regression" type="button" class="btn btn-primary">Linear Regression Interactive App</a>
+</div>
+
+### Exercises
+
+1. Load the immigration dataset [dataset](http://uclspp.github.io/PUBLG100/data/communities_immig.csv)
+1. Rename the `PctImmigRec5` variable to `RecentImmigration5`.
+1. Estimate a model explaining the relationship between unemployment rate and recent immigration over the past 5 years using the variable `RecentImmigration5`.
+1. Plot the regression line of the model.
+1. How does this model compare to the models we estimated in the seminar with `NoHighSchool` and `Minority` as independent variables? Present your findings by comparing the output of all three models in side-by-side tables using the `texreg` package.
+1. Save your model comparison table to a Microsoft Word document (or another format if you don't use Word).
+1. Generate predicted values from the fitted model with `RecentImmigration5` and plot the confidence interval using Zelig.
+1. Save all the plots as graphics files.
+    - Hint: Look at the Plot window in RStudio for an option to save your plot. Alternatively, you can use the
+    `png()` function for saving the graphics file directly from your R script.
