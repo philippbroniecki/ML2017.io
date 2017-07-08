@@ -216,34 +216,49 @@ $(document).ready(function () {
 </div>
 
 
-<pre class="r"><code>rm(list=ls())
-
-library(texreg)
-library(Zelig)
-library(dplyr)
-
+<div id="solution-lab-2" class="section level3">
+<h3>Solution Lab 2</h3>
+<ol style="list-style-type: decimal">
+<li>Load the immigration dataset dataset</li>
+</ol>
+<pre class="r"><code># clear workspace
+rm(list=ls())
 
 # read in various datasets and combine them 
-communities &lt;- read.csv(&quot;./data/communities.csv&quot;)
-communities_employment &lt;- read.csv(&quot;http://uclspp.github.io/PUBLG100/data/communities_employment.csv&quot;)
-communities_immigration &lt;- read.csv(&quot;http://uclspp.github.io/PUBLG100/data/communities_immig.csv&quot;)</code></pre>
-<pre class="r"><code>communities &lt;- merge(communities, communities_employment, by = c(&quot;state&quot;, &quot;communityname&quot;))
-communities &lt;- merge(communities, communities_immigration, by = c(&quot;state&quot;, &quot;communityname&quot;))</code></pre>
-<pre class="r"><code>## ------------------------------------------------------------------------
-communities &lt;- select(communities, 
-                      state, 
-                      Community = communityname, 
-                      UnemploymentRate = PctUnemployed.y, 
-                      NoHighSchool = PctNotHSGrad,
-                      White = racePctWhite,
-                      RecentImmigration5 = PctImmigRec5)
+immi &lt;- read.csv(&quot;http://uclspp.github.io/PUBLG100/data/communities_immig.csv&quot;)</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Rename the <code>PctImmigRec5</code> variable to <code>RecentImmigration5</code>.</li>
+</ol>
+<p>Here, we use <code>select()</code> from <code>dplyr</code>. Sometimes different packages provide packages with similar names. Both <code>dplyr</code> and <code>Zelig</code> have functions called <code>select()</code> for example. This can cause conflicts. If we have a package installed, we can call a function from it directly without loading the function of that package into the current namespace. The following code does this. We also have to merge some data sets.</p>
+<pre class="r"><code># load original communities data set
+com &lt;- read.csv(&quot;C:/Users/phili/Dropbox/Essex 2017 ML/Day 2/Lab/communities.csv&quot;)
 
-## ------------------------------------------------------------------------
-model_immigration &lt;- lm(UnemploymentRate ~ RecentImmigration5, data = communities)
-summary(model_immigration)</code></pre>
+# load data set on employment
+empl &lt;- read.csv(&quot;http://uclspp.github.io/PUBLG100/data/communities_employment.csv&quot;)
+
+## merge data sets
+# com and empl
+com &lt;- merge(com, empl, by = c(&quot;state&quot;, &quot;communityname&quot;))
+# merge immi to the data sets
+com &lt;- merge(com, immi, by = c(&quot;state&quot;, &quot;communityname&quot;))
+# remove the now unecessary data sets immi and empl
+rm(immi, empl)
+
+com &lt;- dplyr::select(com,
+                     community = communityname,
+                     unemploymentrate = PctUnemployed.y,
+                     nohighschool = PctNotHSGrad,
+                     white = racePctWhite,
+                     recentimmigration5 = PctImmigRec5
+                     )</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Estimate a model explaining the relationship between unemployment rate and recent immigration over the past 5 years using the variable <code>RecentImmigration5</code>.</li>
+</ol>
+<pre class="r"><code>m_immi &lt;- lm(unemploymentrate ~ recentimmigration5, data = com)
+summary(m_immi)</code></pre>
 <pre><code>## 
 ## Call:
-## lm(formula = UnemploymentRate ~ RecentImmigration5, data = communities)
+## lm(formula = unemploymentrate ~ recentimmigration5, data = com)
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
@@ -252,38 +267,47 @@ summary(model_immigration)</code></pre>
 ## Coefficients:
 ##                    Estimate Std. Error t value Pr(&gt;|t|)    
 ## (Intercept)        0.325347   0.008917  36.488  &lt; 2e-16 ***
-## RecentImmigration5 0.105882   0.021344   4.961 7.62e-07 ***
+## recentimmigration5 0.105882   0.021344   4.961 7.62e-07 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## Residual standard error: 0.201 on 1992 degrees of freedom
 ## Multiple R-squared:  0.0122, Adjusted R-squared:  0.01171 
 ## F-statistic: 24.61 on 1 and 1992 DF,  p-value: 7.621e-07</code></pre>
-<pre class="r"><code>## ------------------------------------------------------------------------
-plot(communities$RecentImmigration5, communities$UnemploymentRate,
+<ol start="4" style="list-style-type: decimal">
+<li>Plot the regression line of the model.</li>
+</ol>
+<p>We draw a scatterplot using the <code>plot()</code> function and <code>abline()</code> to draw the regression line.</p>
+<pre class="r"><code># the scatterplot
+plot(com$unemploymentrate ~ com$recentimmigration5,
      xlab = &quot;Recent Immigration&quot;,
-     ylab = &quot;Unemployment Rate&quot;)
+     ylab = &quot;Unemployment Rate&quot;,
+     bty = &quot;n&quot;, pch = 16)
 
-abline(model_immigration, col = &quot;red&quot;)</code></pre>
-<p><img src="solutions2_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
-<pre class="r"><code>## ------------------------------------------------------------------------
-model_education &lt;- lm(UnemploymentRate ~ NoHighSchool, data = communities)
+# add the regression line
+abline(m_immi, col = &quot;red&quot;, lwd = 2)</code></pre>
+<p><img src="solutions2_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<ol start="5" style="list-style-type: decimal">
+<li>How does this model compare to the models we estimated in the seminar with NoHighSchool and Minority as independent variables? Present your findings by comparing the output of all three models in side-by-side tables using the texreg package.</li>
+</ol>
+<pre class="r"><code>m_edu &lt;- lm(unemploymentrate ~ nohighschool, data = com)
 
-communities$Minority &lt;- 1 - communities$White
-model_minority &lt;- lm(UnemploymentRate ~ Minority, data = communities)
+# minority percentage
+com$minority &lt;- 1 - com$white
+m_minority &lt;- lm(unemploymentrate ~ minority, data = com)
 
-screenreg(list(model_education, model_minority, model_immigration))</code></pre>
+texreg::screenreg(list(m_edu, m_minority, m_immi))</code></pre>
 <pre><code>## 
 ## =========================================================
 ##                     Model 1      Model 2      Model 3    
 ## ---------------------------------------------------------
 ## (Intercept)            0.08 ***     0.26 ***     0.33 ***
 ##                       (0.01)       (0.01)       (0.01)   
-## NoHighSchool           0.74 ***                          
+## nohighschool           0.74 ***                          
 ##                       (0.01)                             
-## Minority                            0.43 ***             
+## minority                            0.43 ***             
 ##                                    (0.02)                
-## RecentImmigration5                               0.11 ***
+## recentimmigration5                               0.11 ***
 ##                                                 (0.02)   
 ## ---------------------------------------------------------
 ## R^2                    0.55         0.27         0.01    
@@ -292,21 +316,32 @@ screenreg(list(model_education, model_minority, model_immigration))</code></pre>
 ## RMSE                   0.14         0.17         0.20    
 ## =========================================================
 ## *** p &lt; 0.001, ** p &lt; 0.01, * p &lt; 0.05</code></pre>
-<pre class="r"><code>## ------------------------------------------------------------------------
-htmlreg(list(model_education, model_minority, model_immigration), file = &quot;solutions_Lab2_model_comparison.doc&quot;)</code></pre>
-<pre><code>## The table was written to the file &#39;solutions_Lab2_model_comparison.doc&#39;.</code></pre>
-<pre class="r"><code>## ------------------------------------------------------------------------
-z.out &lt;- zelig(UnemploymentRate ~ RecentImmigration5, data = communities, model = &quot;ls&quot;)</code></pre>
+<ol start="6" style="list-style-type: decimal">
+<li>Save your model comparison table to a Microsoft Word document (or another format if you donâ€™t use Word).</li>
+</ol>
+<pre class="r"><code>texreg::htmlreg(list(m_edu, m_minority, m_immi), file = &quot;Lab2_model_comparison.doc&quot;)</code></pre>
+<pre><code>## The table was written to the file &#39;Lab2_model_comparison.doc&#39;.</code></pre>
+<ol start="7" style="list-style-type: decimal">
+<li>Generate predicted values from the fitted model with RecentImmigration5 and plot the confidence interval using <code>Zelig</code>.</li>
+</ol>
+<pre class="r"><code>library(Zelig)
+z.out &lt;- zelig(unemploymentrate ~ recentimmigration5, data = com, model = &quot;ls&quot;)</code></pre>
 <pre><code>## How to cite this model in Zelig:
 ##   R Core Team. 2007.
 ##   ls: Least Squares Regression for Continuous Dependent Variables
 ##   in Christine Choirat, Christopher Gandrud, James Honaker, Kosuke Imai, Gary King, and Olivia Lau,
 ##   &quot;Zelig: Everyone&#39;s Statistical Software,&quot; http://zeligproject.org/</code></pre>
-<pre class="r"><code>x.out &lt;- setx(z.out, RecentImmigration5 = seq(0, 1, 0.1))
-s.out &lt;- sim(z.out, x = x.out, n=10000)
-
-ci.plot(s.out, xlab = &quot;Recent Immigration (last 5 years)&quot;, ci = 95)</code></pre>
-<p><img src="solutions2_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
+<pre class="r"><code>x.out &lt;- setx(z.out, recentimmigration5 = seq(0, 1, 0.1))
+s.out &lt;- sim(z.out, x = x.out, n=10000)</code></pre>
+<ol start="8" style="list-style-type: decimal">
+<li>Save all the plots as graphics files.</li>
+</ol>
+<pre class="r"><code>png(&quot;plot.png&quot;)
+ci.plot(s.out, xlab = &quot;Recent Immigration (last 5 years)&quot;, ci = 95)
+dev.off()</code></pre>
+<pre><code>## png 
+##   2</code></pre>
+</div>
 
 
 
