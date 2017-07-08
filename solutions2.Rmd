@@ -29,7 +29,7 @@ com <- read.csv("C:/Users/phili/Dropbox/Essex 2017 ML/Day 2/Lab/communities.csv"
 # load data set on employment
 empl <- read.csv("http://uclspp.github.io/PUBLG100/data/communities_employment.csv")
 
-## merge data sets
+# merge data sets
 # com and empl
 com <- merge(com, empl, by = c("state", "communityname"))
 # merge immi to the data sets
