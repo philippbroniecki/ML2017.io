@@ -396,7 +396,7 @@ communities_employment &lt;- read.csv(&quot;http://uclspp.github.io/PUBLG100/dat
 <td>The <em>dependent</em> variable, also sometimes called the outcome variable. We are trying to model the effects of <code>NoHighSchool</code> on <code>UnemploymentRate</code> so <code>UnemploymentRate</code> is the <em>dependent</em> variable.</td>
 </tr>
 <tr class="even">
-<td><img src="../ML2017.io/ML2017.io/img/circle2.png" /></td>
+<td><img src="img/circle2.png" /></td>
 <td>The <em>independent</em> variable or the predictor variable. In our example, <code>NoHighSchool</code> is the <em>independent</em> variable.</td>
 </tr>
 <tr class="odd">
@@ -544,11 +544,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##     mean         sd       50%      2.5%     97.5%
-## 1 0.6866 0.01227759 0.6869097 0.6627768 0.7104559
+##        mean         sd       50%      2.5%     97.5%
+## 1 0.6868956 0.01218569 0.6874963 0.6624955 0.7098783
 ## pv
 ##           mean        sd       50%      2.5%    97.5%
-## [1,] 0.6906223 0.1674131 0.6901088 0.3429259 1.012345
+## [1,] 0.6880621 0.1720964 0.6893358 0.3439971 1.025491
 ## 
 ## 
 ## [1] 0.3
@@ -558,10 +558,10 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##        mean          sd       50%      2.5%     97.5%
-## 1 0.5580151 0.007998419 0.5579934 0.5424188 0.5734861
+## 1 0.5581227 0.007969797 0.5582158 0.5431353 0.5727519
 ## pv
-##           mean        sd       50%      2.5%     97.5%
-## [1,] 0.5689579 0.1765655 0.5695574 0.2441437 0.9043277
+##          mean       sd       50%      2.5%     97.5%
+## [1,] 0.556062 0.167125 0.5585136 0.2221274 0.8696635
 ## 
 ## 
 ## [1] 0.6
@@ -571,10 +571,10 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##        mean          sd       50%      2.5%     97.5%
-## 1 0.4294303 0.004556757 0.4294963 0.4207095 0.4387261
+## 1 0.4293498 0.004515151 0.4293525 0.4200485 0.4379658
 ## pv
-##           mean        sd       50%       2.5%    97.5%
-## [1,] 0.4345355 0.1832108 0.4335705 0.08207022 0.791152
+##          mean        sd       50%       2.5%     97.5%
+## [1,] 0.425753 0.1714919 0.4350073 0.06959246 0.7333948
 ## 
 ## 
 ## [1] 0.9
@@ -583,11 +583,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean          sd       50%      2.5%     97.5%
-## 1 0.3008454 0.004594246 0.3008297 0.2921034 0.3098845
+##        mean        sd       50%     2.5%     97.5%
+## 1 0.3005768 0.0043701 0.3005148 0.292408 0.3093004
 ## pv
-##           mean        sd       50%       2.5%     97.5%
-## [1,] 0.3040326 0.1781843 0.3036242 -0.0601122 0.6481226</code></pre>
+##           mean       sd       50%        2.5%     97.5%
+## [1,] 0.2990947 0.172305 0.2963158 -0.03807021 0.6461085</code></pre>
 <pre class="r"><code>ci.plot(s.out, xlab = &quot;Majority population (%)&quot;, ci = 95)</code></pre>
 <p><img src="day2_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
 </div>

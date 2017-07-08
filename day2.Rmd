@@ -154,7 +154,7 @@ The output from `lm()` might seem overwhelming at first so let's break it down o
 |#|Description|
 |-----|------------------------------------------------------------------|
 |![](../ML2017.io/img/circle1.png)|The *dependent* variable, also sometimes called the outcome variable. We are trying to model the effects of `NoHighSchool` on `UnemploymentRate` so `UnemploymentRate` is the *dependent* variable.|
-|![](../ML2017.io/ML2017.io/img/circle2.png)|The *independent* variable or the predictor variable. In our example, `NoHighSchool` is the *independent* variable.|
+|![](../ML2017.io/img/circle2.png)|The *independent* variable or the predictor variable. In our example, `NoHighSchool` is the *independent* variable.|
 |![](../ML2017.io/img/circle3.png)|The differences between the observed values and the predicted values are called *residuals*.|
 |![](../ML2017.io/img/circle4.png)|The *coefficients* for the intercept and the *independent* variables. Using the *coefficients* we can write down the relationship between the *dependent* and the *independent* variables as: <br><br>`UnemploymentRate` = `r coef(model1)[1]` + ( `r coef(model1)[2]` * `NoHighSchool` ) <br><br>This tells us that for each unit increase in the variable `NoHighSchool`, the `UnemploymentRate` increases by `r coef(model1)[2]`.|
 |![](../ML2017.io/img/circle5.png)|The *p-value* of the model. Recall that according to the null hypotheses, the coefficient of interest is zero. The *p-value* tells us whether can can reject the null hypotheses or not.|
