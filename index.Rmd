@@ -2,14 +2,7 @@
 title: "1K Machine Learning"
 ---
 
-<<<<<<< HEAD
-```{r, echo = FALSE}
-url <- "https://github.com/philippbroniecki/ML2017.io/blob/master/img/lleeman-218x218.jpg"
-```
-<img src="`r url`">
-=======
-![]("http://philippbroniecki.github.io/images/lleeman-218x218.jpg")
->>>>>>> ace14d74374d172e02644f286082539943fbd1d5
+![](../ML2017.io/img/lleeman-218x218.jpg)
 
 ### Course Content
 This course will introduce participants to a fascinating field of statistics. We will see how we can rely on statistical models to gain a deep understanding from data. This often involves finding optimal predictions and classifications. Machine Learning (also known as Statistical Learning) is quickly developing and is being applied in various fields such as business analytics, political science, sociology, and elsewhere.
