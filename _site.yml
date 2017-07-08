@@ -1,0 +1,8 @@
+name: "Essex 2017 Machine Learning"
+navbar:
+  title: "Essex 2017 Machine Learning"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "About"
+      href: about.html
