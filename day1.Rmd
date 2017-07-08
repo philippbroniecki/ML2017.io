@@ -284,4 +284,4 @@ head(student_data)
 10. Pick the year 1991 and drop all observations from the data set that are not from 1991.
 11. Summarize the variable democ (stands for democracy) and produce a frequency table.
 12. Delete all observations from the data where `democ` $< 0$.
-13. Print a histogram of democracy – type `?hist`.
+13. Print a histogram of democracy - type `?hist`.
