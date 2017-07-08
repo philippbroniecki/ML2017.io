@@ -279,8 +279,8 @@ head(student_data)
     - Row 1: smallest positive integers divisible by 3, in ascending order.
     - Row 2: smallest prime numbers, in ascending order.
     - Row 3: greatest mutiples of 6, smaller than 60, in descending order.
-8. Change the elements on the main diagonal to 1’s.
-9. Load “polity.csv” and call your data frame “df”.
+8. Change the elements on the main diagonal to 1's.
+9. Load `polity.csv` and call your data frame `df`.
 10. Pick the year 1991 and drop all observations from the data set that are not from 1991.
 11. Summarize the variable democ (stands for democracy) and produce a frequency table.
 12. Delete all observations from the data where `democ` $< 0$.
