@@ -329,7 +329,7 @@ $(document).ready(function () {
 <div id="loading-dataset-in-stata-format" class="section level3">
 <h3>Loading Dataset in Stata Format</h3>
 <p>We will load a data set in Stata format. One of the core packages that comes pre-installed with R allows us to directly read a file saved in Stata format. The package is called <code>foreign</code> and it’s designed to provide support for non-native (or “foreign”) file formats.</p>
-<p>The function we need to use for loading a file in Stata format is <a href="http://bit.ly/R_read_dta"><code>read.dta()</code></a>. We use data from the Institute for Quality of Governance today. You can download a codebook for the variables <a href="http://www.qogdata.pol.gu.se/dataarchive/qog_bas_jan15.pdf">here</a>.</p>
+<p>The function we need to use for loading a file in Stata format is <a href="http://bit.ly/R_read_dta"><code>read.dta()</code></a>. We use data from the Institute for Quality of Governance today. You can download a codebook for the variables <a href="http://www.qogdata.pol.gu.se/dataarchive/qog_bas_jan15.pdf">here</a> and download the data <a href="https://github.com/philippbroniecki/ML2017.io/blob/master/data/QoG2012.dta">here</a>.</p>
 <p>Now let’s load the dataset and do our usual routine of getting to know our data.</p>
 <pre class="r"><code>library(foreign) # to work with foreign file formats
 
@@ -650,10 +650,10 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##        mean         sd       50%      2.5%     97.5%
-## 1 0.6870629 0.01281606 0.6876635 0.6612068 0.7117993
+## 1 0.6865862 0.01287781 0.6869032 0.6616586 0.7120605
 ## pv
-##           mean        sd       50%      2.5%    97.5%
-## [1,] 0.6922885 0.1750263 0.6914171 0.3698522 1.053352
+##           mean        sd      50%      2.5%    97.5%
+## [1,] 0.6789689 0.1685011 0.673939 0.3548827 1.024824
 ## 
 ## 
 ## [1] 0.3
@@ -662,11 +662,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean          sd       50%      2.5%     97.5%
-## 1 0.5582618 0.008336097 0.5584561 0.5412996 0.5746716
+##        mean          sd       50%      2.5%    97.5%
+## 1 0.5579972 0.008379209 0.5584106 0.5413475 0.573669
 ## pv
-##           mean        sd       50%      2.5%     97.5%
-## [1,] 0.5459304 0.1797628 0.5402986 0.1870767 0.9007031
+##           mean       sd       50%     2.5%     97.5%
+## [1,] 0.5579841 0.174052 0.5562682 0.227091 0.9027078
 ## 
 ## 
 ## [1] 0.6
@@ -676,10 +676,10 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##        mean          sd       50%      2.5%     97.5%
-## 1 0.4294606 0.004626701 0.4294732 0.4205544 0.4385541
+## 1 0.4294081 0.004615912 0.4294879 0.4205471 0.4383246
 ## pv
-##           mean        sd       50%       2.5%     97.5%
-## [1,] 0.4395833 0.1801456 0.4314586 0.08588395 0.8024433
+##           mean        sd       50%      2.5%     97.5%
+## [1,] 0.4336367 0.1689175 0.4312364 0.1226087 0.7778092
 ## 
 ## 
 ## [1] 0.9
@@ -688,11 +688,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean          sd      50%    2.5%     97.5%
-## 1 0.3006595 0.004472021 0.300743 0.29158 0.3091122
+##        mean          sd      50%      2.5%     97.5%
+## 1 0.3008191 0.004373152 0.300783 0.2925296 0.3096086
 ## pv
-##           mean       sd       50%        2.5%     97.5%
-## [1,] 0.2966142 0.177384 0.2926693 -0.06971691 0.6583583</code></pre>
+##           mean        sd       50%        2.5%     97.5%
+## [1,] 0.2979211 0.1778615 0.2982624 -0.04019109 0.6473266</code></pre>
 <pre class="r"><code>ci.plot(s.out, xlab = &quot;Majority population (%)&quot;, ci = 95)</code></pre>
 <p><img src="day2_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
 </div>

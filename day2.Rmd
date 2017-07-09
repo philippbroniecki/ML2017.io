@@ -19,7 +19,7 @@ rm(list=ls()) # clear workspace
 
 We will load a data set in Stata format. One of the core packages that comes pre-installed with R allows us to directly read a file saved in Stata format. The package is called `foreign` and it's designed to provide support for non-native (or "foreign") file formats.
 
-The function we need to use for loading a file in Stata format is [`read.dta()`](http://bit.ly/R_read_dta). We use data from the Institute for Quality of Governance today. You can download a codebook for the variables [here](http://www.qogdata.pol.gu.se/dataarchive/qog_bas_jan15.pdf). 
+The function we need to use for loading a file in Stata format is [`read.dta()`](http://bit.ly/R_read_dta). We use data from the Institute for Quality of Governance today. You can download a codebook for the variables [here](http://www.qogdata.pol.gu.se/dataarchive/qog_bas_jan15.pdf) and download the data [here](https://github.com/philippbroniecki/ML2017.io/blob/master/data/QoG2012.dta). 
 
 Now let's load the dataset and do our usual routine of getting to know our data. 
 
