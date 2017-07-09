@@ -19,7 +19,8 @@ rm(list=ls()) # clear workspace
 
 We will load a data set in Stata format. One of the core packages that comes pre-installed with R allows us to directly read a file saved in Stata format. The package is called `foreign` and it's designed to provide support for non-native (or "foreign") file formats.
 
-The function we need to use for loading a file in Stata format is [`read.dta()`](http://bit.ly/R_read_dta). We use data from the Institute for Quality of Governance today. You can download a codebook for the variables [here](http://www.qogdata.pol.gu.se/dataarchive/qog_bas_jan15.pdf) and download the data [here](https://github.com/philippbroniecki/ML2017.io/blob/master/data/QoG2012.dta). 
+The function we need to use for loading a file in Stata format is [`read.dta()`](http://bit.ly/R_read_dta). We use data from the Institute for Quality of Governance today. You can download a codebook for the variables [here](http://www.qogdata.pol.gu.se/dataarchive/qog_bas_jan15.pdf) and download the data [here](http://philippbroniecki.github.io/ML2017.io/data/QoG2012.dta).
+
 
 Now let's load the dataset and do our usual routine of getting to know our data. 
 
@@ -107,12 +108,12 @@ communities_employment <- read.csv("http://uclspp.github.io/PUBLG100/data/commun
 Since our dataset has more columns than we need, let's select only the ones we're interested in and rename them with meaningful names. One approach would be to use either the `subset()` function or the square bracket [ ] extraction operator for selecting the columns we're interested in. But the easiest way to accomplish this is with the dplyr `select()` function that allows us select the columns we need and rename them at the same time.
 
 ```{r}
-communities <- select(communities, 
-                      state, 
-                      Community = communityname, 
-                      UnemploymentRate = PctUnemployed, 
-                      NoHighSchool = PctNotHSGrad,
-                      White = racePctWhite)
+communities <- dplyr::select(communities, 
+                             state, 
+                             Community = communityname, 
+                             UnemploymentRate = PctUnemployed, 
+                             NoHighSchool = PctNotHSGrad,
+                             White = racePctWhite)
 ```
 
 Now that we've merged the dataset and renamed the columns the way we want, let's try to visualize the data with a simple plot command.

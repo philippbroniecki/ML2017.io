@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Philipp Broniecki and Lucas Leemann – Machine Learning 1K" />
+
+
+<title>Lab 3 – Classification</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Essex 2017 Machine Learning</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="day1.html">Day 1</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 2
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day2.html">Lab</a>
+    </li>
+    <li>
+      <a href="solutions2.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 3
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day3.html">Lab</a>
+    </li>
+    <li>
+      <a href="solutions3.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 4
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day4.html">Lab</a>
+    </li>
+    <li>
+      <a href="solutions4.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 5
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day5.html">Lab</a>
+    </li>
+    <li>
+      <a href="solutions5.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 6
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day6.html">Lab</a>
+    </li>
+    <li>
+      <a href="solutions6.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 7
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day7.html">Lab</a>
+    </li>
+    <li>
+      <a href="solutions7.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 8
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day8.html">Lab</a>
+    </li>
+    <li>
+      <a href="solutions8.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 9
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day9.html">Lab</a>
+    </li>
+    <li>
+      <a href="solutions9.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Lab 3 – Classification</h1>
+<h4 class="author"><em>Philipp Broniecki and Lucas Leemann – Machine Learning 1K</em></h4>
+
+</div>
+
+
+<div id="based-on-james-et-al.-2013" class="section level5">
+<h5>(based on James et al. 2013)</h5>
+</div>
+<div id="the-non-western-foreigners-data-set" class="section level3">
+<h3>The Non-Western Foreigners Data Set</h3>
+<p>We start by clearing our workspace.</p>
+<pre class="r"><code># clear workspace
+rm(list = ls())</code></pre>
+<p>Let’s check the codebook of our data.</p>
+<table style="width:96%;">
+<colgroup>
+<col width="12%" />
+<col width="83%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>IMMBRIT</td>
+<td>Out of every 100 people in Britain, how many do you think are immigrants from Non-western countries?</td>
+</tr>
+<tr class="even">
+<td>over.estimate</td>
+<td>1 if estimate is higher than 10.7%.</td>
+</tr>
+<tr class="odd">
+<td>RSex</td>
+<td>1 = male, 2 = female</td>
+</tr>
+<tr class="even">
+<td>RAge</td>
+<td>Age of respondent</td>
+</tr>
+<tr class="odd">
+<td>Househld</td>
+<td>Number of people living in respondent’s household</td>
+</tr>
+<tr class="even">
+<td>Cons, Lab, SNP, Ukip, BNP, GP, party.other</td>
+<td>Party self-identification</td>
+</tr>
+<tr class="odd">
+<td>paper</td>
+<td>Do you normally read any daily morning newspaper 3+ times/week?</td>
+</tr>
+<tr class="even">
+<td>WWWhourspW</td>
+<td>How many hours WWW per week?</td>
+</tr>
+<tr class="odd">
+<td>religious</td>
+<td>Do you regard yourself as belonging to any particular religion?</td>
+</tr>
+<tr class="even">
+<td>employMonths</td>
+<td>How many mnths w. present employer?</td>
+</tr>
+<tr class="odd">
+<td>urban</td>
+<td>Population density, 4 categories (highest density is 4, lowest is 1)</td>
+</tr>
+<tr class="even">
+<td>health.good</td>
+<td>How is your health in general for someone of your age? (0: bad, 1: fair, 2: fairly good, 3: good)</td>
+</tr>
+<tr class="odd">
+<td>HHInc</td>
+<td>Income bands for household, high number = high HH income</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># load non-western foreigners data set
+load(&quot;./data/BSAS_manip.RData&quot;)
+df &lt;- data2 # make a copy with a shorter name
+rm(data2) # remove the original with longer name
+
+names(df)</code></pre>
+<pre><code>##  [1] &quot;IMMBRIT&quot;       &quot;over.estimate&quot; &quot;RSex&quot;          &quot;RAge&quot;         
+##  [5] &quot;Househld&quot;      &quot;Cons&quot;          &quot;Lab&quot;           &quot;SNP&quot;          
+##  [9] &quot;Ukip&quot;          &quot;BNP&quot;           &quot;GP&quot;            &quot;party.other&quot;  
+## [13] &quot;paper&quot;         &quot;WWWhourspW&quot;    &quot;religious&quot;     &quot;employMonths&quot; 
+## [17] &quot;urban&quot;         &quot;health.good&quot;   &quot;HHInc&quot;</code></pre>
+<pre class="r"><code>dim(df)</code></pre>
+<pre><code>## [1] 1049   19</code></pre>
+<pre class="r"><code>summary(df)</code></pre>
+<pre><code>##     IMMBRIT       over.estimate         RSex            RAge      
+##  Min.   :  0.00   Min.   :0.0000   Min.   :1.000   Min.   :17.00  
+##  1st Qu.: 10.00   1st Qu.:0.0000   1st Qu.:1.000   1st Qu.:36.00  
+##  Median : 25.00   Median :1.0000   Median :2.000   Median :49.00  
+##  Mean   : 29.03   Mean   :0.7235   Mean   :1.544   Mean   :49.75  
+##  3rd Qu.: 40.00   3rd Qu.:1.0000   3rd Qu.:2.000   3rd Qu.:62.00  
+##  Max.   :100.00   Max.   :1.0000   Max.   :2.000   Max.   :99.00  
+##     Househld          Cons             Lab              SNP         
+##  Min.   :1.000   Min.   :0.0000   Min.   :0.0000   Min.   :0.00000  
+##  1st Qu.:1.000   1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.00000  
+##  Median :2.000   Median :0.0000   Median :0.0000   Median :0.00000  
+##  Mean   :2.392   Mean   :0.2707   Mean   :0.2669   Mean   :0.01525  
+##  3rd Qu.:3.000   3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:0.00000  
+##  Max.   :8.000   Max.   :1.0000   Max.   :1.0000   Max.   :1.00000  
+##       Ukip              BNP                GP           party.other    
+##  Min.   :0.00000   Min.   :0.00000   Min.   :0.00000   Min.   :0.0000  
+##  1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.00000   1st Qu.:0.0000  
+##  Median :0.00000   Median :0.00000   Median :0.00000   Median :0.0000  
+##  Mean   :0.02955   Mean   :0.03051   Mean   :0.02193   Mean   :0.3651  
+##  3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:0.00000   3rd Qu.:1.0000  
+##  Max.   :1.00000   Max.   :1.00000   Max.   :1.00000   Max.   :1.0000  
+##      paper          WWWhourspW        religious       employMonths   
+##  Min.   :0.0000   Min.   :  0.000   Min.   :0.0000   Min.   :  1.00  
+##  1st Qu.:0.0000   1st Qu.:  0.000   1st Qu.:0.0000   1st Qu.: 72.00  
+##  Median :0.0000   Median :  2.000   Median :0.0000   Median : 72.00  
+##  Mean   :0.4538   Mean   :  5.251   Mean   :0.4929   Mean   : 86.56  
+##  3rd Qu.:1.0000   3rd Qu.:  7.000   3rd Qu.:1.0000   3rd Qu.: 72.00  
+##  Max.   :1.0000   Max.   :100.000   Max.   :1.0000   Max.   :600.00  
+##      urban        health.good        HHInc       
+##  Min.   :1.000   Min.   :0.000   Min.   : 1.000  
+##  1st Qu.:2.000   1st Qu.:2.000   1st Qu.: 6.000  
+##  Median :3.000   Median :2.000   Median : 9.000  
+##  Mean   :2.568   Mean   :2.044   Mean   : 9.586  
+##  3rd Qu.:3.000   3rd Qu.:3.000   3rd Qu.:13.000  
+##  Max.   :4.000   Max.   :3.000   Max.   :17.000</code></pre>
+<pre class="r"><code># data manipulation
+df$urban &lt;- factor(df$urban, labels = c(&quot;rural&quot;, &quot;more rural&quot;, &quot;more urban&quot;, &quot;urban&quot;))
+df$RSex &lt;- factor(df$RSex, labels = c(&quot;Male&quot;, &quot;Female&quot;))
+df$health.good &lt;- factor(df$health.good, labels = c(&quot;bad&quot;, &quot;fair&quot;, &quot;fairly good&quot;, &quot;good&quot;) )
+
+# pairwise comparisons (for a managable subset of the data)
+pairs(df[, c(&quot;IMMBRIT&quot;, &quot;RAge&quot;, &quot;Househld&quot;, &quot;employMonths&quot;, &quot;WWWhourspW&quot;, &quot;HHInc&quot;)])</code></pre>
+<p><img src="day3_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre class="r"><code># correlations
+cor(df[,c(&quot;IMMBRIT&quot;, &quot;RAge&quot;, &quot;Househld&quot;, &quot;employMonths&quot;, &quot;WWWhourspW&quot;,  &quot;HHInc&quot;)])</code></pre>
+<pre><code>##                  IMMBRIT        RAge    Househld employMonths  WWWhourspW
+## IMMBRIT       1.00000000 -0.03947882  0.03999490  -0.08112956 -0.02302223
+## RAge         -0.03947882  1.00000000 -0.40536068   0.12130423 -0.28221388
+## Househld      0.03999490 -0.40536068  1.00000000  -0.01966762  0.13894672
+## employMonths -0.08112956  0.12130423 -0.01966762   1.00000000 -0.01899327
+## WWWhourspW   -0.02302223 -0.28221388  0.13894672  -0.01899327  1.00000000
+## HHInc        -0.32375032 -0.22325828  0.27656287   0.15419221  0.10938389
+##                   HHInc
+## IMMBRIT      -0.3237503
+## RAge         -0.2232583
+## Househld      0.2765629
+## employMonths  0.1541922
+## WWWhourspW    0.1093839
+## HHInc         1.0000000</code></pre>
+<pre class="r"><code># how good are we at guessing immigration
+boxplot(df$IMMBRIT, 
+        main = &quot;Perception of Immigration from Non-Western Countries&quot;,
+        ylab = &quot;Subjective number of immigrants per 100 British&quot;, 
+        frame.plot = FALSE, col = &quot;darkgray&quot;)</code></pre>
+<p><img src="day3_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>
+<pre class="r"><code># by party affiliation
+par( mfrow = c(1, 6) ) # plot window separated into 1 row and 6 columns
+boxplot(df$IMMBRIT[ df$Cons == 1],  frame.plot = FALSE, main = &quot;Tories&quot;, col = &quot;#114477&quot;, ylim = c(0, 100))
+boxplot(df$IMMBRIT[ df$Lab == 1], frame.plot = FALSE, main = &quot;Labour&quot;, col = &quot;#AA4455&quot;, ylim = c(0, 100))
+boxplot(df$IMMBRIT[ df$SNP == 1], frame.plot = FALSE, main = &quot;SNP&quot;, col = &quot;#DDDD77&quot;, ylim = c(0, 100))
+boxplot(df$IMMBRIT[ df$GP == 1], frame.plot = FALSE, main = &quot;Greens&quot;, col = &quot;#44AA77&quot;, ylim = c(0, 100))
+boxplot(df$IMMBRIT[ df$Ukip == 1], frame.plot = FALSE, main = &quot;Ukip&quot;, col = &quot;#AA4488&quot;, ylim = c(0, 100))
+boxplot(df$IMMBRIT[ df$BNP == 1], frame.plot = FALSE, main = &quot;BNP&quot;, col = &quot;#AA7744&quot;, ylim = c(0, 100))</code></pre>
+<p><img src="day3_files/figure-html/unnamed-chunk-2-3.png" width="672" /></p>
+</div>
+<div id="logistic-regression" class="section level3">
+<h3>Logistic Regression</h3>
+<p>We want to predict whether respondents over-estimate immigration from non-western contexts. We begin by looking at the distribution of the dependent variable. We check how well we could predict misperception of immigration in our sample without a statistical model.</p>
+<pre class="r"><code># predict whether poeple overestimate rate of immigrants (i.e. more than 10.7%)
+table(df$over.estimate)</code></pre>
+<pre><code>## 
+##   0   1 
+## 290 759</code></pre>
+<pre class="r"><code># probability of misperception of immigration in the sample
+mean(df$over.estimate)  </code></pre>
+<pre><code>## [1] 0.7235462</code></pre>
+<pre class="r"><code># naive guess
+median(df$over.estimate)</code></pre>
+<pre><code>## [1] 1</code></pre>
+<p>Now, we fit a logistic regression.</p>
+<pre class="r"><code># run logistic regression
+m.log &lt;- glm(over.estimate ~ RSex + RAge + Househld + Lab + SNP + Ukip + BNP + 
+               GP + party.other + paper + WWWhourspW +  religious + 
+               employMonths + urban + health.good + HHInc, data = df,
+             family = binomial(link = &quot;logit&quot;))
+summary(m.log)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = over.estimate ~ RSex + RAge + Househld + Lab + 
+##     SNP + Ukip + BNP + GP + party.other + paper + WWWhourspW + 
+##     religious + employMonths + urban + health.good + HHInc, family = binomial(link = &quot;logit&quot;), 
+##     data = df)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.2342  -1.1328   0.6142   0.8262   1.3815  
+## 
+## Coefficients:
+##                          Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)             1.2908359  0.5269689   2.450   0.0143 *  
+## RSexFemale              0.6402959  0.1505657   4.253 2.11e-05 ***
+## RAge                    0.0005869  0.0051629   0.114   0.9095    
+## Househld                0.0208592  0.0606329   0.344   0.7308    
+## Lab                    -0.3157714  0.1996362  -1.582   0.1137    
+## SNP                     1.8551303  1.0560289   1.757   0.0790 .  
+## Ukip                    0.0560439  0.4484618   0.125   0.9005    
+## BNP                     0.9213103  0.5730484   1.608   0.1079    
+## GP                     -0.5131484  0.4657417  -1.102   0.2706    
+## party.other             0.1254213  0.1876025   0.669   0.5038    
+## paper                   0.1485517  0.1521012   0.977   0.3287    
+## WWWhourspW             -0.0032539  0.0100313  -0.324   0.7457    
+## religious               0.0513879  0.1527385   0.336   0.7365    
+## employMonths            0.0002652  0.0009945   0.267   0.7897    
+## urbanmore rural        -0.0288113  0.2049791  -0.141   0.8882    
+## urbanmore urban         0.3509666  0.2100675   1.671   0.0948 .  
+## urbanurban              0.4782831  0.2267105   2.110   0.0349 *  
+## health.goodfair        -0.0953404  0.3385583  -0.282   0.7782    
+## health.goodfairly good  0.1166949  0.3123972   0.374   0.7087    
+## health.goodgood         0.0274371  0.3189533   0.086   0.9314    
+## HHInc                  -0.1045647  0.0182074  -5.743 9.30e-09 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 1236.9  on 1048  degrees of freedom
+## Residual deviance: 1143.3  on 1028  degrees of freedom
+## AIC: 1185.3
+## 
+## Number of Fisher Scoring iterations: 5</code></pre>
+<p>There are also two other ways to look at the estimated parameters of our model. We can just call the coefficients or we can exploit that they are an object within the summary object of the model object.</p>
+<pre class="r"><code># extract coeffiecients only
+coef(m.log)</code></pre>
+<pre><code>##            (Intercept)             RSexFemale                   RAge 
+##           1.2908358907           0.6402959296           0.0005869125 
+##               Househld                    Lab                    SNP 
+##           0.0208591784          -0.3157713704           1.8551303100 
+##                   Ukip                    BNP                     GP 
+##           0.0560439011           0.9213102747          -0.5131484487 
+##            party.other                  paper             WWWhourspW 
+##           0.1254212704           0.1485517394          -0.0032539450 
+##              religious           employMonths        urbanmore rural 
+##           0.0513879498           0.0002651681          -0.0288113412 
+##        urbanmore urban             urbanurban        health.goodfair 
+##           0.3509665515           0.4782830875          -0.0953403512 
+## health.goodfairly good        health.goodgood                  HHInc 
+##           0.1166949207           0.0274371430          -0.1045647469</code></pre>
+<pre class="r"><code># only estimates table of summary
+summary(m.log)$coef</code></pre>
+<pre><code>##                             Estimate   Std. Error     z value     Pr(&gt;|z|)
+## (Intercept)             1.2908358907 0.5269688602  2.44954871 1.430354e-02
+## RSexFemale              0.6402959296 0.1505656608  4.25260266 2.113003e-05
+## RAge                    0.0005869125 0.0051629119  0.11367858 9.094926e-01
+## Househld                0.0208591784 0.0606328525  0.34402436 7.308280e-01
+## Lab                    -0.3157713704 0.1996361888 -1.58173411 1.137103e-01
+## SNP                     1.8551303100 1.0560288510  1.75670419 7.896824e-02
+## Ukip                    0.0560439011 0.4484617839  0.12496918 9.005480e-01
+## BNP                     0.9213102747 0.5730484405  1.60773542 1.078931e-01
+## GP                     -0.5131484487 0.4657417045 -1.10178763 2.705540e-01
+## party.other             0.1254212704 0.1876024786  0.66854805 5.037838e-01
+## paper                   0.1485517394 0.1521012139  0.97666373 3.287357e-01
+## WWWhourspW             -0.0032539450 0.0100313328 -0.32437813 7.456518e-01
+## religious               0.0513879498 0.1527385094  0.33644397 7.365361e-01
+## employMonths            0.0002651681 0.0009944704  0.26664249 7.897444e-01
+## urbanmore rural        -0.0288113412 0.2049790820 -0.14055747 8.882195e-01
+## urbanmore urban         0.3509665515 0.2100674697  1.67073251 9.477452e-02
+## urbanurban              0.4782830875 0.2267105175  2.10966431 3.488728e-02
+## health.goodfair        -0.0953403512 0.3385583495 -0.28160685 7.782450e-01
+## health.goodfairly good  0.1166949207 0.3123971704  0.37354666 7.087416e-01
+## health.goodgood         0.0274371430 0.3189532689  0.08602245 9.314486e-01
+## HHInc                  -0.1045647469 0.0182074014 -5.74298026 9.302457e-09</code></pre>
+<pre class="r"><code># display p-values only
+summary(m.log)$coef[, 4]</code></pre>
+<pre><code>##            (Intercept)             RSexFemale                   RAge 
+##           1.430354e-02           2.113003e-05           9.094926e-01 
+##               Househld                    Lab                    SNP 
+##           7.308280e-01           1.137103e-01           7.896824e-02 
+##                   Ukip                    BNP                     GP 
+##           9.005480e-01           1.078931e-01           2.705540e-01 
+##            party.other                  paper             WWWhourspW 
+##           5.037838e-01           3.287357e-01           7.456518e-01 
+##              religious           employMonths        urbanmore rural 
+##           7.365361e-01           7.897444e-01           8.882195e-01 
+##        urbanmore urban             urbanurban        health.goodfair 
+##           9.477452e-02           3.488728e-02           7.782450e-01 
+## health.goodfairly good        health.goodgood                  HHInc 
+##           7.087416e-01           9.314486e-01           9.302457e-09</code></pre>
+<p>The parameters may be of interest if inference is our goal. But if we are just interested in classification we would like to make predictions. This can be done directly by using the predict() function:</p>
+<pre class="r"><code># predict probabilities
+pred.probs &lt;- predict( m.log, type = &quot;response&quot;)
+pred.probs[1:10] # predictions for the first 10 respondents</code></pre>
+<pre><code>##         1         2         3         4         5         6         7 
+## 0.5213789 0.9181186 0.8412570 0.8244665 0.8349719 0.6931744 0.9370885 
+##         8         9        10 
+## 0.6815346 0.9090575 0.6897961</code></pre>
+<p>To see how good our classification model is we need to compare the classification with the actual outcomes. We first create an object <code>exp.out</code> which will be either <code>0</code> or <code>1</code>. In a second step, we cross-tab it with the true outcomes and this allows us to see how well the classification model is doing.</p>
+<pre class="r"><code># predict whether respondent over-estimates or not
+exp.out &lt;- ifelse( pred.probs &gt; 0.5, yes = 1, no = 0)
+
+# confusion matrix (table of predictions and true outcomes)
+table(prediction = exp.out, truth = df$over.estimate)</code></pre>
+<pre><code>##           truth
+## prediction   0   1
+##          0  41  40
+##          1 249 719</code></pre>
+<p>The diagonal elements are the correct classifications and the off-diagonal ones are wrong. We can compute the share of correct classified observations as a ratio.</p>
+<pre class="r"><code># percent correctly classified
+(41 + 719) / 1049</code></pre>
+<pre><code>## [1] 0.7244995</code></pre>
+<p>We can also write code that will estimate the percentage correctly classified for different values.</p>
+<pre class="r"><code># more generally
+mean( exp.out == df$over.estimate)</code></pre>
+<pre><code>## [1] 0.7244995</code></pre>
+<p>This is the performance on the training data and we expect the test error to be higher than this. To get at a better indication of the model’s classification error we can split the dataset into a training set and a test set.</p>
+<pre class="r"><code># set the random number generator
+set.seed(12)
+
+# random draw of 80% of the observation (row numbers) to train the model
+train.ids &lt;- sample(nrow(df), size = as.integer( (nrow(df)*.80) ), replace = FALSE)
+
+# the validation data 
+df.test &lt;- df[ -train.ids, ]
+dim(df.test)</code></pre>
+<pre><code>## [1] 210  19</code></pre>
+<p>Now we fit the model using the training data only and then test its performance on the test data.</p>
+<pre class="r"><code># re-fit the model on the raining data
+m.log &lt;- glm(over.estimate ~ RSex + RAge + Househld + Lab + SNP + Ukip + BNP + 
+               GP + party.other + paper + WWWhourspW +  religious + 
+               employMonths + urban + health.good + HHInc, data = df, subset = train.ids, 
+             family = binomial(link = &quot;logit&quot;))
+
+# predict probabilities of over-estimating but for the unseen data
+pred.probs &lt;- predict(m.log, newdata = df.test, type = &quot;response&quot;)
+
+# classify predictions as over-estimating or not
+exp.out &lt;- ifelse( pred.probs &gt; 0.5, yes = 1, no = 0)
+
+# confusion matrix of predictions against truth
+table( prediction = exp.out, truth = df.test$over.estimate)</code></pre>
+<pre><code>##           truth
+## prediction   0   1
+##          0   9  10
+##          1  57 134</code></pre>
+<pre class="r"><code># percent correctly classified
+mean( exp.out == df.test$over.estimate )</code></pre>
+<pre><code>## [1] 0.6809524</code></pre>
+<p>We see that the classification accuracy is too high in the training dataset. The accuracy on the test dataset provides a good estimate of the model’s abbility to correctly identify observations.</p>
+<p>Let’s try to improve the classification model by relying on the strongest predictors.</p>
+<pre class="r"><code># try to improve the prediction model by relying on strong predictors
+m.log &lt;- glm(over.estimate ~ RSex + urban + HHInc, 
+             data = df, subset = train.ids, family = binomial(link = &quot;logit&quot;))
+pred.probs &lt;- predict(m.log, newdata = df.test, type = &quot;response&quot;)
+exp.out &lt;- ifelse( pred.probs &gt; 0.5, yes = 1, no = 0)
+table( prediction = exp.out, truth = df.test$over.estimate )</code></pre>
+<pre><code>##           truth
+## prediction   0   1
+##          0   7   4
+##          1  59 140</code></pre>
+<pre class="r"><code>mean( exp.out == df.test$over.estimate )</code></pre>
+<pre><code>## [1] 0.7</code></pre>
+<p>We see that the classification model’s accurcy increases when we only rely the strongest predictors.</p>
+<p>You can also make predictions for specific settings:</p>
+<pre class="r"><code># prediction for a specific setting
+predict(m.log, newdata = data.frame( RSex = c(&quot;Male&quot;, &quot;Female&quot;), 
+                                     urban = c(&quot;urban&quot;, &quot;urban&quot;),
+                                     HHInc = c(9, 9)), type = &quot;response&quot;)</code></pre>
+<pre><code>##         1         2 
+## 0.7221946 0.8443793</code></pre>
+</div>
+<div id="linear-discriminant-analysis" class="section level3">
+<h3>Linear Discriminant Analysis</h3>
+<pre class="r"><code>library(MASS)</code></pre>
+<pre class="r"><code># fit model
+m.lda &lt;- lda( over.estimate ~ RSex + urban + HHInc, data = df, subset = train.ids)
+m.lda</code></pre>
+<pre><code>## Call:
+## lda(over.estimate ~ RSex + urban + HHInc, data = df, subset = train.ids)
+## 
+## Prior probabilities of groups:
+##         0         1 
+## 0.2669845 0.7330155 
+## 
+## Group means:
+##   RSexFemale urbanmore rural urbanmore urban urbanurban     HHInc
+## 0  0.3973214       0.2946429       0.2678571  0.2008929 11.156250
+## 1  0.5967480       0.2520325       0.2894309  0.2699187  8.993496
+## 
+## Coefficients of linear discriminants:
+##                        LD1
+## RSexFemale       1.2069339
+## urbanmore rural -0.1094889
+## urbanmore urban  0.3129345
+## urbanurban       0.4823726
+## HHInc           -0.1569342</code></pre>
+<pre class="r"><code># predict outcomes on test set
+lda.pred &lt;- predict(m.lda, newdata = df.test)
+
+# check prediction object
+names(lda.pred)</code></pre>
+<pre><code>## [1] &quot;class&quot;     &quot;posterior&quot; &quot;x&quot;</code></pre>
+<pre class="r"><code># predicted probabilities
+pred.probs &lt;- lda.pred$posterior[, 2]
+
+# predict returns predicted classification directly
+exp.out &lt;- lda.pred$class
+
+# confusion matrix
+table( prediction = exp.out, truth = df.test$over.estimate)</code></pre>
+<pre><code>##           truth
+## prediction   0   1
+##          0   7   4
+##          1  59 140</code></pre>
+<pre class="r"><code># percent correctly classified
+mean( exp.out == df.test$over.estimate )</code></pre>
+<pre><code>## [1] 0.7</code></pre>
+<p>As is often the case, we get similar model performace from the logistic regression as from LDA.</p>
+<p>You can also generate these predictions yourself and this will allow you to vary the threshold:</p>
+<pre class="r"><code># generate classification ourselves with different thresholds
+sum( pred.probs &gt;= .40 ) # over-estimates</code></pre>
+<pre><code>## [1] 210</code></pre>
+<pre class="r"><code>sum( pred.probs &lt; .40) # realistic evaluation</code></pre>
+<pre><code>## [1] 0</code></pre>
+</div>
+<div id="k-nearest-neighbors" class="section level3">
+<h3>K-Nearest Neighbors</h3>
+<p>For KNN we need to provide the data in a slightly different format:</p>
+<pre class="r"><code>library(class)
+
+# training &amp; test data set of predictor variables only
+train.X &lt;- cbind( df$RSex, df$urban, df$HHInc )[train.ids, ]
+test.X &lt;- cbind( df$RSex, df$urban, df$HHInc )[-train.ids, ]
+
+# response variable for training observations
+train.Y &lt;- df$over.estimate[ train.ids ]
+
+# re-setting the random number generator
+set.seed(123)
+
+# run knn
+knn.out &lt;- knn(train.X, test.X, train.Y, k = 1)
+
+# confusion matrix
+table( prediction = knn.out, truth = df.test$over.estimate )</code></pre>
+<pre><code>##           truth
+## prediction   0   1
+##          0   8  12
+##          1  58 132</code></pre>
+<pre class="r"><code># percent correctly classified
+mean( knn.out == df.test$over.estimate )</code></pre>
+<pre><code>## [1] 0.6666667</code></pre>
+<p>We can try and increase the accuracy by changing the number of nearest neighbors we are using:</p>
+<pre class="r"><code># try to increae accuracy by varying k
+knn.out &lt;- knn(train.X, test.X, train.Y, k = 11)
+mean( knn.out == df.test$over.estimate )</code></pre>
+<pre><code>## [1] 0.7</code></pre>
+</div>
+<div id="model-the-underlying-continuous-process" class="section level3">
+<h3>Model the Underlying Continuous Process</h3>
+<p>Lastly, we can try to model the underlying process and classify afterwards. By doing that, the depdendent variable provides more information. In effect we turn our classification problem into a regression problem.</p>
+<pre class="r"><code># fit the linear model on the numer of immigrants per 100 Brits
+m.lm &lt;- glm(IMMBRIT ~ RSex + urban + HHInc, data = df, subset = train.ids, family = gaussian())
+
+# predictions
+beta_hats &lt;- as.matrix(coef(m.lm))
+X &lt;- cbind( 1, 
+            df.test$RSex == &quot;Female&quot;, 
+            df.test$urban == &quot;more rural&quot;,
+            df.test$urban == &quot;more urban&quot;,
+            df.test$urban == &quot;urban&quot;,
+            df.test$HHInc)
+
+# yhats (y_hat = X * beta_hats)
+y_hats &lt;- X %*% beta_hats
+
+# now we do the classfication 
+exp.out &lt;- ifelse( y_hats &gt; 10.7, yes = 1, no = 0)
+
+# confusion matrix
+table( prediction = exp.out, truth = df.test$over.estimate)</code></pre>
+<pre><code>##           truth
+## prediction   0   1
+##          1  66 144</code></pre>
+<pre class="r"><code># percent correctly classified
+mean( exp.out == df.test$over.estimate)</code></pre>
+<pre><code>## [1] 0.6857143</code></pre>
+<p>We do worse by treating this as a regression problem rather than a classification problem.</p>
+</div>
+<div id="exercises" class="section level3">
+<h3>Exercises</h3>
+</div>
+<div id="q1" class="section level3">
+<h3>Q1</h3>
+<p>In this problem, you will develop a model to predict whether a given car gets high or low gas mileage based on the Auto dataset from the ISLR package. Start by loading <code>library(ISLR)</code>. Check the codebook of the Auto data set that comes with the ISLR package by typing <code>?Auto</code>.</p>
+<ul>
+<li>Create a binary variable, <code>mpg01</code>, that contains a 1 if <code>mpg</code> contains a value above its median, and a 0 if <code>mpg</code> contains a value below its median. You can compute the median using the <code>median()</code> function. Note you may find it helpful to use the <code>data.frame()</code> function to create a single data set containing both <code>mpg01</code> and the other Auto variables.</li>
+<li>Explore the data graphically in order to investigate the association between mpg01 and the other features. Which of the other features seem most likely to be useful in predicting <code>mpg01</code>? Scatterplots and boxplots may be useful tools to answer this question. Describe your findings.</li>
+<li>Split the data into a training set and a test set.</li>
+<li>Perform LDA on the training data in order to predict <code>mpg01</code> using the variables that seemed most associated with <code>mpg01</code> in (b). What is the test error of the model obtained? Perform logistic regression on the training data in order to predict <code>mpg01</code> using the variables that seemed most associated with <code>mpg01</code> in (b). What is the test error of the model obtained?</li>
+<li>Perform KNN on the training data, with several values of K, in order to predict <code>mpg01</code>. Use only the variables that seemed most associated with <code>mpg01</code> in (b). What test errors do you obtain? Which value of K seems to perform the best on this data set?</li>
+<li>Write a loop and try to find systematically the best value for K.</li>
+</ul>
+</div>
+<div id="q2" class="section level3">
+<h3>Q2</h3>
+<p>This problem involves writing functions.</p>
+<ul>
+<li><p>Write a function, <code>Power()</code>, that prints out the result of raising 2 to the 3rd power. In other words, your function should compute <span class="math inline">\(2^3\)</span> and print out the results.</p>
+<p>Hint: Recall that <span class="math inline">\(x^a\)</span> raises x to the power a. Use the <code>print()</code> function to output the result.</p></li>
+<li><p>Create a new function, <code>Power2()</code>, that allows you to pass any two numbers, x and a, and prints out the value of <span class="math inline">\(x^a\)</span>. You can do this by beginning your function with the line</p></li>
+</ul>
+<pre class="r"><code>Power2 &lt;- function(x, a){</code></pre>
+<p>You should be able to call your function by entering, for instance,</p>
+<pre class="r"><code>Power2(2, 8)</code></pre>
+<p>on the command line. This should output the value of <span class="math inline">\(3^8\)</span>, namely, 6,561.</p>
+<ul>
+<li><p>Using the <code>Power2()</code> function that you just wrote, compute <span class="math inline">\(10^3\)</span>, <span class="math inline">\(8^17\)</span>, and <span class="math inline">\(131^3\)</span>.</p></li>
+<li><p>Now create a new function, <code>Power3()</code>, that actually returns the result <span class="math inline">\(x^a\)</span> as an R object, rather than simply printing it to the screen. That is, if you store the value <span class="math inline">\(x^a\)</span> in an object called result within your function, then you can simply return() this result, using the following line:</p></li>
+</ul>
+<pre class="r"><code>return(result)</code></pre>
+<p>The line above should be the last line in your function, before the <code>}</code> symbol that closes the function.</p>
+<ul>
+<li><p>Now using the <code>Power3()</code> function, create a plot of <span class="math inline">\(f(x) = x^2\)</span>. The <span class="math inline">\(x\)</span>-axis should display a range of integers from 1 to 10, and the <span class="math inline">\(y\)</span>-axis should display <span class="math inline">\(x^2\)</span>. Label the axes appropriately, and use an appropriate title for the figure. Consider displaying either the <span class="math inline">\(x\)</span>-axis, the <span class="math inline">\(y\)</span>-axis, or both on the log-scale. You can do this by using <code>log = &quot;x&quot;</code>, <code>log = &quot;y&quot;</code>, or <code>log = &quot;xy&quot;</code> as arguments to the <code>plot()</code> function.</p></li>
+<li><p>Create a function, <code>PlotPower()</code>, that allows you to create a plot of <span class="math inline">\(x\)</span> against <span class="math inline">\(x^a\)</span> for a fixed <span class="math inline">\(a\)</span> and for a range of values of <span class="math inline">\(x\)</span>. For instance, if you call</p></li>
+</ul>
+<pre class="r"><code>PlotPower3( 1:10, 3 )</code></pre>
+<p>then a plot should be created with an <span class="math inline">\(x\)</span>-axis taking on values <span class="math inline">\(1,2,.,10\)</span> and a <span class="math inline">\(y\)</span>-axis taking on values <span class="math inline">\(1^3,2^3,.,10^3\)</span>.</p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
