@@ -248,22 +248,22 @@ gam1 <- lm(wage ~ bs(year, 4) + bs(age, 5) + education, data = Wage)
 However, the `gam` package offers a general solution to fitting GAMs and is especially useful when splines cannot be easily expressed in terms of basis functions.
 
 ```{r}
-library(gam)
-gam.m3 <- gam(wage ~ ns(year, 4) + ns(age, 5) + education, data = Wage)
+#library(gam)
+gam.m3 <- gam::gam(wage ~ ns(year, 4) + ns(age, 5) + education, data = Wage)
 ```
 
 The `plot()` function behaves the same way as it does with `lm()` and `glm()`.
 
 ```{r, eval = FALSE}
 par(mfrow = c(1, 3))
-plot.gam(gam1, se = TRUE, col = "red")
+mgcv::plot.gam(gam1, se = TRUE, col = "red")
 ```
 
 We can use `anova()` to find the best performing model.
 
 ```{r}
-gam.m1 <- gam(wage ~ ns(age, 5) + education, data = Wage)
-gam.m2 <- gam(wage ~ year + ns(age, 5) + education, data = Wage)
+gam.m1 <- gam::gam(wage ~ ns(age, 5) + education, data = Wage)
+gam.m2 <- gam::gam(wage ~ year + ns(age, 5) + education, data = Wage)
 anova(gam.m1, gam.m2, gam.m3, test = "F")
 ```
 

@@ -550,7 +550,7 @@ legend(&quot;topright&quot;, legend = c(&quot;Span=0.2&quot;, &quot;Span=0.5&quo
 <pre class="r"><code>gam.m3 &lt;- gam(wage ~ ns(year, 4) + ns(age, 5) + education, data = Wage)</code></pre>
 <p>The <code>plot()</code> function behaves the same way as it does with <code>lm()</code> and <code>glm()</code>.</p>
 <pre class="r"><code>par(mfrow = c(1, 3))
-plot.gam(gam1, se = TRUE, col = &quot;red&quot;)</code></pre>
+mgcv::plot.gam(gam1, se = TRUE, col = &quot;red&quot;)</code></pre>
 <p>We can use <code>anova()</code> to find the best performing model.</p>
 <pre class="r"><code>gam.m1 &lt;- gam(wage ~ ns(age, 5) + education, data = Wage)
 gam.m2 &lt;- gam(wage ~ year + ns(age, 5) + education, data = Wage)
