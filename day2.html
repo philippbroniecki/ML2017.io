@@ -209,7 +209,97 @@ $(document).ready(function () {
       <a href="day3.html">Lab</a>
     </li>
     <li>
-      <a href="solutions3html">Solutions</a>
+      <a href="solutions3.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 4
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day4.html">Lab</a>
+    </li>
+    <li>
+      <a href="solutions4.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 5
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day5.html">Lab</a>
+    </li>
+    <li>
+      <a href="solutions5.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 6
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day6.html">Lab</a>
+    </li>
+    <li>
+      <a href="solutions6.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 7
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day7.html">Lab</a>
+    </li>
+    <li>
+      <a href="solutions7.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 8
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day8.html">Lab</a>
+    </li>
+    <li>
+      <a href="solutions8.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 9
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day9.html">Lab</a>
+    </li>
+    <li>
+      <a href="solutions9.html">Solutions</a>
     </li>
   </ul>
 </li>
@@ -244,7 +334,7 @@ $(document).ready(function () {
 <pre class="r"><code>library(foreign) # to work with foreign file formats
 
 # loading a STATA format data set (remember to load the library foreign 1st)
-world.data &lt;- read.dta(&quot;http://uclspp.github.io/PUBLG100/data/QoG2012.dta&quot;)
+world.data &lt;- read.dta(&quot;./data/QoG2012.dta&quot;)
 
 # the dimensions: rows (observations) and columns (variables) 
 dim(world.data)</code></pre>
@@ -301,17 +391,8 @@ world.data[ 1:10 , ]</code></pre>
 </table>
 <p>Remember, to use any of the <code>dplyr</code> functions, you must first load package with <code>library(dplyr)</code>.</p>
 <p>We want to rename the variable <code>h_j</code> which is a categorical variable, where <code>1</code> means that an independent judiciary exists and the other category means that the executive branch has some control over the judiciary. In order to save your new variable name in the dataset <code>world.data</code>, we have to assign our renamed variable to the dataset using the <code>&lt;-</code> symbol. We will now rename <code>h_j</code> into <code>judiciary</code>.</p>
-<pre class="r"><code>library(dplyr)</code></pre>
-<pre><code>## Warning: package &#39;dplyr&#39; was built under R version 3.4.1</code></pre>
-<pre><code>## 
-## Attaching package: &#39;dplyr&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:stats&#39;:
-## 
-##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code># dataset.name &lt;- rename(argument1, argument2 = argument3)
+<pre class="r"><code>library(dplyr)
+# dataset.name &lt;- rename(argument1, argument2 = argument3)
 # h_j = 1 means there is an independent judiciary
 # rename h_j to judiciary
 
@@ -329,17 +410,9 @@ names(world.data)</code></pre>
 <pre class="r"><code>install.packages(&quot;Zelig&quot;)
 install.packages(&quot;texreg&quot;)</code></pre>
 <p>Now, let’s load Zelig, textreg, and dplyr.</p>
-<pre class="r"><code>library(texreg)</code></pre>
-<pre><code>## Warning: package &#39;texreg&#39; was built under R version 3.4.1</code></pre>
-<pre><code>## Version:  1.36.23
-## Date:     2017-03-03
-## Author:   Philip Leifeld (University of Glasgow)
-## 
-## Please cite the JSS article in your publications -- see citation(&quot;texreg&quot;).</code></pre>
-<pre class="r"><code>library(Zelig)</code></pre>
-<pre><code>## Warning: package &#39;Zelig&#39; was built under R version 3.4.1</code></pre>
-<pre><code>## Loading required package: survival</code></pre>
-<pre class="r"><code>library(dplyr)</code></pre>
+<pre class="r"><code>library(texreg)
+library(Zelig)
+library(dplyr)</code></pre>
 <p>Let’s load 2 datasets into R using read.csv() and confirm that the state and communityname are present in each dataset.</p>
 <pre class="r"><code># load the communities datasets
 communities &lt;- read.csv(&quot;./data/communities.csv&quot;)
@@ -576,11 +649,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##       mean         sd       50%      2.5%     97.5%
-## 1 0.686619 0.01225699 0.6867624 0.6619888 0.7094003
+##        mean         sd       50%      2.5%     97.5%
+## 1 0.6870629 0.01281606 0.6876635 0.6612068 0.7117993
 ## pv
-##           mean    sd       50%      2.5%    97.5%
-## [1,] 0.6833427 0.169 0.6891778 0.3596725 1.006747
+##           mean        sd       50%      2.5%    97.5%
+## [1,] 0.6922885 0.1750263 0.6914171 0.3698522 1.053352
 ## 
 ## 
 ## [1] 0.3
@@ -590,10 +663,10 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##        mean          sd       50%      2.5%     97.5%
-## 1 0.5580988 0.008021133 0.5582715 0.5425143 0.5728539
+## 1 0.5582618 0.008336097 0.5584561 0.5412996 0.5746716
 ## pv
-##           mean       sd       50%     2.5%     97.5%
-## [1,] 0.5594575 0.174073 0.5503174 0.240035 0.9198341
+##           mean        sd       50%      2.5%     97.5%
+## [1,] 0.5459304 0.1797628 0.5402986 0.1870767 0.9007031
 ## 
 ## 
 ## [1] 0.6
@@ -603,10 +676,10 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##        mean          sd       50%      2.5%     97.5%
-## 1 0.4295786 0.004561529 0.4295386 0.4206741 0.4382981
+## 1 0.4294606 0.004626701 0.4294732 0.4205544 0.4385541
 ## pv
 ##           mean        sd       50%       2.5%     97.5%
-## [1,] 0.4250309 0.1756258 0.4232539 0.09530527 0.7685919
+## [1,] 0.4395833 0.1801456 0.4314586 0.08588395 0.8024433
 ## 
 ## 
 ## [1] 0.9
@@ -615,11 +688,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean          sd       50%      2.5%     97.5%
-## 1 0.3010584 0.004431784 0.3011079 0.2927198 0.3101115
+##        mean          sd      50%    2.5%     97.5%
+## 1 0.3006595 0.004472021 0.300743 0.29158 0.3091122
 ## pv
-##           mean        sd       50%        2.5%     97.5%
-## [1,] 0.3011503 0.1746761 0.3061678 -0.03642388 0.6267647</code></pre>
+##           mean       sd       50%        2.5%     97.5%
+## [1,] 0.2966142 0.177384 0.2926693 -0.06971691 0.6583583</code></pre>
 <pre class="r"><code>ci.plot(s.out, xlab = &quot;Majority population (%)&quot;, ci = 95)</code></pre>
 <p><img src="day2_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
 </div>

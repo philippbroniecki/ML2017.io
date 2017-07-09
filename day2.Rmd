@@ -27,7 +27,7 @@ Now let's load the dataset and do our usual routine of getting to know our data.
 library(foreign) # to work with foreign file formats
 
 # loading a STATA format data set (remember to load the library foreign 1st)
-world.data <- read.dta("http://uclspp.github.io/PUBLG100/data/QoG2012.dta")
+world.data <- read.dta("./data/QoG2012.dta")
 
 # the dimensions: rows (observations) and columns (variables) 
 dim(world.data)
