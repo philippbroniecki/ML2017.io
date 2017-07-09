@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Philipp Broniecki and Lucas Leemann – Machine Learning 1K" />
+
+
+<title>Lab 4 – Cross-Validation</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Essex 2017 Machine Learning</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 1
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day1.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D1%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 2
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day2.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D2%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions2.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 3
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day3.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D3%20-%20Classification.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions3.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 4
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day4.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D4%20-%20Resampling.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions4.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 5
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day5.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D5%20-%20Model%20Selection%20I.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions5.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 6
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day6.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D6%20-%20Model%20Selection%20II.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions6.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 7
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day7.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D7%20-%20Polynomial%20Models.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions7.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 8
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day8.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D8%20-%20Tree-Based%20Methods.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions8.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 9
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day9.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D9%20-%20Unsupervised%20Learning.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions9.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Lab 4 – Cross-Validation</h1>
+<h4 class="author"><em>Philipp Broniecki and Lucas Leemann – Machine Learning 1K</em></h4>
+
+</div>
+
+
+<div id="based-on-james-et-al.-2013-chapter-5" class="section level5">
+<h5>(based on James et al. 2013, chapter 5)</h5>
+<p>We start by clearing our workspace.</p>
+<pre class="r"><code># clear workspace
+rm( list = ls() )</code></pre>
+</div>
+<div id="the-validation-set-approach" class="section level3">
+<h3>The Validation Set Approach</h3>
+<p>We use a subset of last weeks non-western immigrants data set (the version for this week includes men only). We can use the <code>head()</code> function to have a quick glance at the data. The codebook is:</p>
+<p>Let’s check the codebook of our data.</p>
+<table style="width:96%;">
+<colgroup>
+<col width="12%" />
+<col width="83%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>IMMBRIT</td>
+<td>Out of every 100 people in Britain, how many do you think are immigrants from Non-western countries?</td>
+</tr>
+<tr class="even">
+<td>over.estimate</td>
+<td>1 if estimate is higher than 10.7%.</td>
+</tr>
+<tr class="odd">
+<td>RAge</td>
+<td>Age of respondent</td>
+</tr>
+<tr class="even">
+<td>Househld</td>
+<td>Number of people living in respondent’s household</td>
+</tr>
+<tr class="odd">
+<td>Cons, Lab, SNP, Ukip, BNP, GP, party.other</td>
+<td>Party self-identification</td>
+</tr>
+<tr class="even">
+<td>paper</td>
+<td>Do you normally read any daily morning newspaper 3+ times/week?</td>
+</tr>
+<tr class="odd">
+<td>WWWhourspW</td>
+<td>How many hours WWW per week?</td>
+</tr>
+<tr class="even">
+<td>religious</td>
+<td>Do you regard yourself as belonging to any particular religion?</td>
+</tr>
+<tr class="odd">
+<td>employMonths</td>
+<td>How many mnths w. present employer?</td>
+</tr>
+<tr class="even">
+<td>urban</td>
+<td>Population density, 4 categories (highest density is 4, lowest is 1)</td>
+</tr>
+<tr class="odd">
+<td>health.good</td>
+<td>How is your health in general for someone of your age? (0: bad, 1: fair, 2: fairly good, 3: good)</td>
+</tr>
+<tr class="even">
+<td>HHInc</td>
+<td>Income bands for household, high number = high HH income</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># load non-western foreigners data
+load(&quot;your directory/BSAS_manip_men.RData&quot;)
+
+# take a look at the data
+head(data2)
+
+# you can attach a data set to call its contents directly
+attach(data2)</code></pre>
+<p>For this exercise, we first select a random sample of 239 out of 478 observations. We initialize the random number generator with a seed using <code>set.seed()</code> to ensure that repeated runs produce consistent results.</p>
+<pre class="r"><code># initialize random number generator
+set.seed(1)
+
+# pick 239 numbers out of 1 to 478
+train &lt;- sample(478, 239)</code></pre>
+<p>We then estimate the effects of age on the perceived number of immigrants per 100 Brits with <code>lm()</code> on the selected subset.</p>
+<pre class="r"><code># fit a linear regression
+lm.fit &lt;- lm( IMMBRIT ~ RAge, data = data2, subset = train)</code></pre>
+<p>Next, we calculate the mean squared error (MSE) for the remaining observations in the validation set. The training subset is excluded from the MSE calculation using <strong>-train</strong> index.</p>
+<pre class="r"><code># mse in the validation set
+mse &lt;- mean( (IMMBRIT[-train] -  predict(lm.fit, data2)[-train])^2 )
+mse # error rate</code></pre>
+<pre><code>## [1] 423.1941</code></pre>
+<p>he error rate for a linear model is <span class="math inline">\(423.1941\)</span>. We can also fit higher degree polynomials with the <code>poly()</code> function. First, let’s try a quadratic model.</p>
+<pre class="r"><code># polynomials (quadratic)
+lm.fit2 &lt;- lm( IMMBRIT ~ poly(RAge, 2), data = data2, subset = train)
+mse2  &lt;- mean( (IMMBRIT[-train] -  predict(lm.fit2, data2)[-train])^2 )
+mse2</code></pre>
+<pre><code>## [1] 403.8076</code></pre>
+<p>Quadratic regression performs better than a linear model and reduces the error rate to <span class="math inline">\(403.8076\)</span>. Let’s also try a cubic model.</p>
+<pre class="r"><code># cubic model
+lm.fit3 &lt;- lm( IMMBRIT ~ poly(RAge, 3), data = data2, subset = train)
+mse3  &lt;- mean( (IMMBRIT[-train] -  predict(lm.fit3, data2)[-train])^2 )
+mse3</code></pre>
+<pre><code>## [1] 403.2994</code></pre>
+<p>We can fit these models on a different subset of training observations by initializing the random number generator with a different seed.</p>
+<pre class="r"><code># fit the models on a different training/test split
+set.seed(2)
+train &lt;- sample(478, 239)
+lm.fit &lt;- lm( IMMBRIT ~ RAge, data = data2, subset = train)
+
+mean( (IMMBRIT[-train] -  predict(lm.fit, data2)[-train])^2 )</code></pre>
+<pre><code>## [1] 375.1684</code></pre>
+<pre class="r"><code># quadratic
+lm.fit2 &lt;- lm( IMMBRIT ~ poly(RAge, 2), data = data2, subset = train)
+mean( (IMMBRIT[-train] -  predict(lm.fit2, data2)[-train])^2 )</code></pre>
+<pre><code>## [1] 362.7666</code></pre>
+<pre class="r"><code># cubic
+lm.fit3 &lt;- lm( IMMBRIT ~ poly(RAge, 3), data = data2, subset = train)
+mean( (IMMBRIT[-train] -  predict(lm.fit3, data2)[-train])^2 )</code></pre>
+<pre><code>## [1] 362.0622</code></pre>
+<p>The error rates are different from our initial training sample but the results are consistent with previous findings. A quadratic model performs better than a linear model but there is not much improvement when we use a cubic model.</p>
+</div>
+<div id="leave-one-out-cross-validation" class="section level3">
+<h3>Leave-One-Out Cross-Validation</h3>
+<p>The <code>glm()</code> function offers a generalization of the linear model while allowing for different link functions and error distributions other than gaussian. By default, <code>glm()</code> simply fits a linear model identical to the one estimated with <code>lm()</code>.</p>
+<pre class="r"><code># linear regression fitted with glm() and lm()
+glm.fit &lt;- glm( IMMBRIT ~ RAge, data = data2)
+lm.fit &lt;- lm( IMMBRIT ~ RAge, data = data2)</code></pre>
+<p>The <code>glm()</code> function can be used with <code>cv.glm()</code> to estimate k-fold cross-validation prediction error.</p>
+<pre class="r"><code># use cv.glm() for k-fold corss-validation on glm
+library(boot)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;boot&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:survival&#39;:
+## 
+##     aml</code></pre>
+<pre class="r"><code>cv.err &lt;- cv.glm(data2, glm.fit)
+# cross-validation error
+cv.err$delta</code></pre>
+<pre><code>## [1] 380.2451 380.2415</code></pre>
+<pre class="r"><code># the number of folds
+cv.err$K</code></pre>
+<pre><code>## [1] 478</code></pre>
+<p>The returned value from <code>cv.glm()</code> contains a delta vector of components - the raw cross-validation estimate and the adjusted cross-validation estimate respectively. We are interested in the raw cross-validation error.</p>
+<p>NOTE: if we do not provide the option <strong>K</strong> in <code>cv.glm()</code> we automatically perfrom LOOCV.</p>
+<p>We can repeat this process in a <code>for()</code> loop to compare the cross-validation error of higher-order polynomials. The following example estimates the polynomial fit of the order 1 through 7 and stores the result in a cv.error vector.</p>
+<pre class="r"><code># container for cv errors
+cv.error &lt;- NA
+
+# loop over age raised to the power 1...7
+for (i in 1:7){
+  glm.fit &lt;- glm( IMMBRIT ~ poly(RAge, i), data = data2 )
+  cv.error[i] &lt;- cv.glm(data2, glm.fit)$delta[1]
+}
+cv.error</code></pre>
+<pre><code>## [1] 380.2451 367.8718 365.8549 366.6699 367.1566 368.4337 369.0857</code></pre>
+<p>We plot the effect of increasing the complexity of the model</p>
+<pre class="r"><code># plot of error rates
+plot( cv.error ~ seq(1, 7), bty = &quot;n&quot;, pch = 20,
+      xlab = &quot;complexity&quot;, ylab = &quot;cross-validation error&quot;,
+      ylim = c(365, 385))
+lines( y = cv.error, x = seq(1,7), lwd = 2)</code></pre>
+<p><img src="day4_files/figure-html/non.finished.plotting-1.png" width="672" /></p>
+</div>
+<div id="k-fold-cross-validation" class="section level3">
+<h3>k-Fold Cross-Validation</h3>
+<p>In addition to LOOCV, <code>cv.glm()</code> can also be used to run k-fold cross-validation. In the following example, we estimate the cross-validation error of polynomials of the order <span class="math inline">\(1\)</span> through <span class="math inline">\(7\)</span> using <span class="math inline">\(10\)</span>-fold cross-validation.</p>
+<pre class="r"><code># re-initialize random number generator
+set.seed(17)
+
+# container for 10-fold cross-validation errors
+cv.error.10 &lt;- NA
+
+# loop over 7 different powers of age
+for (i in 1:7){
+  glm.fit &lt;- glm( IMMBRIT ~ poly(RAge, i), data = data2)
+  cv.error.10[i] &lt;- cv.glm( data2, glm.fit, K = 10)$delta[1]
+}
+cv.error.10</code></pre>
+<pre><code>## [1] 383.1988 368.5701 366.4449 366.6201 364.9708 369.2413 373.4323</code></pre>
+<p>We add the results to the plot:</p>
+<pre class="r"><code># plot of error rates
+plot( cv.error ~ seq(1, 7), bty = &quot;n&quot;, pch = 20,
+      xlab = &quot;complexity&quot;, ylab = &quot;cross-validation error&quot;,
+      ylim = c(365, 385))
+lines( y = cv.error, x = seq(1,7), lwd = 2)
+# add to plot
+points(x = seq(1,7), y = cv.error.10, col = &quot;red&quot;, pch = 20)
+lines( x = seq(1,7), y = cv.error.10, col = &quot;red&quot;, lty = &quot;dashed&quot;, lwd = 2)</code></pre>
+<p><img src="day4_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>The 10-fold cross-validation error is more wiggly. In this expample it estimates the best performance when use the fifth polynomial of age wehreas the LOOCV errror finds a minimum at the cube of age. Eyeballing the results we suggest that there are no sifnificant improvements beyond the squared term.</p>
+</div>
+<div id="the-bootstrap" class="section level3">
+<h3>The Bootstrap</h3>
+<p>In order to perform bootstrap analysis, we first create an <code>alpha.fn()</code> for estimating <span class="math inline">\(\alpha\)</span> You can think of <span class="math inline">\(\alpha\)</span> as a proxy for investment risk (see p. 187 for more details).</p>
+<pre class="r"><code>library(ISLR)
+
+# function on investment risk
+alpha.fn &lt;- function(data, index){
+  X &lt;- data$X[index]
+  Y &lt;- data$Y[index]
+  return( (var(Y) - cov(X,Y)) / ( var(X) + var(Y) - 2*cov(X,Y)) )
+}</code></pre>
+<p>The following example estimates <span class="math inline">\(\alpha\)</span> using observations <span class="math inline">\(1\)</span> through <span class="math inline">\(100\)</span> from the <a href="http://finzi.psych.upenn.edu/library/ISLR/html/Portfolio.html">Portfolio</a> dataset.</p>
+<pre class="r"><code># estmate alpha based on observations 1 to 100 of Portfolio data set
+alpha.fn(Portfolio, 1: 100)</code></pre>
+<pre><code>## [1] 0.5758321</code></pre>
+<p>The subset from our dataset can also be obtained with the <code>sample()</code> function as previously discussed.</p>
+<pre class="r"><code># use the sample function to re-sample observations from Portfolio
+set.seed(1)
+alpha.fn(Portfolio, sample(100, 100, replace = TRUE))</code></pre>
+<pre><code>## [1] 0.5963833</code></pre>
+<p>Instead of manually repeating this procedure with different samples from our dataset, we can automate this process with the <code>boot()</code> function as shown below.</p>
+<pre class="r"><code># boot() function
+boot( Portfolio, alpha.fn, R = 1000 )</code></pre>
+<pre><code>## 
+## ORDINARY NONPARAMETRIC BOOTSTRAP
+## 
+## 
+## Call:
+## boot(data = Portfolio, statistic = alpha.fn, R = 1000)
+## 
+## 
+## Bootstrap Statistics :
+##      original        bias    std. error
+## t1* 0.5758321 -7.315422e-05  0.08861826</code></pre>
+<p>We can apply the same bootstrap approach to the Auto dataset by creating a bootstrap function that fits a linear model to our dataset.</p>
+<pre class="r"><code># bootstrap function for our linear model
+boot.fn &lt;- function(data, index){
+  return( coef( lm(IMMBRIT ~ RAge, data = data2, subset = index) ) )
+}
+boot.fn(data2, 1:478)</code></pre>
+<pre><code>## (Intercept)        RAge 
+## 25.83352996 -0.02560252</code></pre>
+<p>We can run this manually on different samples from the dataset.</p>
+<pre class="r"><code>set.seed(1)
+boot.fn(data2, sample( nrow(data2), nrow(data2), replace = TRUE) )</code></pre>
+<pre><code>## (Intercept)        RAge 
+## 23.38887407  0.02511054</code></pre>
+<p>And we can also automate this by fitting the model on 1000 replicates from our dataset.</p>
+<pre class="r"><code>boot( data2, boot.fn, 1000)</code></pre>
+<pre><code>## 
+## ORDINARY NONPARAMETRIC BOOTSTRAP
+## 
+## 
+## Call:
+## boot(data = data2, statistic = boot.fn, R = 1000)
+## 
+## 
+## Bootstrap Statistics :
+##        original       bias    std. error
+## t1* 25.83352996  0.008571397    3.163461
+## t2* -0.02560252 -0.000189780    0.057523</code></pre>
+<p>The <code>summary()</code> function be used to compute standard errors for the regression coefficients.</p>
+<pre class="r"><code>summary(lm(IMMBRIT ~ RAge, data = data2))$coef</code></pre>
+<pre><code>##                Estimate Std. Error    t value     Pr(&gt;|t|)
+## (Intercept) 25.83352996  2.8776284  8.9773683 6.453038e-18
+## RAge        -0.02560252  0.0540674 -0.4735297 6.360524e-01</code></pre>
+<p>Finally, we redefine the bootstrap function to use a quadratic model and compare the standard errors that from bootstrap to the ones obtained from the <code>summary()</code> function.</p>
+<pre class="r"><code>boot.fn &lt;- function(data, index){
+  coefficients( lm( IMMBRIT ~ RAge + I(RAge^2), data = data, subset =  index) )
+}
+
+set.seed(1)
+boot(data2, boot.fn, 1000)</code></pre>
+<pre><code>## 
+## ORDINARY NONPARAMETRIC BOOTSTRAP
+## 
+## 
+## Call:
+## boot(data = data2, statistic = boot.fn, R = 1000)
+## 
+## 
+## Bootstrap Statistics :
+##        original        bias    std. error
+## t1* 54.30633115  0.5054405939 8.312765634
+## t2* -1.26452170 -0.0236614172 0.334430578
+## t3*  0.01208576  0.0002474923 0.003206637</code></pre>
+<pre class="r"><code>summary( lm( IMMBRIT ~ RAge + I(RAge^2), data = data2) )$coef</code></pre>
+<pre><code>##                Estimate  Std. Error   t value     Pr(&gt;|t|)
+## (Intercept) 54.30633115 7.138409826  7.607623 1.511072e-13
+## RAge        -1.26452170 0.290145739 -4.358229 1.608238e-05
+## I(RAge^2)    0.01208576 0.002782629  4.343290 1.717136e-05</code></pre>
+</div>
+<div id="exercises" class="section level3">
+<h3>Exercises</h3>
+</div>
+<div id="q1" class="section level3">
+<h3>Q1</h3>
+<p>Yesterday we used logistic regression to predict the probability of overestimating the rate of non-western immigrants using the variables <code>RSex</code>, <code>urban</code> and <code>HHInc</code> on the full foeigners data set. We will now estimate the test error of this logistic regression model using the validation set approach. Do not forget to set a random seed before beginning your analysis and reload the full data set <code>BSAS_manip.RData</code>.</p>
+<ol style="list-style-type: decimal">
+<li><p>Fit a logistic regression model that uses <code>RSex</code>, <code>urban</code>, and <code>HHInc</code> to predict <code>over.estimate</code>.</p></li>
+<li><p>Using the validation set approach, estimate the test error of this model. In order to do this, you must perform the following steps:</p>
+<ol style="list-style-type: lower-alpha">
+<li>Split the sample set into a training set and a validation set.</li>
+<li>Fit a multiple logistic regression model using only the training observations.</li>
+<li>Obtain a prediction for each individual in the validation set by computing the posterior probability of over estimating for that individual, and classifying the individual to the over estimating category if the posterior probability is greater than 0.5.</li>
+<li>Compute the validation set error, which is the fraction of the observations in the validation set that are misclassified.</li>
+</ol></li>
+<li><p>Repeat the process in (2) three times, using three different splits of the observations into a training set and a validation set. Comment on the results obtained.</p></li>
+<li><p>Now consider a logistic regression model that predicts the probability of over estimating using additional dummy variables for people who self-identify with Ukip or the BNP. Estimate the test error for this model using the validation set approach. Comment on whether or not including a dummy variable for student leads to a reduction in the test error rate.</p></li>
+</ol>
+</div>
+<div id="q2" class="section level3">
+<h3>Q2</h3>
+<p>In the lab session for today (Sections 5.3.2 and 5.3.3 in James et al.), we saw that the <code>cv.glm()</code> function can be used in order to compute the LOOCV test error estimate. Alternatively, one could compute those quantities using just the <code>glm()</code> and <code>predict.glm()</code> functions, and a <code>for()</code> loop. You will now take this approach in order to compute the LOOCV error for a simple logistic regression model on the Weekly data set. Recall that in the context of classification problems, the LOOCV error is given in Section 5.1.5 (5.4, page 184).</p>
+<ol style="list-style-type: decimal">
+<li><p>Fit a logistic regression model on <code>over.estimate</code> using <code>paper</code> and <code>religious</code>.</p></li>
+<li><p>Fit a logistic regression model that predicts <code>over.estimate</code> using <code>paper</code> and <code>religious</code> using all but the first observation.</p></li>
+<li><p>Use the model from (2) to predict the direction of the first observation. You can do this by predicting that the first observation will over estimate if <span class="math inline">\(P(over.estimate == 1 | paper, religious) &gt; 0.5\)</span>. Was this observation correctly classified?</p></li>
+<li><p>Write a for loop from <span class="math inline">\(i=1\)</span> to <span class="math inline">\(i=n\)</span>, where <span class="math inline">\(n\)</span> is the number of observations in the data set, that performs each of the following steps:</p>
+<ol style="list-style-type: lower-alpha">
+<li>Fit a logistic regression model using all but the <span class="math inline">\(i^{th}\)</span> observation to predict <code>over.estimate</code> using <code>paper</code> and <code>religious</code>.</li>
+<li>Compute the posterior probability that the person over estimates the rate of immigrants for the <span class="math inline">\(i^{th}\)</span> observation.</li>
+<li>Use the posterior probability for the <span class="math inline">\(i^{th}\)</span> observation in order to predict whether or not the person over-estimates the rate of immigrants.</li>
+<li>Determine whether or not an error was made in predicting the direction for the <span class="math inline">\(i^{th}\)</span> observation. If an error was made, then indicate this as a <span class="math inline">\(1\)</span>, and otherwise indicate it as a <span class="math inline">\(0\)</span>.</li>
+</ol></li>
+<li><p>Take the average of the n numbers obtained in 4.d. in order to obtain the LOOCV estimate for the test error. Comment on the results.</p></li>
+</ol>
+</div>
+<div id="q3" class="section level3">
+<h3>Q3</h3>
+<p>We will now perform cross-validation on a simulated data set.</p>
+<ol style="list-style-type: decimal">
+<li>Generate a simulated data set as follows:</li>
+</ol>
+<pre class="r"><code>set.seed(1)
+y &lt;- rnorm(100)
+x &lt;- rnorm(100)
+y &lt;- x -2*x^2 + rnorm(100)</code></pre>
+<p>In this data set, what is <span class="math inline">\(n\)</span> and what is <span class="math inline">\(p\)</span>? Write out the model used to generate the data in equation form.</p>
+<ol start="2" style="list-style-type: decimal">
+<li><p>Create a scatterplot of <span class="math inline">\(X\)</span> against <span class="math inline">\(Y\)</span>. Comment on what you find.</p></li>
+<li><p>Set a random seed, and then compute the LOOCV errors that result from fitting the following four models using least squares:</p>
+<ol style="list-style-type: lower-alpha">
+<li><span class="math inline">\(Y=\beta_{0}+\beta_{1}X+\epsilon\)</span></li>
+<li><span class="math inline">\(Y=\beta_{0}+\beta_{1}X+\beta_{2}X_{2}+\epsilon\)</span></li>
+<li><span class="math inline">\(Y=\beta_{0}+\beta_{1}X+\beta_{2}X_{2}+\beta_{3}X_{3}+\epsilon\)</span></li>
+<li><span class="math inline">\(Y=\beta_{0}+\beta_{1}X+\beta_{2}X_{2}+\beta_{3}X_{3}+\beta_{4}X_{4}+\epsilon\)</span></li>
+</ol></li>
+</ol>
+<p>Note, you may find it helpful to use the <code>data.frame()</code> function to create a single data set containing both <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>.</p>
+<ol start="4" style="list-style-type: decimal">
+<li><p>Repeat the last task using another random seed, and report your results. Are your results the same as what you got 3.? Why?</p></li>
+<li><p>Which of the models in 3. had the smallest LOOCV error? Is this what you expected? Explain your answer.</p></li>
+<li><p>Comment on the statistical significance of the coefficient estimates that results from fitting each of the models in 3. using least squares. Do these results agree with the conclusions drawn based on the cross-validation results?</p></li>
+</ol>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
