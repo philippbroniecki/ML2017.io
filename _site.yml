@@ -72,7 +72,7 @@ navbar:
         - text: "Lab"
           href: day9.html
         - text: "Slides"
-          href: "./slides/D9%20-%20Unsupervised%20Learning.pdf.pdf"
+          href: "./slides/D9%20-%20Unsupervised%20Learning.pdf"
         - text: "Solutions"
           href: solutions9.html
 output:
