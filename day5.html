@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Philipp Broniecki and Lucas Leemann – Machine Learning 1K" />
+
+
+<title>Lab 5 – Subset Selection</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Essex 2017 Machine Learning</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 1
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day1.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D1%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 2
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day2.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D2%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions2.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 3
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day3.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D3%20-%20Classification.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions3.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 4
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day4.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D4%20-%20Resampling.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions4.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 5
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day5.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D5%20-%20Model%20Selection%20I.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions5.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 6
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day6.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D6%20-%20Model%20Selection%20II.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions6.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 7
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day7.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D7%20-%20Polynomial%20Models.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions7.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 8
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day8.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D8%20-%20Tree-Based%20Methods.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions8.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 9
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day9.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D9%20-%20Unsupervised%20Learning.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions9.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Lab 5 – Subset Selection</h1>
+<h4 class="author"><em>Philipp Broniecki and Lucas Leemann – Machine Learning 1K</em></h4>
+
+</div>
+
+
+<div id="based-on-james-et-al.-2013-chapter-6" class="section level5">
+<h5>(based on James et al. 2013, chapter 6)</h5>
+<p>We start by clearing our workspace.</p>
+<pre class="r"><code># clear workspace
+rm( list = ls() )</code></pre>
+</div>
+<div id="subset-selection-methods" class="section level3">
+<h3>Subset Selection Methods</h3>
+<p>We use a modified data set on non-western immigrants (we inserted some missings).The codebook is:</p>
+<p>Let’s check the codebook of our data.</p>
+<table style="width:96%;">
+<colgroup>
+<col width="12%" />
+<col width="83%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>IMMBRIT</td>
+<td>Out of every 100 people in Britain, how many do you think are immigrants from Non-western countries?</td>
+</tr>
+<tr class="even">
+<td>over.estimate</td>
+<td>1 if estimate is higher than 10.7%.</td>
+</tr>
+<tr class="odd">
+<td>RSex</td>
+<td>1 = male, 2 = female</td>
+</tr>
+<tr class="even">
+<td>RAge</td>
+<td>Age of respondent</td>
+</tr>
+<tr class="odd">
+<td>Househld</td>
+<td>Number of people living in respondent’s household</td>
+</tr>
+<tr class="even">
+<td>Cons, Lab, SNP, Ukip, BNP, GP, party.other</td>
+<td>Party self-identification</td>
+</tr>
+<tr class="odd">
+<td>paper</td>
+<td>Do you normally read any daily morning newspaper 3+ times/week?</td>
+</tr>
+<tr class="even">
+<td>WWWhourspW</td>
+<td>How many hours WWW per week?</td>
+</tr>
+<tr class="odd">
+<td>religious</td>
+<td>Do you regard yourself as belonging to any particular religion?</td>
+</tr>
+<tr class="even">
+<td>employMonths</td>
+<td>How many mnths w. present employer?</td>
+</tr>
+<tr class="odd">
+<td>urban</td>
+<td>Population density, 4 categories (highest density is 4, lowest is 1)</td>
+</tr>
+<tr class="even">
+<td>health.good</td>
+<td>How is your health in general for someone of your age? (0: bad, 1: fair, 2: fairly good, 3: good)</td>
+</tr>
+<tr class="odd">
+<td>HHInc</td>
+<td>Income bands for household, high number = high HH income</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># load foreigners data
+load(&quot;your directory/BSAS_manip_missings.RData&quot;)</code></pre>
+<p>We check our data set for missing values variable by variable using <code>apply()</code>, <code>is.na()</code>, and <code>table()</code>.</p>
+<pre class="r"><code># check for missing values
+apply(data2, 2, function(x) table(is.na(x))[&quot;TRUE&quot;] )</code></pre>
+<pre><code>##       IMMBRIT over.estimate          RSex          RAge      Househld 
+##             8            NA            NA            NA            NA 
+##          Cons           Lab           SNP          Ukip           BNP 
+##            NA            NA            NA            NA            NA 
+##            GP   party.other         paper    WWWhourspW     religious 
+##            NA            NA            NA            NA            NA 
+##  employMonths         urban   health.good         HHInc 
+##            NA            NA            NA            NA</code></pre>
+<pre class="r"><code>#  immbrit has missings which we drop
+data2 &lt;- data2[ !is.na(data2$IMMBRIT), ]</code></pre>
+<p>We now declare the categorical variables to be factors and create a copy of the main data set that excludes <code>over.estimate</code>.</p>
+<pre class="r"><code># declare factor variables
+data2$urban &lt;- factor(data2$urban, labels = c(&quot;rural&quot;, &quot;more rural&quot;, &quot;more urban&quot;, &quot;urban&quot;))
+data2$RSex &lt;- factor(data2$RSex, labels = c(&quot;Male&quot;, &quot;Female&quot;))
+data2$health.good &lt;- factor(data2$health.good, labels = c(&quot;bad&quot;, &quot;fair&quot;, &quot;fairly good&quot;, &quot;good&quot;) )
+
+# keep only variables to use for subset selection 
+df &lt;- dplyr::select(data2, IMMBRIT, RSex, RAge, Househld, Lab, SNP, Ukip,
+                    BNP, GP, party.other, paper, WWWhourspW, religious, employMonths,
+                    urban, health.good, HHInc)</code></pre>
+</div>
+<div id="best-subset-selection" class="section level3">
+<h3>Best Subset Selection</h3>
+<p>We use the <code>regsubsets()</code> function to identify the best model based on subset selection quantified by the residual sum of squares (RSS) for each model.</p>
+<pre class="r"><code>library(leaps)
+
+# run best subset selection
+regfit.full &lt;- regsubsets(IMMBRIT ~ ., data = df)
+summary(regfit.full)</code></pre>
+<pre><code>## Subset selection object
+## Call: regsubsets.formula(IMMBRIT ~ ., data = df)
+## 20 Variables  (and intercept)
+##                        Forced in Forced out
+## RSexFemale                 FALSE      FALSE
+## RAge                       FALSE      FALSE
+## Househld                   FALSE      FALSE
+## Lab                        FALSE      FALSE
+## SNP                        FALSE      FALSE
+## Ukip                       FALSE      FALSE
+## BNP                        FALSE      FALSE
+## GP                         FALSE      FALSE
+## party.other                FALSE      FALSE
+## paper                      FALSE      FALSE
+## WWWhourspW                 FALSE      FALSE
+## religious                  FALSE      FALSE
+## employMonths               FALSE      FALSE
+## urbanmore rural            FALSE      FALSE
+## urbanmore urban            FALSE      FALSE
+## urbanurban                 FALSE      FALSE
+## health.goodfair            FALSE      FALSE
+## health.goodfairly good     FALSE      FALSE
+## health.goodgood            FALSE      FALSE
+## HHInc                      FALSE      FALSE
+## 1 subsets of each size up to 8
+## Selection Algorithm: exhaustive
+##          RSexFemale RAge Househld Lab SNP Ukip BNP GP  party.other paper
+## 1  ( 1 ) &quot; &quot;        &quot; &quot;  &quot; &quot;      &quot; &quot; &quot; &quot; &quot; &quot;  &quot; &quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
+## 2  ( 1 ) &quot;*&quot;        &quot; &quot;  &quot; &quot;      &quot; &quot; &quot; &quot; &quot; &quot;  &quot; &quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
+## 3  ( 1 ) &quot;*&quot;        &quot; &quot;  &quot;*&quot;      &quot; &quot; &quot; &quot; &quot; &quot;  &quot; &quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
+## 4  ( 1 ) &quot;*&quot;        &quot; &quot;  &quot;*&quot;      &quot; &quot; &quot; &quot; &quot; &quot;  &quot;*&quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
+## 5  ( 1 ) &quot;*&quot;        &quot; &quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot; &quot;  &quot;*&quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
+## 6  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot; &quot;  &quot;*&quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
+## 7  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot; &quot;  &quot;*&quot; &quot; &quot; &quot; &quot;         &quot;*&quot;  
+## 8  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot;*&quot;  &quot;*&quot; &quot; &quot; &quot; &quot;         &quot;*&quot;  
+##          WWWhourspW religious employMonths urbanmore rural urbanmore urban
+## 1  ( 1 ) &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;             &quot; &quot;            
+## 2  ( 1 ) &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;             &quot; &quot;            
+## 3  ( 1 ) &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;             &quot; &quot;            
+## 4  ( 1 ) &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;             &quot; &quot;            
+## 5  ( 1 ) &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;             &quot; &quot;            
+## 6  ( 1 ) &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;             &quot; &quot;            
+## 7  ( 1 ) &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;             &quot; &quot;            
+## 8  ( 1 ) &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;             &quot; &quot;            
+##          urbanurban health.goodfair health.goodfairly good health.goodgood
+## 1  ( 1 ) &quot; &quot;        &quot; &quot;             &quot; &quot;                    &quot; &quot;            
+## 2  ( 1 ) &quot; &quot;        &quot; &quot;             &quot; &quot;                    &quot; &quot;            
+## 3  ( 1 ) &quot; &quot;        &quot; &quot;             &quot; &quot;                    &quot; &quot;            
+## 4  ( 1 ) &quot; &quot;        &quot; &quot;             &quot; &quot;                    &quot; &quot;            
+## 5  ( 1 ) &quot; &quot;        &quot; &quot;             &quot; &quot;                    &quot; &quot;            
+## 6  ( 1 ) &quot; &quot;        &quot; &quot;             &quot; &quot;                    &quot; &quot;            
+## 7  ( 1 ) &quot; &quot;        &quot; &quot;             &quot; &quot;                    &quot; &quot;            
+## 8  ( 1 ) &quot; &quot;        &quot; &quot;             &quot; &quot;                    &quot; &quot;            
+##          HHInc
+## 1  ( 1 ) &quot;*&quot;  
+## 2  ( 1 ) &quot;*&quot;  
+## 3  ( 1 ) &quot;*&quot;  
+## 4  ( 1 ) &quot;*&quot;  
+## 5  ( 1 ) &quot;*&quot;  
+## 6  ( 1 ) &quot;*&quot;  
+## 7  ( 1 ) &quot;*&quot;  
+## 8  ( 1 ) &quot;*&quot;</code></pre>
+<p>The <code>nvmax</code> parameter can be use to control the number of variables in the model. The default used by <code>regsubsets()</code> is 8.</p>
+<pre class="r"><code># increase the max number of variables
+regfit.full &lt;- regsubsets(IMMBRIT ~ ., data = df, nvmax = 20)
+reg.summary &lt;- summary(regfit.full)</code></pre>
+<p>We can look at the components of the <code>reg.summary</code> object using the <code>names()</code> function and examine the <span class="math inline">\(R^2\)</span> statistic stored in <code>rsq</code>.</p>
+<pre class="r"><code>names(reg.summary)</code></pre>
+<pre><code>## [1] &quot;which&quot;  &quot;rsq&quot;    &quot;rss&quot;    &quot;adjr2&quot;  &quot;cp&quot;     &quot;bic&quot;    &quot;outmat&quot; &quot;obj&quot;</code></pre>
+<pre class="r"><code>reg.summary$rsq</code></pre>
+<pre><code>##  [1] 0.1040145 0.1316228 0.1469748 0.1546376 0.1595363 0.1621379 0.1650727
+##  [8] 0.1672137 0.1689371 0.1699393 0.1708328 0.1717100 0.1721041 0.1723151
+## [15] 0.1725153 0.1726176 0.1726758 0.1726769 0.1726772 0.1726772</code></pre>
+<p>Next, we plot the <span class="math inline">\(RSS\)</span> and adjusted <span class="math inline">\(R^2\)</span> and add a point where <span class="math inline">\(R^2\)</span> is at its maximum using the <code>which.max()</code> function.</p>
+<pre class="r"><code>par( mfrow =  c(2,2) ) # 2 row, 2 columns in plot window
+plot(reg.summary$rss, xlab = &quot;Number of Variables&quot;, ylab = &quot;Residual Sum of Squares&quot;, type = &quot;l&quot;)
+plot(reg.summary$adjr2, xlab = &quot;Number of Variables&quot;, ylab = &quot;Adjusted R^2&quot;, type = &quot;l&quot;)
+
+# find the peak of adj. R^2
+adjr2.max &lt;- which.max( reg.summary$adjr2 )
+points(adjr2.max, reg.summary$adjr2[adjr2.max], col = &quot;red&quot;, pch = 20, cex = 2)</code></pre>
+<p><img src="day5_files/figure-html/more.plotting-1.png" width="672" /></p>
+<p>We can also plot the the <span class="math inline">\(C_{p}\)</span> statistic and <span class="math inline">\(BIC\)</span> and identify the minimum points for each statistic using the <span class="math inline">\(which.min()\)</span> function.</p>
+<pre class="r"><code>par( mfrow =  c(2,2) ) # 2 row, 2 columns in plot window
+plot(reg.summary$rss, xlab = &quot;Number of Variables&quot;, ylab = &quot;Residual Sum of Squares&quot;, type = &quot;l&quot;)
+plot(reg.summary$adjr2, xlab = &quot;Number of Variables&quot;, ylab = &quot;Adjusted R^2&quot;, type = &quot;l&quot;)
+
+# find the peak of adj. R^2
+adjr2.max &lt;- which.max( reg.summary$adjr2 )
+points(adjr2.max, reg.summary$adjr2[adjr2.max], col = &quot;red&quot;, pch = 20, cex = 2)
+# cp
+plot(reg.summary$cp, xlab = &quot;Number of Variables&quot;, ylab = &quot;Cp&quot;, type = &quot;l&quot;)
+cp.min &lt;- which.min(reg.summary$cp)
+points(cp.min, reg.summary$cp[cp.min], col = &quot;red&quot;, cex = 2, pch = 20)
+
+# bic
+bic.min &lt;- which.min(reg.summary$bic)
+plot(reg.summary$bic, xlab = &quot;Number of Variables&quot;, ylab = &quot;BIC&quot;, type = &quot;l&quot;)
+points(bic.min, reg.summary$bic[bic.min], col = &quot;red&quot;, cex = 2, pch = 20)</code></pre>
+<p><img src="day5_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>The estimated models from <code>regsubsets()</code> can be directly plotted to compare the differences based on the values of <span class="math inline">\(R^2\)</span>, adjusted <span class="math inline">\(R^2\)</span>, <span class="math inline">\(C_{p}\)</span> and <span class="math inline">\(BIC\)</span> statistics.</p>
+<pre class="r"><code>par( mfrow = c(1,1), oma = c(3,0,0,0))
+
+# plot model comparison based on R^2
+plot(regfit.full, scale = &quot;r2&quot;)</code></pre>
+<p><img src="day5_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code># plot model comparison based on adjusted R^2
+plot(regfit.full, scale = &quot;adjr2&quot;)</code></pre>
+<p><img src="day5_files/figure-html/unnamed-chunk-10-2.png" width="672" /></p>
+<pre class="r"><code># plot model comparison based on adjusted CP
+plot(regfit.full, scale = &quot;Cp&quot;)</code></pre>
+<p><img src="day5_files/figure-html/unnamed-chunk-10-3.png" width="672" /></p>
+<pre class="r"><code># plot model comparison based on adjusted BIC
+plot(regfit.full, scale = &quot;bic&quot;)</code></pre>
+<p><img src="day5_files/figure-html/unnamed-chunk-10-4.png" width="672" /></p>
+<p>To show the coefficients associated with the model with the lowest <span class="math inline">\(BIC\)</span>, we use the <code>coef()</code> function.</p>
+<pre class="r"><code>coef(regfit.full, bic.min)</code></pre>
+<pre><code>## (Intercept)  RSexFemale    Househld         BNP       HHInc 
+##   34.576036    6.970692    2.000771   10.830195   -1.511176</code></pre>
+</div>
+<div id="forward-and-backward-stepwise-selection" class="section level3">
+<h3>Forward and Backward Stepwise Selection</h3>
+<p>The default method used by <code>regsubsets()</code> is exhaustive but we can change it to forward or backward and compare the results.</p>
+<pre class="r"><code># run forward selection
+regfit.fwd &lt;- regsubsets(IMMBRIT ~ ., data = df, nvmax = 20, method = &quot;forward&quot;)
+summary(regfit.fwd)</code></pre>
+<pre><code>## Subset selection object
+## Call: regsubsets.formula(IMMBRIT ~ ., data = df, nvmax = 20, method = &quot;forward&quot;)
+## 20 Variables  (and intercept)
+##                        Forced in Forced out
+## RSexFemale                 FALSE      FALSE
+## RAge                       FALSE      FALSE
+## Househld                   FALSE      FALSE
+## Lab                        FALSE      FALSE
+## SNP                        FALSE      FALSE
+## Ukip                       FALSE      FALSE
+## BNP                        FALSE      FALSE
+## GP                         FALSE      FALSE
+## party.other                FALSE      FALSE
+## paper                      FALSE      FALSE
+## WWWhourspW                 FALSE      FALSE
+## religious                  FALSE      FALSE
+## employMonths               FALSE      FALSE
+## urbanmore rural            FALSE      FALSE
+## urbanmore urban            FALSE      FALSE
+## urbanurban                 FALSE      FALSE
+## health.goodfair            FALSE      FALSE
+## health.goodfairly good     FALSE      FALSE
+## health.goodgood            FALSE      FALSE
+## HHInc                      FALSE      FALSE
+## 1 subsets of each size up to 20
+## Selection Algorithm: forward
+##           RSexFemale RAge Househld Lab SNP Ukip BNP GP  party.other paper
+## 1  ( 1 )  &quot; &quot;        &quot; &quot;  &quot; &quot;      &quot; &quot; &quot; &quot; &quot; &quot;  &quot; &quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
+## 2  ( 1 )  &quot;*&quot;        &quot; &quot;  &quot; &quot;      &quot; &quot; &quot; &quot; &quot; &quot;  &quot; &quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
+## 3  ( 1 )  &quot;*&quot;        &quot; &quot;  &quot;*&quot;      &quot; &quot; &quot; &quot; &quot; &quot;  &quot; &quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
+## 4  ( 1 )  &quot;*&quot;        &quot; &quot;  &quot;*&quot;      &quot; &quot; &quot; &quot; &quot; &quot;  &quot;*&quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
+## 5  ( 1 )  &quot;*&quot;        &quot; &quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot; &quot;  &quot;*&quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
+## 6  ( 1 )  &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot; &quot;  &quot;*&quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
+## 7  ( 1 )  &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot; &quot;  &quot;*&quot; &quot; &quot; &quot; &quot;         &quot;*&quot;  
+## 8  ( 1 )  &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot;*&quot;  &quot;*&quot; &quot; &quot; &quot; &quot;         &quot;*&quot;  
+## 9  ( 1 )  &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot;*&quot;  &quot;*&quot; &quot; &quot; &quot; &quot;         &quot;*&quot;  
+## 10  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
+## 11  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
+## 12  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
+## 13  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
+## 14  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
+## 15  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
+## 16  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
+## 17  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot;*&quot;         &quot;*&quot;  
+## 18  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot;*&quot;         &quot;*&quot;  
+## 19  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot;*&quot;         &quot;*&quot;  
+## 20  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot;*&quot;         &quot;*&quot;  
+##           WWWhourspW religious employMonths urbanmore rural
+## 1  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 2  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 3  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 4  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 5  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 6  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 7  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 8  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 9  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 10  ( 1 ) &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 11  ( 1 ) &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 12  ( 1 ) &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 13  ( 1 ) &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 14  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 15  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 16  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot;*&quot;          &quot; &quot;            
+## 17  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot;*&quot;          &quot; &quot;            
+## 18  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot;*&quot;          &quot; &quot;            
+## 19  ( 1 ) &quot;*&quot;        &quot;*&quot;       &quot;*&quot;          &quot; &quot;            
+## 20  ( 1 ) &quot;*&quot;        &quot;*&quot;       &quot;*&quot;          &quot;*&quot;            
+##           urbanmore urban urbanurban health.goodfair
+## 1  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
+## 2  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
+## 3  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
+## 4  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
+## 5  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
+## 6  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
+## 7  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
+## 8  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
+## 9  ( 1 )  &quot; &quot;             &quot;*&quot;        &quot; &quot;            
+## 10  ( 1 ) &quot; &quot;             &quot;*&quot;        &quot; &quot;            
+## 11  ( 1 ) &quot; &quot;             &quot;*&quot;        &quot;*&quot;            
+## 12  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
+## 13  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
+## 14  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
+## 15  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
+## 16  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
+## 17  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
+## 18  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
+## 19  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
+## 20  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
+##           health.goodfairly good health.goodgood HHInc
+## 1  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 2  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 3  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 4  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 5  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 6  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 7  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 8  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 9  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 10  ( 1 ) &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 11  ( 1 ) &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 12  ( 1 ) &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 13  ( 1 ) &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 14  ( 1 ) &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 15  ( 1 ) &quot; &quot;                    &quot;*&quot;             &quot;*&quot;  
+## 16  ( 1 ) &quot; &quot;                    &quot;*&quot;             &quot;*&quot;  
+## 17  ( 1 ) &quot; &quot;                    &quot;*&quot;             &quot;*&quot;  
+## 18  ( 1 ) &quot;*&quot;                    &quot;*&quot;             &quot;*&quot;  
+## 19  ( 1 ) &quot;*&quot;                    &quot;*&quot;             &quot;*&quot;  
+## 20  ( 1 ) &quot;*&quot;                    &quot;*&quot;             &quot;*&quot;</code></pre>
+<pre class="r"><code># run backward selection
+regfit.bwd &lt;- regsubsets(IMMBRIT ~ ., data = df, nvmax = 20, method = &quot;backward&quot;)
+summary(regfit.bwd)</code></pre>
+<pre><code>## Subset selection object
+## Call: regsubsets.formula(IMMBRIT ~ ., data = df, nvmax = 20, method = &quot;backward&quot;)
+## 20 Variables  (and intercept)
+##                        Forced in Forced out
+## RSexFemale                 FALSE      FALSE
+## RAge                       FALSE      FALSE
+## Househld                   FALSE      FALSE
+## Lab                        FALSE      FALSE
+## SNP                        FALSE      FALSE
+## Ukip                       FALSE      FALSE
+## BNP                        FALSE      FALSE
+## GP                         FALSE      FALSE
+## party.other                FALSE      FALSE
+## paper                      FALSE      FALSE
+## WWWhourspW                 FALSE      FALSE
+## religious                  FALSE      FALSE
+## employMonths               FALSE      FALSE
+## urbanmore rural            FALSE      FALSE
+## urbanmore urban            FALSE      FALSE
+## urbanurban                 FALSE      FALSE
+## health.goodfair            FALSE      FALSE
+## health.goodfairly good     FALSE      FALSE
+## health.goodgood            FALSE      FALSE
+## HHInc                      FALSE      FALSE
+## 1 subsets of each size up to 20
+## Selection Algorithm: backward
+##           RSexFemale RAge Househld Lab SNP Ukip BNP GP  party.other paper
+## 1  ( 1 )  &quot; &quot;        &quot; &quot;  &quot; &quot;      &quot; &quot; &quot; &quot; &quot; &quot;  &quot; &quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
+## 2  ( 1 )  &quot;*&quot;        &quot; &quot;  &quot; &quot;      &quot; &quot; &quot; &quot; &quot; &quot;  &quot; &quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
+## 3  ( 1 )  &quot;*&quot;        &quot; &quot;  &quot;*&quot;      &quot; &quot; &quot; &quot; &quot; &quot;  &quot; &quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
+## 4  ( 1 )  &quot;*&quot;        &quot; &quot;  &quot;*&quot;      &quot; &quot; &quot; &quot; &quot; &quot;  &quot;*&quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
+## 5  ( 1 )  &quot;*&quot;        &quot; &quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot; &quot;  &quot;*&quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
+## 6  ( 1 )  &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot; &quot;  &quot;*&quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
+## 7  ( 1 )  &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot; &quot;  &quot;*&quot; &quot; &quot; &quot; &quot;         &quot;*&quot;  
+## 8  ( 1 )  &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot;*&quot;  &quot;*&quot; &quot; &quot; &quot; &quot;         &quot;*&quot;  
+## 9  ( 1 )  &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot;*&quot;  &quot;*&quot; &quot; &quot; &quot; &quot;         &quot;*&quot;  
+## 10  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
+## 11  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
+## 12  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot; &quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
+## 13  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
+## 14  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
+## 15  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
+## 16  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
+## 17  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot;*&quot;         &quot;*&quot;  
+## 18  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot;*&quot;         &quot;*&quot;  
+## 19  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot;*&quot;         &quot;*&quot;  
+## 20  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot;*&quot;         &quot;*&quot;  
+##           WWWhourspW religious employMonths urbanmore rural
+## 1  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 2  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 3  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 4  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 5  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 6  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 7  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 8  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 9  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 10  ( 1 ) &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 11  ( 1 ) &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 12  ( 1 ) &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 13  ( 1 ) &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 14  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 15  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
+## 16  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot;*&quot;          &quot; &quot;            
+## 17  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot;*&quot;          &quot; &quot;            
+## 18  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot;*&quot;          &quot; &quot;            
+## 19  ( 1 ) &quot;*&quot;        &quot;*&quot;       &quot;*&quot;          &quot; &quot;            
+## 20  ( 1 ) &quot;*&quot;        &quot;*&quot;       &quot;*&quot;          &quot;*&quot;            
+##           urbanmore urban urbanurban health.goodfair
+## 1  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
+## 2  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
+## 3  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
+## 4  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
+## 5  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
+## 6  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
+## 7  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
+## 8  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
+## 9  ( 1 )  &quot; &quot;             &quot;*&quot;        &quot; &quot;            
+## 10  ( 1 ) &quot; &quot;             &quot;*&quot;        &quot; &quot;            
+## 11  ( 1 ) &quot; &quot;             &quot;*&quot;        &quot;*&quot;            
+## 12  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
+## 13  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
+## 14  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
+## 15  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
+## 16  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
+## 17  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
+## 18  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
+## 19  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
+## 20  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
+##           health.goodfairly good health.goodgood HHInc
+## 1  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 2  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 3  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 4  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 5  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 6  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 7  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 8  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 9  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 10  ( 1 ) &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 11  ( 1 ) &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 12  ( 1 ) &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 13  ( 1 ) &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 14  ( 1 ) &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
+## 15  ( 1 ) &quot; &quot;                    &quot;*&quot;             &quot;*&quot;  
+## 16  ( 1 ) &quot; &quot;                    &quot;*&quot;             &quot;*&quot;  
+## 17  ( 1 ) &quot; &quot;                    &quot;*&quot;             &quot;*&quot;  
+## 18  ( 1 ) &quot;*&quot;                    &quot;*&quot;             &quot;*&quot;  
+## 19  ( 1 ) &quot;*&quot;                    &quot;*&quot;             &quot;*&quot;  
+## 20  ( 1 ) &quot;*&quot;                    &quot;*&quot;             &quot;*&quot;</code></pre>
+<pre class="r"><code># mdoel coefficients of best 7-variable models
+coef(regfit.full, 7)</code></pre>
+<pre><code>## (Intercept)  RSexFemale        RAge    Househld         Lab         BNP 
+## 40.02553709  7.14423868 -0.08205116  1.70838328 -3.34664442  9.11326764 
+##       paper       HHInc 
+##  2.37633989 -1.60436490</code></pre>
+<pre class="r"><code>coef(regfit.fwd, 7)</code></pre>
+<pre><code>## (Intercept)  RSexFemale        RAge    Househld         Lab         BNP 
+## 40.02553709  7.14423868 -0.08205116  1.70838328 -3.34664442  9.11326764 
+##       paper       HHInc 
+##  2.37633989 -1.60436490</code></pre>
+<pre class="r"><code>coef(regfit.bwd, 7)</code></pre>
+<pre><code>## (Intercept)  RSexFemale        RAge    Househld         Lab         BNP 
+## 40.02553709  7.14423868 -0.08205116  1.70838328 -3.34664442  9.11326764 
+##       paper       HHInc 
+##  2.37633989 -1.60436490</code></pre>
+<div id="choosing-among-models-using-the-validation-set-approach-and-cross-validation" class="section level4">
+<h4>Choosing Among Models Using the Validation Set Approach and Cross-Validation</h4>
+<p>For validation set approach, we split the dataset into a training subset and a test subset. In order to ensure that the results are consistent over multiple iterations, we set the random seed with <code>set.seed()</code> before calling <code>sample()</code>.</p>
+<pre class="r"><code>set.seed(1)
+
+# sample true or false for each observation
+train &lt;- sample( c(TRUE, FALSE), size = nrow(df), replace = TRUE )
+# the complement
+test &lt;- (!train)</code></pre>
+<p>We use <code>regsubsets()</code> as we did in the last section, but limit the estimation to the training subset.</p>
+<pre class="r"><code>regfit.best &lt;- regsubsets(IMMBRIT ~ ., data = df[train, ], nvmax = 20)</code></pre>
+<p>We create a matrix from the test subset using <code>model.matrix()</code>.</p>
+<pre class="r"><code># test data
+test.mat &lt;- model.matrix(IMMBRIT ~., data = df[test, ])</code></pre>
+<p>Next, we compute the validation error for each model.</p>
+<pre class="r"><code># validation error for each model
+val.errors &lt;- NA
+for (i in 1:20 ){
+  coefi &lt;- coef(regfit.best, id = i)
+  y_hat &lt;- test.mat[, names(coefi)] %*% coefi
+  val.errors[i] &lt;- mean(  (df$IMMBRIT[test] - y_hat)^2   )
+}</code></pre>
+<p>We examine the validation error for each model and identify the best model with the lowest error.</p>
+<pre class="r"><code>val.errors</code></pre>
+<pre><code>##  [1] 378.8917 383.0225 368.8723 372.9856 367.8958 371.1948 374.5266
+##  [8] 374.7800 374.4518 378.2256 376.5576 376.5623 375.7109 376.6845
+## [15] 375.4616 375.3801 375.2315 375.0680 375.8331 375.8172</code></pre>
+<pre class="r"><code># which model has smallest error
+min.val.errors &lt;- which.min(val.errors)
+# coefficients of that model
+coef( regfit.best, min.val.errors )</code></pre>
+<pre><code>## (Intercept)  RSexFemale    Househld         BNP party.other       HHInc 
+##   32.873751    5.199141    2.855654    8.450339    3.794634   -1.605292</code></pre>
+<p>We can combine these steps into a function that can be called repeatedly when running k-fold cross-validation.</p>
+<pre class="r"><code># precict function for repeatedly choosing model with lowest test error
+predict.regsubsets &lt;- function( object, newdata, id, ... ){
+  m.formula &lt;- as.formula( object$call[[2]] )
+  mat &lt;- model.matrix( m.formula, newdata )
+  coefi &lt;- coef( object, id = id )
+  xvars &lt;- names( coefi )
+  mat[ , xvars ] %*% coefi
+}</code></pre>
+<p>As a final step, we run <code>regsubsets()</code> on the full dataset and examine the coefficients associated with the model that has the lower validation error.</p>
+<pre class="r"><code># best subset on full data set
+regfit.best &lt;- regsubsets( IMMBRIT ~ ., data = df, nvmax = 20 )
+
+# examine coefficients of the model that had the lowest validation error
+coef( regfit.best, min.val.errors )</code></pre>
+<pre><code>## (Intercept)  RSexFemale    Househld         Lab         BNP       HHInc 
+##   35.920518    6.886259    2.062351   -3.394188    9.708402   -1.563859</code></pre>
+<p>For cross-validation, we create the number of folds needed (10, in this case) and allocate a matrix for storing the results.</p>
+<pre class="r"><code># number of folds
+k &lt;- 10
+set.seed(1)
+# fold assignment for each observation
+folds &lt;- sample(1:k, nrow(df), replace = TRUE)
+# container for cross-validation errors
+cv.errors &lt;- matrix(NA, nrow = k, ncol = 20, dimnames = list(NULL, paste(1:20)))</code></pre>
+<p>We then run through each fold in a <code>for()</code> loop and predict the salary using our predict function. We then calculate the validation error for each fold and save them in the matrix created above.</p>
+<pre class="r"><code># loop over folds
+for (a in 1:k){
+  
+  # best subset selection on training data
+  best.fit &lt;- regsubsets(IMMBRIT ~ ., data = df[ folds != a, ], nvmax = 20)
+  
+  # loop over the 20 subsets
+  for (b in 1:20){
+    
+    # predict response for test set for current subset
+    pred &lt;- predict(best.fit, df[ folds == a ,], id = b )
+    
+    # MSE into container; rows are folds; columns are subsets
+    cv.errors[a, b] &lt;- mean( (df$IMMBRIT[folds==a] - pred)^2 )
+    
+  } # end of loop over the 20 subsets
+} # end of loop over folds</code></pre>
+<p>We calculate the mean error for all subsets by applying mean to each column using the <code>apply()</code> function.</p>
+<pre class="r"><code># average cross-validation errors over the folds
+mean.cv.errors &lt;- apply(cv.errors, 2, mean)
+mean.cv.errors</code></pre>
+<pre><code>##        1        2        3        4        5        6        7        8 
+## 398.3527 385.8281 382.0506 382.3354 380.4119 380.3984 380.4861 380.4448 
+##        9       10       11       12       13       14       15       16 
+## 382.0528 380.3524 379.4324 380.5708 380.5263 381.2859 381.7960 382.3629 
+##       17       18       19       20 
+## 382.2162 382.5028 382.5268 382.5601</code></pre>
+<pre class="r"><code># visualize
+par( mfrow = c(1,1) , oma = c(0,0,0,0))
+plot( mean.cv.errors, type = &quot;b&quot; )</code></pre>
+<p><img src="day5_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p>Finally, we run <code>regsubsets()</code> on the full dataset and show the coefficients for the best performing model.</p>
+<pre class="r"><code># run regsubsets on full data set
+reg.best &lt;- regsubsets(IMMBRIT ~ ., data = df, nvmax = 20)
+# coefficients of subset which minimized test error
+coef(reg.best, which.min(mean.cv.errors))</code></pre>
+<pre><code>##     (Intercept)      RSexFemale            RAge        Househld 
+##     39.77322361      7.01819910     -0.07375744      1.73379158 
+##             Lab            Ukip             BNP              GP 
+##     -3.93833149     -6.00319269      9.20444619     -4.52952484 
+##           paper      urbanurban health.goodfair           HHInc 
+##      2.43834361      2.17126407     -1.72574453     -1.60450935</code></pre>
+</div>
+</div>
+<div id="exercises" class="section level3">
+<h3>Exercises</h3>
+<div id="q1" class="section level4">
+<h4>Q1</h4>
+<p>In this exercise, we will generate simulated data, and will then use this data to perform best subset selection.</p>
+<ol style="list-style-type: decimal">
+<li>Use the <code>rnorm()</code> function to generate a predictor <span class="math inline">\(X\)</span> of length <span class="math inline">\(n=100\)</span>, as well as a noise vector &amp;&amp; of length <span class="math inline">\(n=100\)</span>.</li>
+<li>Generate a response vector <span class="math inline">\(Y\)</span> of length <span class="math inline">\(n=100\)</span> according to the model <span class="math display">\[ Y = \beta_{0} + \beta_{1} X + \beta_{2} X^{2} + \beta_{3} X^{3} + \epsilon,\]</span> where <span class="math inline">\(\beta_{0},\: \beta_{1}, \: \beta_{2}, \: \beta_{3}\)</span> are constants of your choice.</li>
+<li>Use the <code>regsubsets()</code> function to perform best subset selection in order to choose the best model containing the predictors <span class="math inline">\(X, X^2,\ldots,X^{10}\)</span>. What is the best model obtained according to <span class="math inline">\(C_{p}\)</span>, <span class="math inline">\(BIC\)</span>, and adjusted <span class="math inline">\(R^2\)</span> Show some plots to provide evidence for your answer, and report the coefficients of the best model obtained. Note you will need to use the <code>data.frame()</code> function to create a single data set containing both <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>.</li>
+<li>Repeat (3), using forward stepwise selection and also using backwards stepwise selection. How does your answer compare to the results in (3)?</li>
+</ol>
+</div>
+<div id="q2" class="section level4">
+<h4>Q2</h4>
+<p>We have seen that as the number of features used in a model increases, the training error will necessarily decrease, but the test error may not. We will now explore this in a simulated data set.</p>
+<ol style="list-style-type: decimal">
+<li>Generate a data set with <span class="math inline">\(p=20\)</span> features, <span class="math inline">\(n=1,000\)</span> observations, and an associated quantitative response vector generated according to the model <span class="math display">\[Y = X\beta+\epsilon,\]</span> where <span class="math inline">\(\beta\)</span> has some elements that are exactly equal to <span class="math inline">\(0\)</span>.</li>
+</ol>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

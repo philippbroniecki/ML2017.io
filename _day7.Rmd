@@ -1,0 +1,326 @@
+---
+title: "Lab 7  -- Polynomial Models"
+author: "Philipp Broniecki and Lucas Leemann -- Machine Learning 1K"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(global.par = TRUE)
+```
+
+##### (based on James et al. 2013)
+
+We begin by loading that `ISLR` package and attaching to the Wage dataset that we will be using throughout this exercise.
+
+```{r, eval=FALSE}
+# clear workspace, load ISLR, attach wage data set
+rm(list=ls())
+library(ISLR)
+attach(Wage)
+?Wage # codebook
+```
+
+```{r, include=FALSE}
+# clear workspace, load ISLR, attach wage data set
+rm(list=ls())
+library(ISLR)
+attach(Wage)
+```
+
+### Polynomial Regression and Step Functions
+
+Let's fit a linear model to predict `wage` with a forth-degree polynomial using the `poly()` function.
+
+```{r}
+# linear regression on wage, with age up to a 4th degree polynomial
+fit <- lm(wage ~ poly(age, 4), data = Wage)
+coef(summary(fit))
+```
+
+We can also obtain raw instead of orthogonal polynomials by passing the `raw = TRUE` argument to `poly()`.
+
+```{r}
+fit2 <- lm(wage ~ poly(age, 4, raw = TRUE), data = Wage)
+coef(summary(fit2))
+```
+
+Finally, instead of using `poly()`, we can specify the polynomials directly in the formula as shown below.
+
+```{r}
+fit2a <- lm(wage ~ age + I(age^2) + I(age^3) + I(age^4), data = Wage)
+coef(fit2a)
+```
+
+A more compact version of the same example uses `cbind()` and eliminates the need to wrap each term in `I()`.
+
+```{r}
+fit2b <- lm(wage ~ cbind(age, age^2, age^3, age^4), data = Wage)
+coef(fit2b)
+```
+
+We can create an age grid for the targeted values of the prediction and pass the grid to `predict()`.
+
+```{r}
+agelims <- range(age)
+age.grid <- seq(from = agelims[1], to = agelims[2])
+preds <- predict(fit, newdata = list(age = age.grid), se = TRUE)
+se.bands <- cbind(preds$fit + 2 * preds$se.fit, preds$fit - 2 * preds$se.fit)
+```
+
+We can plot the data and add the fit from the degree-4 polynomial.
+
+```{r, eval=FALSE}
+par(mfrow = c(1, 2), mar = c(4.5, 4.5, 1, 1), oma = c(0, 0, 4, 0))
+plot(jitter(age,2), wage, xlim = agelims, cex = 0.5, col = "darkgrey", bty = "n",
+     xlab = "age")
+title("Degree -4 Polynomial ", outer = TRUE)
+lines(age.grid, preds$fit, lwd = 2, col = "blue")
+matlines(age.grid, se.bands, lwd = 2, col = "blue", lty = 3)
+```
+
+```{r, echo=FALSE}
+par(mfrow = c(1, 1), mar = c(4.5, 4.5, 1, 1), oma = c(0, 0, 4, 0))
+plot(jitter(age,2), wage, xlim = agelims, cex = 0.5, col = "darkgrey", bty = "n",
+     xlab = "age")
+title("Degree -4 Polynomial ", outer = TRUE)
+lines(age.grid, preds$fit, lwd = 2, col = "blue")
+matlines(age.grid, se.bands, lwd = 2, col = "blue", lty = 3)
+```
+
+Comparing orthogonolized fit with regular fit.
+
+```{r}
+preds2 <- predict(fit2, newdata = list(age = age.grid), se = TRUE)
+max(abs(preds$fit - preds2$fit))
+```
+
+We can use `anova()` to compare five different models of linear fit.
+
+```{r}
+fit.1 <- lm(wage ~ age, data = Wage)
+fit.2 <- lm(wage ~ poly(age, 2), data = Wage)
+fit.3 <- lm(wage ~ poly(age, 3), data = Wage)
+fit.4 <- lm(wage ~ poly(age, 4), data = Wage)
+fit.5 <- lm(wage ~ poly(age, 5), data = Wage)
+anova(fit.1, fit.2, fit.3, fit.4, fit.5)
+```
+
+The same p-values can also be obtained from the `coef()` function.
+
+```{r}
+coef(summary(fit.5))
+```
+
+The `anova()` function can also compare the variances when other terms are included as predictors.
+
+```{r}
+# comparing models when other predictors are added
+fit.1 <- lm(wage ~ education + age, data = Wage)
+fit.2 <- lm(wage ~ education + poly(age, 2), data = Wage)
+fit.3 <- lm(wage ~ education + poly(age, 3), data = Wage)
+anova(fit.1, fit.2, fit.3)
+```
+
+With `glm()` we can also fit a polynomial logistic regression.
+
+```{r}
+fit <- glm(I(wage > 250) ~ poly(age, 4), data = Wage, family = binomial)
+```
+
+And use the same method for making predictions using `predict()` as seen above.
+
+```{r}
+preds <- predict(fit, newdata = list(age = age.grid), se = TRUE)
+pfit <- exp(preds$fit) / (1 + exp(preds$fit))
+se.bands.logit <- cbind(preds$fit + 2 * preds$se.fit, preds$fit - 2 * preds$se.fit)
+se.bands <- exp(se.bands.logit)/(1 + exp(se.bands.logit))
+preds <- predict(fit, newdata = list(age = age.grid), type = "response", se = TRUE)
+```
+
+We can plot these results with the `plot()` function as usual.
+
+```{r, eval = FALSE}
+plot(age, I(wage > 250), xlim = agelims, type = "n", ylim = c(0, 0.2))
+points(jitter(age), I((wage > 250)/5), cex = 1, pch = "|", col = " darkgrey ")
+lines(age.grid, pfit, lwd = 2, col = "blue")
+matlines(age.grid, se.bands, lwd = 2, col = "blue", lty = 3)
+```
+
+```{r, echo=FALSE}
+par(mfrow = c(1, 2), mar = c(4.5, 4.5, 1, 0), oma = c(0, 0, 4, 0))
+
+# old data
+fit <- lm(wage ~ poly(age, 4), data = Wage)
+agelims <- range(age)
+age.grid <- seq(from = agelims[1], to = agelims[2])
+preds <- predict(fit, newdata = list(age = age.grid), se = TRUE)
+se.bands <- cbind(preds$fit + 2 * preds$se.fit, preds$fit - 2 * preds$se.fit)
+
+# old plot
+plot(jitter(age,2), wage, xlim = agelims, cex = 0.5, col = "darkgrey", bty = "n",
+     xlab = "age")
+title("Degree -4 Polynomial ", outer = TRUE)
+lines(age.grid, preds$fit, lwd = 2, col = "blue")
+matlines(age.grid, se.bands, lwd = 2, col = "blue", lty = 3)
+
+# newdata
+fit <- glm(I(wage > 250) ~ poly(age, 4), data = Wage, family = binomial)
+preds <- predict(fit, newdata = list(age = age.grid), se = TRUE)
+pfit <- exp(preds$fit) / (1 + exp(preds$fit))
+se.bands.logit <- cbind(preds$fit + 2 * preds$se.fit, preds$fit - 2 * preds$se.fit)
+se.bands <- exp(se.bands.logit)/(1 + exp(se.bands.logit))
+preds <- predict(fit, newdata = list(age = age.grid), type = "response", se = TRUE)
+
+# second plot
+plot(age, I(wage > 250), xlim = agelims, type = "n", ylim = c(0, 0.2), bty = "n")
+points(jitter(age), I((wage > 250)/5), cex = 1, pch = "|", col = " darkgrey ")
+lines(age.grid, pfit, lwd = 2, col = "blue")
+matlines(age.grid, se.bands, lwd = 2, col = "blue", lty = 3)
+```
+
+
+In the above plot, the `jitter()` function is used to prevent the same age observations from overlapping each other.
+
+The `cut()` functions creates cutpoints in the observations, which are then used as predictors for the linear model to fit a step function.
+
+```{r}
+# linear step function
+table(cut(age, 4))
+fit <- lm(wage ~ cut(age, 4), data = Wage)
+coef(summary(fit))
+```
+
+
+### Splines
+
+We use the `splines` package to run regression splines.
+
+```{r}
+library(splines)
+```
+
+We first use `bs()` to generate a basis matrix for a polynomial spline and fit a model with knots at age 25, 40 and 60.
+
+```{r}
+fit <- lm(wage ~ bs(age, knots = c(25, 40, 60)), data = Wage)
+pred <- predict(fit, newdata = list(age = age.grid), se = TRUE)
+par( mfrow = c(1,1))
+plot(jitter(age,2), wage, col = "gray", xlab = "age", bty = "n")
+lines(age.grid, pred$fit, lwd = 2)
+lines(age.grid, pred$fit + 2 * pred$se, lty = "dashed", lwd = 2)
+lines(age.grid, pred$fit - 2 * pred$se, lty = "dashed", lwd = 2)
+```
+
+Alternatively, the `df()` function can be used to produce a spline fit with knots at uniform intervals.
+
+```{r}
+dim( bs(age, knots = c(25, 40, 60)) )
+dim(bs(age, df = 6))
+attr(bs(age, df = 6), "knots")
+
+plot(jitter(age,2), wage, col = "gray", bty = "n", xlab = "age")
+fit2 <- lm(wage ~ ns(age, df = 4), data = Wage)
+pred2 <- predict(fit2, newdata = list(age = age.grid), se = TRUE)
+lines(age.grid, pred2$fit, col = "red", lwd = 2)
+```
+
+Using the `loess()` smoother.
+
+```{r}
+plot(jitter(age,2), wage, xlim = agelims, cex = 0.5, col = "darkgrey", bty = "n", xlab = "age")
+title(" Local Regression ")
+fit <- loess(wage ~ age, span = 0.2, data = Wage)
+fit2 <- loess(wage ~ age, span = 0.5, data = Wage)
+lines(age.grid, predict(fit, data.frame(age = age.grid)), col = "red", lwd = 2)
+lines(age.grid, predict(fit2, data.frame(age = age.grid)), col = "blue", lwd = 2)
+legend("topright", legend = c("Span=0.2", "Span=0.5"), col = c("red", "blue"), 
+       lty = 1, lwd = 2, cex = 0.8, bty = "n")
+```
+
+### GAMs
+
+We can fit a GAM with `lm()` when an appropriate basis function can used.
+
+```{r}
+gam1 <- lm(wage ~ bs(year, 4) + bs(age, 5) + education, data = Wage)
+```
+
+However, the `gam` package offers a general solution to fitting GAMs and is especially useful when splines cannot be easily expressed in terms of basis functions.
+
+```{r}
+library(gam)
+gam.m3 <- gam(wage ~ ns(year, 4) + ns(age, 5) + education, data = Wage)
+```
+
+The `plot()` function behaves the same way as it does with `lm()` and `glm()`.
+
+```{r, eval = FALSE}
+par(mfrow = c(1, 3))
+plot.gam(gam1, se = TRUE, col = "red")
+```
+
+We can use `anova()` to find the best performing model.
+
+```{r}
+gam.m1 <- gam(wage ~ ns(age, 5) + education, data = Wage)
+gam.m2 <- gam(wage ~ year + ns(age, 5) + education, data = Wage)
+anova(gam.m1, gam.m2, gam.m3, test = "F")
+```
+
+And use `summary()` to generate a summary of the fitted model.
+
+```{r}
+summary(gam.m3)
+```
+
+We can make predictions using `predict()` just as we did with linear and logistic regressions.
+
+```{r}
+preds <- predict(gam.m2, newdata = Wage)
+```
+
+The `gam()` function also allows fitting logistic regression GAM with the `family = binomial` argument.
+
+```{r}
+gam.lr <- gam(I(wage > 250) ~ year + ns(age, df = 5) + education, family = binomial, data = Wage)
+par(mfrow = c(1, 3))
+plot(gam.lr, se = TRUE, col = "green")
+
+table(education, I(wage > 250))
+
+gam.lr.s <- gam(I(wage > 250) ~ year + ns(age, df = 5) + education, family = binomial, data = Wage, subset = (education != "1. < HS Grad"))
+plot(gam.lr.s, se = TRUE, col = "green")
+```
+
+
+### Exercises
+
+#### Q1
+
+In this exercise, you will further analyze the `Wage` dataset coming with the `ISLR` package.
+
+1. Perform polynomial regression to predict `wage` using `age`. Use cross-validation to select the optimal degree dd for the polynomial. What degree was chosen, and how does this compare to the results of hypothesis testing using `ANOVA`? Make a plot of the resulting polynomial fit to the data.
+2. Fit a step function to predict `wage` using `age`, and perform cross-validation to choose the optimal number of cuts. Make a plot of the fit obtained.
+
+#### Q2
+
+The `Wage` data set contains a number of other features that we haven't yet covered, such as marital status (`maritl`), job class (`jobclass`), and others. Explore the relationships between some of these other predictors and `wage`, and use non-linear fitting techniques in order to fit flexible models to the data. Create plots of the results obtained, and write a summary of your findings.
+
+#### Q3
+
+This question uses the variables `dis` (the weighted mean of distances to five Boston employment centers) and `nox` (nitrogen oxides concentration in parts per 10 million) from the `Boston` data available as part of the `MASS` package. We will treat `dis` as the predictor and `nox` as the response.
+
+1. Use the `poly()` function to fit a cubic polynomial regression to predict `nox` using `dis`. Report the regression output, and plot the resulting data and polynomial fits.
+2. Plot the polynomial fits for a range of different polynomial degrees (say, from 1 to 10), and report the associated residual sum of squares.
+3. Perform cross-validation or another approach to select the optimal degree for the polynomial, and explain your results.
+4. Use the `bs()` function to fit a regression spline to predict `nox` using `dis`. Report the output for the fit using four degrees of freedom. How did you choose the knots? Plot the resulting fit.
+5. Now fit a regression spline for a range of degrees of freedom, and plot the resulting fits and report the resulting RSS. Describe the results obtained.
+
+#### Q4
+
+This question relates to the `College` dataset from the `ISLR` package.
+
+1. Split the data into a training set and a test set. Using out-of-state tuition as the response and the other variables as the predictors, perform forward stepwise selection on the training set in order to identify a satisfactory model that uses just a subset of the predictors.
+2. Fit a GAM on the training data, using out-of-state tuition as the response and the features selected in the previous step as the predictors. Plot the results, and explain your findings.
+3. Evaluate the model obtained on the test set, and explain the results obtained.
+4. For which variables, if any, is there evidence of a non-linear relationship with the response?

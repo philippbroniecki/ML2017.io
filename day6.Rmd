@@ -1,0 +1,231 @@
+---
+title: "Lab 6  -- Regularization"
+author: "Philipp Broniecki and Lucas Leemann -- Machine Learning 1K"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(global.par = TRUE)
+```
+
+##### (based on James et al. 2013, chapter 6)
+
+### Ridge Regression and the Lasso
+
+We start by clearing our workspace, loading the foreigners data, and doing the necessary variable manipulations.
+
+```{r, eval=FALSE}
+# clear workspace
+rm(list=ls())
+
+# load foreigners data
+load("your directory/BSAS_manip.RData")
+head(data2)
+
+# we declare the factor variables
+data2$urban <- factor(data2$urban, labels = c("rural", "more rural", "more urban", "urban"))
+data2$RSex <- factor(data2$RSex, labels = c("Male", "Female"))
+data2$health.good <- factor(data2$health.good, labels = c("bad", "fair", "fairly good", "good") )
+```
+
+```{r, include=FALSE}
+# clear workspace
+rm(list=ls())
+
+# load foreigners data
+load("./data/BSAS_manip.RData")
+head(data2)
+
+# we declare the factor variables
+data2$urban <- factor(data2$urban, labels = c("rural", "more rural", "more urban", "urban"))
+data2$RSex <- factor(data2$RSex, labels = c("Male", "Female"))
+data2$health.good <- factor(data2$health.good, labels = c("bad", "fair", "fairly good", "good") )
+```
+
+In order to run ridge regression, we create a matrix from our dataset using the `model.matrix()` function. We also need to remove the intercept from the resulting matrix because the function to run ridge regression automatically includes one. Furthermore, we will use the subjective rate of immigrants as response. Consequently, we have to remove `over.estimate` as it measures the same thing. Otherwise, it would be somewhat similar to predicting height measured in inches using as a predictor whether the person is taller than 70 inches. Lastly, the party affiliation dummies are mutually exclusive, se we have to exclude the model category `Cons`.
+
+```{r}
+# covariates in matrix form
+x <- model.matrix(IMMBRIT ~ ., data2)
+
+# drop the intercept and over.estimate & Cons
+drop <- which(colnames(x) %in% (c("(Intercept)", "over.estimate", "Cons")))
+x <- x[, -drop]
+# check if it looks fine
+head(x)
+
+# response vector
+y <- data2$IMMBRIT
+```
+
+
+#### Ridge Regression
+
+The `glmnet` package provides functionality to fit ridge regression and lasso models. We load the package and call `glmnet()` to perform ridge regression.
+
+```{r}
+library(glmnet)
+
+# tuning parameter
+grid <- 10^seq(4, -2, length = 100)
+plot(grid, bty = "n", pch = 19,
+     main = expression(paste("Grid of Tuning Parameters ", lambda)))
+
+# run ridge; alpha = 0 means do ridge
+ridge.mod <- glmnet(x, y, alpha = 0, lambda = grid)
+
+# coefficient shrinkage visualized
+plot(ridge.mod, xvar = "lambda", label = TRUE)
+
+# a set of coefficients for each lambda
+dim(coef(ridge.mod))
+```
+
+We can look at the coefficients at different values for $\lambda$. Here, we randomly choose two different values and notice that smaller values of $\lambda$ result in larger coefficient estimates and vice-versa.
+
+```{r}
+# Lambda and Betas
+ridge.mod$lambda[80]
+coef(ridge.mod)[, 80]
+sqrt( sum(coef(ridge.mod)[-1, 80]^2) )
+
+ridge.mod$lambda[40]
+coef(ridge.mod)[, 40]
+sqrt(sum(coef(ridge.mod)[-1, 40]^2))
+```
+
+We can get ridge regression coefficients for any value of $\lambda$ using predict.
+
+```{r}
+# compute coefficients at lambda = s
+predict(ridge.mod, s = 50, type = "coefficients")[1:21, ]
+```
+
+Next, we can use cross-validation on ridge regression by first splitting the dataset into training and test subsets.
+
+```{r}
+# cross-validate lambda by splitting dataset into training and test
+set.seed(1)
+train <- sample(1:nrow(x), nrow(x) * .5)
+y.test <- y[-train]
+```
+
+We estimate the parameters with `glmnet()` over the training set and predict the values on the test set to calculate the validation error.
+
+```{r}
+# fit on training set
+ridge.m <- glmnet(x[train, ], y[train], alpha = 0, lambda = grid, thresh = 1e-12)
+
+# predict with lambda = 4
+ridge.p <- predict(ridge.m, s = 4, newx = x[-train, ])
+
+# MSE on test data
+mean( (ridge.p - y.test)^2 )
+
+# maximal error?
+mean( (mean(y[train]) - y.test)^2)
+```
+
+In the previous example, we used $\lambda=4$ when evaluating the model on the test set. We can use a large value for $\lambda$ and see the difference in mean error.
+
+```{r}
+# try for large lambda
+ridge.p2 <- predict(ridge.m, s = 1e+4, newx = x[-train, ])
+mean((ridge.p2 - y.test)^2)
+```
+
+We can also compare the results with a least squares model where $\lambda = 0$.
+
+```{r}
+# compare to standard logistic regression where lambda is 0
+ridge.p <- predict(ridge.m, s = 0, newx = x[-train, ], exact = TRUE)
+mean( (ridge.p - y.test)^2 )
+
+# standard lm
+lm.data <- data.frame(IMMBRIT = y, x)
+lm.m <- lm(IMMBRIT ~ ., data = lm.data, subset = train)
+lm.p <- predict(lm.m, newdata = lm.data[-train,])
+mean( (lm.p - y.test)^2 )
+```
+
+We can choose different values for $\lambda$ by running cross-validation on ridge regression using `cv.glmnet()`.
+
+```{r}
+set.seed(1)
+# training data for CV to find optimal lambda, but then test data to estimate test error
+cv.out <- cv.glmnet(x[train, ], y[train], alpha = 0)
+plot(cv.out)
+# best performing model's lambda value
+bestlam <- cv.out$lambda.min
+bestlam
+```
+
+The best performing model is the one with $\lambda = 4.661975$
+
+```{r}
+# predict outcomes using best cross-validated lambda
+ridge.pred <- predict(ridge.mod, s = bestlam, newx = x[-train, ])
+mean((ridge.pred - y.test)^2)
+```
+
+Finally, we run ridge regression on the full dataset and examine the coefficients for the model with the best MSE.
+
+```{r}
+# ridge on full data
+out <- glmnet(x, y, alpha = 0)
+predict(out, type = "coefficients", s = bestlam)[1:21, ]
+```
+
+
+#### The Lasso
+
+The lasso model can be estimated in the same way as ridge regression. The `alpha = 1` parameter tells `glmnet()` to run lasso regression instead of ridge regression.
+
+```{r}
+lasso.mod <- glmnet(x[train, ], y[train], alpha = 1, lambda = grid)
+plot(lasso.mod)
+```
+
+Similarly, we can perform cross-validation using identical step as we did in the last exercise on ridge regression.
+
+```{r}
+# cross-validation to pick lambda
+set.seed(1)
+cv.out <- cv.glmnet(x[train, ], y[train], alpha = 1)
+plot(cv.out)
+bestlam <- cv.out$lambda.min
+lasso.pred <- predict(lasso.mod, s = bestlam, newx = x[-train, ])
+mean((lasso.pred - y.test)^2)
+```
+
+We can compare these results with ridge regression by examining the coefficient estimates.
+
+```{r}
+# compare to ridge regression
+out <- glmnet(x, y, alpha = 1, lambda = grid)
+lasso.coef <- predict(out, type = "coefficients", s = bestlam)[1:20, ]
+lasso.coef
+lasso.coef[lasso.coef != 0]
+```
+
+
+
+#### Exercises
+
+##### Q1
+
+In this exercise, we will predict the number of applications received using the `College` data set. You need to load `libary(ISLR)` and then type `?College` to get the codebook.
+
+1. Split the data set into a training set and a test set.
+2. Fit a linear model using least squares on the training set, and report the test error obtained.
+3. Fit a ridge regression model on the training set, with $\lambda$ chosen by cross-validation. Report the test error obtained.
+4. Fit a lasso model on the training set, with $\lambda$ chosen by cross-validation. Report the test error obtained, along with the number of non-zero coefficient estimates.
+5. Comment on the results obtained. How accurately can we predict the number of college applications received? Is there much difference among the test errors resulting from these five approaches?
+
+##### Q2
+
+We will now try to predict the per capita crime rate in the `Boston` data set. The `Boston` data set is in the `MASS` library.
+
+1. Try out some of the regression methods explored in this chapter, such as best subset selection, the lasso, and ridge regression. Present and discuss results for the approaches that you consider.
+2. Propose a model (or set of models) that seem to perform well on this data set, and justify your answer. Make sure that you are evaluating model performance using validation set error, cross-validation, or some other reasonable alternative, as opposed to using training error.
+3. Does your chosen model involve all of the features in the data set? Why or why not?
