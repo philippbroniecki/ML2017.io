@@ -180,8 +180,20 @@ $(document).ready(function () {
         <li>
   <a href="index.html">Home</a>
 </li>
-<li>
-  <a href="day1.html">Day 1</a>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 1
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day1.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D1%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+  </ul>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -326,7 +338,6 @@ $(document).ready(function () {
 rm(list=ls())
 
 library(ISLR)</code></pre>
-<pre><code>## Warning: package &#39;ISLR&#39; was built under R version 3.4.1</code></pre>
 <div id="q1" class="section level4">
 <h4>Q1</h4>
 <p>In this problem, you will develop a model to predict whether a given car gets high or low gas mileage based on the <code>Auto</code> dataset from the <code>ISLR</code> package.</p>
@@ -359,8 +370,12 @@ summary(Auto)</code></pre>
 ##  amc hornet        :  4  
 ##  chevrolet chevette:  4  
 ##  (Other)           :365</code></pre>
-<pre class="r"><code>attach(Auto)
-mpg01 &lt;-  rep(0, length(mpg))
+<pre class="r"><code>attach(Auto)</code></pre>
+<pre><code>## The following objects are masked from Auto (pos = 3):
+## 
+##     acceleration, cylinders, displacement, horsepower, mpg, name,
+##     origin, weight, year</code></pre>
+<pre class="r"><code>mpg01 &lt;-  rep(0, length(mpg))
 mpg01[mpg&gt;median(mpg)] &lt;- 1
 Auto &lt;- data.frame(Auto, mpg01)</code></pre>
 <ol start="2" style="list-style-type: decimal">

@@ -180,8 +180,20 @@ $(document).ready(function () {
         <li>
   <a href="index.html">Home</a>
 </li>
-<li>
-  <a href="day1.html">Day 1</a>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 1
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day1.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D1%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+  </ul>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -649,11 +661,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##       mean         sd       50%     2.5%     97.5%
-## 1 0.686678 0.01273304 0.6863274 0.661171 0.7112885
+##        mean         sd       50%      2.5%     97.5%
+## 1 0.6865477 0.01301464 0.6864831 0.6617767 0.7115595
 ## pv
-##           mean        sd       50%      2.5%    97.5%
-## [1,] 0.6820142 0.1773237 0.6830263 0.3461032 1.032805
+##           mean        sd       50%     2.5%    97.5%
+## [1,] 0.6892495 0.1739995 0.6879215 0.353196 1.017975
 ## 
 ## 
 ## [1] 0.3
@@ -663,10 +675,10 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##        mean          sd       50%      2.5%     97.5%
-## 1 0.5581288 0.008279673 0.5578891 0.5416289 0.5742249
+## 1 0.5579091 0.008397782 0.5580399 0.5414883 0.5738748
 ## pv
 ##           mean        sd       50%      2.5%     97.5%
-## [1,] 0.5475075 0.1752831 0.5437381 0.1924483 0.8871514
+## [1,] 0.5569912 0.1747832 0.5620144 0.1899642 0.8813498
 ## 
 ## 
 ## [1] 0.6
@@ -675,11 +687,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean          sd       50%      2.5%     97.5%
-## 1 0.4295797 0.004628869 0.4295885 0.4204306 0.4387138
+##        mean          sd      50%     2.5%     97.5%
+## 1 0.4292705 0.004488018 0.429298 0.420556 0.4374514
 ## pv
-##           mean        sd       50%      2.5%     97.5%
-## [1,] 0.4242842 0.1737871 0.4164418 0.1014207 0.7576634
+##          mean        sd       50%      2.5%    97.5%
+## [1,] 0.432291 0.1709123 0.4338176 0.1017528 0.765939
 ## 
 ## 
 ## [1] 0.9
@@ -688,11 +700,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean          sd       50%    2.5%   97.5%
-## 1 0.3010305 0.004555294 0.3008857 0.29252 0.30986
+##        mean          sd       50%      2.5%     97.5%
+## 1 0.3006319 0.004270784 0.3005461 0.2925639 0.3092597
 ## pv
 ##           mean        sd       50%        2.5%     97.5%
-## [1,] 0.3082161 0.1812584 0.2989716 -0.02057332 0.6740795</code></pre>
+## [1,] 0.2997474 0.1687306 0.2956672 -0.01457692 0.6339233</code></pre>
 <pre class="r"><code>ci.plot(s.out, xlab = &quot;Majority population (%)&quot;, ci = 95)</code></pre>
 <p><img src="day2_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
 </div>
