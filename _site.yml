@@ -11,8 +11,50 @@ navbar:
       menu:
         - text: "Lab"
           href: day2.html
-        - text: "Solutions 2"
+        - text: "Solutions"
           href: solutions2.html
+    - text: "Day 3"
+      menu:
+        - text: "Lab"
+          href: day3.html
+        - text: "Solutions"
+          href: solutions3.html
+    - text: "Day 4"
+      menu:
+        - text: "Lab"
+          href: day4.html
+        - text: "Solutions"
+          href: solutions4.html
+    - text: "Day 5"
+      menu:
+        - text: "Lab"
+          href: day5.html
+        - text: "Solutions"
+          href: solutions5.html
+    - text: "Day 6"
+      menu:
+        - text: "Lab"
+          href: day6.html
+        - text: "Solutions"
+          href: solutions6.html
+    - text: "Day 7"
+      menu:
+        - text: "Lab"
+          href: day7.html
+        - text: "Solutions"
+          href: solutions7.html
+    - text: "Day 8"
+      menu:
+        - text: "Lab"
+          href: day8.html
+        - text: "Solutions"
+          href: solutions8.html
+    - text: "Day 9"
+      menu:
+        - text: "Lab"
+          href: day9.html
+        - text: "Solutions"
+          href: solutions9.html
 output:
   html_document:
     theme: sandstone
