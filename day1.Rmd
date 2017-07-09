@@ -79,7 +79,7 @@ sqrt(my.vector)
 log(my.vector)
 ```
 
-Use the ? to get help on R functions. E.g. ?rep will open the help for the rep() function.
+Use the `?` to get help on R functions. E.g. `?rep` will open the help for the `rep()` function.
 
 ```{r}
 # creating longer vectors and sequences
@@ -180,6 +180,7 @@ https://www.rstudio.com/wp-content/uploads/2016/06/r-cheat-sheet.pdf
 
 
 ### Exercises 1
+
 
 1. Create a new file called "assignment1.R" in your `StatisticalLearning` folder and write all the solutions in it.
 1. Clear the workspace and set the working directory to your `StatisticalLearning` folder.

@@ -11,6 +11,8 @@ navbar:
           href: day1.html
         - text: "Slides"
           href: "./slides/D1%20-%20Intro%20ML.pdf"
+        - text: "Solutions"
+          href: solutions1.html
     - text: "Day 2"
       menu:
         - text: "Lab"

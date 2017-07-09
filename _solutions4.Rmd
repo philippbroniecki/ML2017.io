@@ -1,0 +1,249 @@
+---
+title: "Solution Day 4 - Resampling Methods"
+author: "Philipp Broniecki and Lucas Leemann -- Machine Learning 1K"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Q1
+
+Load the full data set.
+
+```{r}
+load("./data/BSAS_manip.RData") 
+df <- data2 # make copy with shorter name
+rm(data2) # remove original
+```
+
+1. Fit a logistic regression model that uses `RSex`, `urban`, and `HHInc` to predict `over.estimate`.
+
+Note, `RSex` and `urban` are categorical variables. Categorical variables with more than 2 categories have to be declared factor variables or broken up into dummy variables manually. We show both below but breaking up `RSex` is not necessary because it has only 2 categories.
+
+```{r}
+# declaring factor
+df$urban <- factor(df$urban, labels = c("rural", "partly rural", "partly urban", "urban"))
+
+# manual dummy coding
+df$female <- ifelse(df$RSex == 2, yes = 1, no = 0)
+
+set.seed(666)
+glm.fit <- glm(over.estimate ~ female + urban + HHInc, data = df, family = binomial(link = "logit"))
+summary(glm.fit)
+```
+
+2. Using the validation set approach, estimate the test error of this model. In order to do this, you must perform the following steps:
+    a. Split the sample set into a training set and a validation set.
+    b. Fit a multiple logistic regression model using only the training observations.
+    c. Obtain a prediction for each individual in the validation set by computing the posterior probability of over estimating for that individual, and classifying the individual to the over estimating category if the posterior probability is greater than 0.5.
+    d. Compute the validation set error, which is the fraction of the observations in the validation set that are misclassified.
+   
+   
+```{r}
+val.err <- function(df){
+  
+  # a. 
+  train <- sample(nrow(df), size = nrow(df) *.5, replace = FALSE )
+  
+  # b.
+  m <- glm(over.estimate ~ female + urban + HHInc, data = df, 
+           family = binomial(link = "logit"), subset = train)
+  
+  # c.
+  p <- predict(m, newdata = df[-train,], type = "response")
+  out <- ifelse( p > 0.5, yes = 1, no = 0)
+  
+  # d.
+  return( mean( out != df$over.estimate[-train]) )
+}
+
+# call the function (the only argument it needs is the name of the data set)
+val.err( df = df)
+```
+
+**The error rate in the test set is $25\%$.**
+
+3. Repeat the process in (2) three times, using three different splits of the observations into a training set and a validation set. Comment on the results obtained.
+
+```{r}
+for (a in 1:3) print(val.err( df = df))
+```
+
+**The error rate averages to roughly $27\%$ in the three trials.**
+
+
+4. Now consider a logistic regression model that predicts the probability of over estimating using additional dummy variables for people who self-identify with Ukip or the BNP. Estimate the test error for this model using the validation set approach. Comment on whether or not including a dummy variable for student leads to a reduction in the test error rate.
+
+```{r}
+train <- sample(nrow(df), size = nrow(df) *.5, replace = FALSE)
+m2 <- glm(over.estimate ~ female + urban + HHInc + Ukip + BNP,
+          data = df, family = binomial, subset = train)
+p <- predict( m2, newdata = df[-train, ], type = "response")
+out <- ifelse( p > 0.5, yes = 1, no = 0)
+mean( out != df$over.estimate[-train] )
+```
+
+**The error rate remains at roughly $27\%$. Adding the two dummies did not appear to improve prediction accuracy.**
+
+
+### Q2 
+
+1. Fit a logistic regression model on `over.estimate` using `paper` and `religious`.
+
+```{r}
+m1 <- glm(over.estimate ~ paper + religious, data = df, family = binomial)
+summary(m1)
+```
+
+2. Fit a logistic regression model that predicts `over.estimate` using `paper` and `religious` using all but the first observation.
+
+```{r}
+m2 <- glm(over.estimate ~ paper + religious, data = df[-1, ], family = binomial)
+summary(m2)
+```
+
+3. Use the model from (2) to predict the direction of the first observation. You can do this by predicting that the first observation will over estimate if  $P(over.estimate == 1 | paper, religious) > 0.5$. Was this observation correctly classified?
+
+
+```{r}
+p <- predict(m2, newdata = df[1,], type = "response")
+out <- ifelse( p > 0.5, yes = 1, no = 0)
+out == df$over.estimate[1]
+```
+
+**The first observation was classified incorrectly.**
+
+4. Write a for loop from $i=1$ to $i=n$, where $n$ is the number of observations in the data set, that performs each of the following steps:
+
+    a. Fit a logistic regression model using all but the $i^{th}$ observation to predict `over.estimate` using `paper` and `religious`.
+    b. Compute the posterior probability that the person over-estimates the rate of immigrants for the $i^{th}$ observation.
+    c. Use the posterior probability for the $i^{th}$ observation in order to predict whether or not the person over-estimates the rate of immigrants.
+    d. Determine whether or not an error was made in predicting the direction for the $i^{th}$ observation. If an error was made, then indicate this as a $1$, and otherwise indicate it as a $0$.
+  
+```{r}
+pred.all <- function(df, idx){
+  
+  # a.
+  m <- glm(over.estimate ~ paper + religious, data = df[-idx,], family = binomial)
+  
+  # b.
+  p <- predict(m, newdata = df[idx, ], type = "response")
+  
+  # c.
+  exp.out <- ifelse( p > 0.5, yes = 1, no = 0)
+  
+  # d.
+  return(ifelse( exp.out != df$over.estimate[idx], yes = 1, no = 0))
+}
+
+n.misclassifications <- 0
+for (a in 1: nrow(df)) n.misclassifications <- n.misclassifications + pred.all(df, a)
+n.misclassifications
+```
+
+**We make 290 errors.**
+
+5. Take the average of the n numbers obtained in 4.d. in order to obtain the LOOCV estimate for the test error. Comment on the results.
+
+```{r}
+n.misclassifications / nrow(df)
+```
+
+**We misclassify $28\%$ of the cases according to LOOCV.**
+
+
+### Q3
+
+1. Generate a simulated data set as follows:
+
+```{r}
+set.seed(1)
+y <- rnorm(100)
+x <- rnorm(100)
+y <- x -2*x^2 + rnorm(100)
+```
+
+In this data set, what is $n$ and what is $p$? Write out the model used to generate the data in equation form.
+
+**$n = 100$, $p = 2$; $Y=X-2X^{2}+\epsilon$**
+
+2. Create a scatterplot of $X$ against $Y$. Comment on what you find.
+
+```{r}
+plot( y ~ x, bty = "n", pch = 20)
+```
+
+**Quadratic plot. $X$ from about $-2$ to $2$. $Y$ from about $-8$ to $2$.**
+
+3. Set a random seed, and then compute the LOOCV errors that result from fitting the following four models using least squares:
+
+    a. $Y=\beta_{0}+\beta_{1}X+\epsilon$
+    b. $Y=\beta_{0}+\beta_{1}X+\beta_{2}X_{2}+\epsilon$
+    c. $Y=\beta_{0}+\beta_{1}X+\beta_{2}X_{2}+\beta_{3}X_{3}+\epsilon$
+    d. $Y=\beta_{0}+\beta_{1}X+\beta_{2}X_{2}+\beta_{3}X_{3}+\beta_{4}X_{4}+\epsilon$
+   
+Note, you may find it helpful to use the `data.frame()` function to create a single data set containing both $X$ and $Y$.
+
+```{r}
+library(boot)
+dat <- data.frame(x,y)
+set.seed(1)
+
+# a.
+m <- glm(y ~ x)
+cv.glm( dat, m)$delta
+
+# b.
+m <- glm( y ~ poly(x,2))
+cv.glm(dat, m)$delta
+
+# c.
+m <- glm( y ~ poly(x, 3) )
+cv.glm(dat, m)$delta
+
+# d.
+m <- glm( y ~ poly(x, 4) )
+cv.glm( dat, m)$delta
+
+```
+
+4. Repeat the last task using another random seed, and report your results. Are your results the same as what you got 3.? Why? 
+
+```{r}
+set.seed(10)
+
+# a.
+m <- glm(y ~ x)
+cv.glm( dat, m)$delta
+
+# b.
+m <- glm( y ~ poly(x,2))
+cv.glm(dat, m)$delta
+
+# c.
+m <- glm( y ~ poly(x, 3) )
+cv.glm(dat, m)$delta
+
+# d.
+m <- glm( y ~ poly(x, 4) )
+cv.glm( dat, m)$delta
+```
+
+**Exact same, because LOOCV will be the same since it evaluates $n$ folds of a single observation.**
+
+
+5. Which of the models in 3. had the smallest LOOCV error? Is this what you expected? Explain your answer.
+
+
+**The quadratic polynomial had the lowest LOOCV test error rate. This was expected because it matches the true form of $Y$.**
+
+
+6. Comment on the statistical significance of the coefficient estimates that results from fitting each of the models in 3. using least squares. Do these results agree with the conclusions drawn based on the cross-validation results?
+
+```{r}
+summary(m)
+```
+
+**p-values show statistical significance of linear and quadratic terms, which agrees with the CV results.**

@@ -543,17 +543,14 @@ legend(&quot;topright&quot;, legend = c(&quot;Span=0.2&quot;, &quot;Span=0.5&quo
 <p>We can fit a GAM with <code>lm()</code> when an appropriate basis function can used.</p>
 <pre class="r"><code>gam1 &lt;- lm(wage ~ bs(year, 4) + bs(age, 5) + education, data = Wage)</code></pre>
 <p>However, the <code>gam</code> package offers a general solution to fitting GAMs and is especially useful when splines cannot be easily expressed in terms of basis functions.</p>
-<pre class="r"><code>library(gam)</code></pre>
-<pre><code>## Warning: package &#39;gam&#39; was built under R version 3.4.1</code></pre>
-<pre><code>## Loading required package: foreach</code></pre>
-<pre><code>## Loaded gam 1.14-4</code></pre>
-<pre class="r"><code>gam.m3 &lt;- gam(wage ~ ns(year, 4) + ns(age, 5) + education, data = Wage)</code></pre>
+<pre class="r"><code>#library(gam)
+gam.m3 &lt;- gam::gam(wage ~ ns(year, 4) + ns(age, 5) + education, data = Wage)</code></pre>
 <p>The <code>plot()</code> function behaves the same way as it does with <code>lm()</code> and <code>glm()</code>.</p>
 <pre class="r"><code>par(mfrow = c(1, 3))
 mgcv::plot.gam(gam1, se = TRUE, col = &quot;red&quot;)</code></pre>
 <p>We can use <code>anova()</code> to find the best performing model.</p>
-<pre class="r"><code>gam.m1 &lt;- gam(wage ~ ns(age, 5) + education, data = Wage)
-gam.m2 &lt;- gam(wage ~ year + ns(age, 5) + education, data = Wage)
+<pre class="r"><code>gam.m1 &lt;- gam::gam(wage ~ ns(age, 5) + education, data = Wage)
+gam.m2 &lt;- gam::gam(wage ~ year + ns(age, 5) + education, data = Wage)
 anova(gam.m1, gam.m2, gam.m3, test = &quot;F&quot;)</code></pre>
 <pre><code>## Analysis of Deviance Table
 ## 
@@ -569,7 +566,8 @@ anova(gam.m1, gam.m2, gam.m3, test = &quot;F&quot;)</code></pre>
 <p>And use <code>summary()</code> to generate a summary of the fitted model.</p>
 <pre class="r"><code>summary(gam.m3)</code></pre>
 <pre><code>## 
-## Call: gam(formula = wage ~ ns(year, 4) + ns(age, 5) + education, data = Wage)
+## Call: gam::gam(formula = wage ~ ns(year, 4) + ns(age, 5) + education, 
+##     data = Wage)
 ## Deviance Residuals:
 ##      Min       1Q   Median       3Q      Max 
 ## -120.513  -19.608   -3.583   14.112  214.535 
@@ -591,6 +589,10 @@ anova(gam.m1, gam.m2, gam.m3, test = &quot;F&quot;)</code></pre>
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p>We can make predictions using <code>predict()</code> just as we did with linear and logistic regressions.</p>
+<pre class="r"><code>library(gam)</code></pre>
+<pre><code>## Warning: package &#39;gam&#39; was built under R version 3.4.1</code></pre>
+<pre><code>## Loading required package: foreach</code></pre>
+<pre><code>## Loaded gam 1.14-4</code></pre>
 <pre class="r"><code>preds &lt;- predict(gam.m2, newdata = Wage)</code></pre>
 <p>The <code>gam()</code> function also allows fitting logistic regression GAM with the <code>family = binomial</code> argument.</p>
 <pre class="r"><code>gam.lr &lt;- gam(I(wage &gt; 250) ~ year + ns(age, df = 5) + education, family = binomial, data = Wage)
@@ -605,7 +607,7 @@ plot(gam.lr, se = TRUE, col = &quot;green&quot;)</code></pre>
 ##   3. Some College      643    7
 ##   4. College Grad      663   22
 ##   5. Advanced Degree   381   45</code></pre>
-<pre class="r"><code>gam.lr.s &lt;- gam(I(wage &gt; 250) ~ year + ns(age, df = 5) + education, family = binomial, data = Wage, subset = (education != &quot;1. &lt; HS Grad&quot;))
+<pre class="r"><code>gam.lr.s &lt;- gam::gam(I(wage &gt; 250) ~ year + ns(age, df = 5) + education, family = binomial, data = Wage, subset = (education != &quot;1. &lt; HS Grad&quot;))
 plot(gam.lr.s, se = TRUE, col = &quot;green&quot;)</code></pre>
 <p><img src="day7_files/figure-html/unnamed-chunk-29-2.png" width="672" /></p>
 </div>

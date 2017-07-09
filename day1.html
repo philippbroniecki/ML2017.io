@@ -193,6 +193,9 @@ $(document).ready(function () {
     <li>
       <a href="./slides/D1%20-%20Intro%20ML.pdf">Slides</a>
     </li>
+    <li>
+      <a href="solutions1.html">Solutions</a>
+    </li>
   </ul>
 </li>
 <li class="dropdown">
@@ -429,7 +432,7 @@ my.vector + 2 </code></pre>
 <pre><code>## [1] 3.162278 2.645751 9.949874 5.830952 0.000000 2.236068</code></pre>
 <pre class="r"><code>log(my.vector)</code></pre>
 <pre><code>## [1] 2.302585 1.945910 4.595120 3.526361     -Inf 1.609438</code></pre>
-<p>Use the ? to get help on R functions. E.g. ?rep will open the help for the rep() function.</p>
+<p>Use the <code>?</code> to get help on R functions. E.g. <code>?rep</code> will open the help for the <code>rep()</code> function.</p>
 <pre class="r"><code># creating longer vectors and sequences
 na.vector &lt;- rep(NA, 10)
 na.vector</code></pre>
@@ -603,20 +606,20 @@ df3 &lt;- data2[ -pick, ]</code></pre>
 <pre class="r"><code># scaterplot
 plot(WWWhourspW ~ age, data = data2, 
      main = &quot;scatterplot&quot;)</code></pre>
-<p><img src="day1_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p><img src="day1_files/figure-html/unnamed-chunk-62-1.png" width="672" /></p>
 <pre class="r"><code># boxplot
 plot(HHInc ~ as.factor(Ukip), data = data2,
      main = &quot;boxplot&quot;,
      xlab = &quot;Ukip party affiliation&quot;,
      ylab = &quot;income&quot;,
      frame.plot = FALSE)</code></pre>
-<p><img src="day1_files/figure-html/unnamed-chunk-12-2.png" width="672" /></p>
+<p><img src="day1_files/figure-html/unnamed-chunk-62-2.png" width="672" /></p>
 <pre class="r"><code># density
 plot( density(data2$employMonths), bty = &quot;n&quot;, main = &quot;density plot&quot;)</code></pre>
-<p><img src="day1_files/figure-html/unnamed-chunk-12-3.png" width="672" /></p>
+<p><img src="day1_files/figure-html/unnamed-chunk-62-3.png" width="672" /></p>
 <pre class="r"><code># histogram
 hist( data2$employMonths, main = &quot;histogram&quot;)</code></pre>
-<p><img src="day1_files/figure-html/unnamed-chunk-12-4.png" width="672" /></p>
+<p><img src="day1_files/figure-html/unnamed-chunk-62-4.png" width="672" /></p>
 <p>Download a useful cheat-sheet for R if you are not already familiar with the essentials of R. <a href="https://www.rstudio.com/wp-content/uploads/2016/06/r-cheat-sheet.pdf" class="uri">https://www.rstudio.com/wp-content/uploads/2016/06/r-cheat-sheet.pdf</a></p>
 </div>
 <div id="exercises-1" class="section level3">

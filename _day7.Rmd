@@ -276,6 +276,7 @@ summary(gam.m3)
 We can make predictions using `predict()` just as we did with linear and logistic regressions.
 
 ```{r}
+library(gam)
 preds <- predict(gam.m2, newdata = Wage)
 ```
 
@@ -288,7 +289,7 @@ plot(gam.lr, se = TRUE, col = "green")
 
 table(education, I(wage > 250))
 
-gam.lr.s <- gam(I(wage > 250) ~ year + ns(age, df = 5) + education, family = binomial, data = Wage, subset = (education != "1. < HS Grad"))
+gam.lr.s <- gam::gam(I(wage > 250) ~ year + ns(age, df = 5) + education, family = binomial, data = Wage, subset = (education != "1. < HS Grad"))
 plot(gam.lr.s, se = TRUE, col = "green")
 ```
 
