@@ -15,48 +15,64 @@ navbar:
       menu:
         - text: "Lab"
           href: day2.html
+        - text: "Slides"
+          href: "./slides/D2%20-%20Intro%20ML.pdf"
         - text: "Solutions"
           href: solutions2.html
     - text: "Day 3"
       menu:
         - text: "Lab"
           href: day3.html
+        - text: "Slides"
+          href: "./slides/D3%20-%20Classification.pdf"
         - text: "Solutions"
           href: solutions3.html
     - text: "Day 4"
       menu:
         - text: "Lab"
           href: day4.html
+        - text: "Slides"
+          href: "./slides/D4%20-%20Resampling.pdf"
         - text: "Solutions"
           href: solutions4.html
     - text: "Day 5"
       menu:
         - text: "Lab"
           href: day5.html
+        - text: "Slides"
+          href: "./slides/D5%20-%20Model%20Selection%20I.pdf"
         - text: "Solutions"
           href: solutions5.html
     - text: "Day 6"
       menu:
         - text: "Lab"
           href: day6.html
+        - text: "Slides"
+          href: "./slides/D6%20-%20Model%20Selection%20II.pdf"
         - text: "Solutions"
           href: solutions6.html
     - text: "Day 7"
       menu:
         - text: "Lab"
           href: day7.html
+        - text: "Slides"
+          href: "./slides/D7%20-%20Polynomial%20Models.pdf"
         - text: "Solutions"
           href: solutions7.html
     - text: "Day 8"
       menu:
         - text: "Lab"
           href: day8.html
+        - text: "Slides"
+          href: "./slides/D8%20-%20Tree-Based%20Methods.pdf"
         - text: "Solutions"
           href: solutions8.html
     - text: "Day 9"
       menu:
         - text: "Lab"
           href: day9.html
+        - text: "Slides"
+          href: "./slides/D9%20-%20Unsupervised%20Learning%20notes.pdf"
         - text: "Solutions"
           href: solutions9.html
 output:
