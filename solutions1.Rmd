@@ -111,3 +111,8 @@ The `plot()` function knows that a boxplot is appropriate becuase `schtyp` is a 
 plot(final_score ~ schtyp, data = df, bty = "l", col = c("#AA4455", "#114477"), 
      xlab = "type of school", ylab = "final score", frame.plot = FALSE)
 ```
+
+```{r, echo=FALSE}
+rm(list = ls())
+detach(package:readxl, unload = TRUE)
+```

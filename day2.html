@@ -454,6 +454,11 @@ install.packages(&quot;texreg&quot;)</code></pre>
 <pre class="r"><code>library(Zelig)</code></pre>
 <pre><code>## Warning: package &#39;Zelig&#39; was built under R version 3.4.1</code></pre>
 <pre><code>## Loading required package: survival</code></pre>
+<pre><code>## 
+## Attaching package: &#39;survival&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:boot&#39;:
+## 
+##     aml</code></pre>
 <p>Let’s load 2 datasets into R using <code>read.csv()</code> and confirm that the <code>state</code> and <code>communityname</code> are present in each dataset. You can either directly load the dataset from the online source as shown in the code below. Alternatively, get <code>communities</code> <a href="http://philippbroniecki.github.io/ML2017.io/data/communities.csv">here</a> and <code>communitties_employment</code> <a href="http://philippbroniecki.github.io/ML2017.io/data/communities_employment.csv">here</a>, place them in your working directory and then load them from your local source.</p>
 <pre class="r"><code># load the communities datasets
 communities &lt;- read.csv(&quot;http://philippbroniecki.github.io/ML2017.io/data/communities.csv&quot;)
@@ -690,11 +695,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean         sd       50%      2.5%    97.5%
-## 1 0.6865625 0.01220892 0.6859012 0.6635555 0.710865
+##      mean         sd      50%     2.5%     97.5%
+## 1 0.68691 0.01297505 0.686924 0.661544 0.7121637
 ## pv
-##           mean        sd       50%      2.5%  97.5%
-## [1,] 0.6837459 0.1735017 0.6880338 0.3441714 1.0212
+##          mean        sd       50%     2.5%    97.5%
+## [1,] 0.692866 0.1648238 0.6929996 0.374112 1.015317
 ## 
 ## 
 ## [1] 0.3
@@ -704,10 +709,10 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##        mean          sd       50%      2.5%     97.5%
-## 1 0.5580066 0.007984155 0.5577423 0.5426489 0.5738379
+## 1 0.5581401 0.008462655 0.5583113 0.5419306 0.5745705
 ## pv
-##           mean        sd       50%      2.5%    97.5%
-## [1,] 0.5518302 0.1710651 0.5523608 0.2141184 0.878574
+##           mean        sd       50%     2.5%     97.5%
+## [1,] 0.5572104 0.1720337 0.5571758 0.214799 0.8827391
 ## 
 ## 
 ## [1] 0.6
@@ -716,11 +721,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean          sd       50%      2.5%     97.5%
-## 1 0.4294508 0.004563947 0.4295812 0.4204977 0.4384122
+##        mean         sd       50%      2.5%     97.5%
+## 1 0.4293701 0.00470812 0.4294969 0.4198393 0.4384724
 ## pv
-##           mean        sd       50%       2.5%     97.5%
-## [1,] 0.4323267 0.1777354 0.4314338 0.08615863 0.7703415
+##           mean        sd      50%       2.5%     97.5%
+## [1,] 0.4266729 0.1789059 0.435008 0.05935325 0.7645092
 ## 
 ## 
 ## [1] 0.9
@@ -729,11 +734,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean          sd      50%      2.5%     97.5%
-## 1 0.3008949 0.004506257 0.300968 0.2923435 0.3093909
+##        mean          sd       50%      2.5%     97.5%
+## 1 0.3006002 0.004472306 0.3004253 0.2923056 0.3094671
 ## pv
 ##           mean        sd       50%        2.5%     97.5%
-## [1,] 0.2971718 0.1779312 0.2982512 -0.05013683 0.6582584</code></pre>
+## [1,] 0.3085718 0.1713272 0.3090097 -0.01461866 0.6323666</code></pre>
 <pre class="r"><code>ci.plot(s.out, xlab = &quot;Majority population (%)&quot;, ci = 95)</code></pre>
 <p><img src="day2_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
 </div>
