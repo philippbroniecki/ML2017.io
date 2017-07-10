@@ -96,12 +96,12 @@ library(Zelig)
 library(dplyr)
 ```
 
-Let's load 2 datasets into R using read.csv() and confirm that the state and communityname are present in each dataset.
+Let's load 2 datasets into R using `read.csv()` and confirm that the `state` and `communityname` are present in each dataset. You can either directly load the dataset from the online source as shown in the code below. Alternatively, get `communities` [here](http://philippbroniecki.github.io/ML2017.io/data/communities.csv) and `communitties_employment` [here](http://philippbroniecki.github.io/ML2017.io/data/communities_employment.csv), place them in your working directory and then load them from your local source.
 
 ```{r}
 # load the communities datasets
-communities <- read.csv("./data/communities.csv")
-communities_employment <- read.csv("http://uclspp.github.io/PUBLG100/data/communities_employment.csv")
+communities <- read.csv("http://philippbroniecki.github.io/ML2017.io/data/communities.csv")
+communities_employment <- read.csv("http://philippbroniecki.github.io/ML2017.io/data/communities_employment.csv")
 ```
 
 ### Dplyr `select()` Function
