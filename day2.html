@@ -452,10 +452,10 @@ install.packages(&quot;texreg&quot;)</code></pre>
 <pre class="r"><code>library(texreg)
 library(Zelig)
 library(dplyr)</code></pre>
-<p>Let’s load 2 datasets into R using read.csv() and confirm that the state and communityname are present in each dataset.</p>
+<p>Let’s load 2 datasets into R using <code>read.csv()</code> and confirm that the <code>state</code> and <code>communityname</code> are present in each dataset. You can either directly load the dataset from the online source as shown in the code below. Alternatively, get <code>communities</code> <a href="http://philippbroniecki.github.io/ML2017.io/data/communities.csv">here</a> and <code>communitties_employment</code> <a href="http://philippbroniecki.github.io/ML2017.io/data/communities_employment.csv">here</a>, place them in your working directory and then load them from your local source.</p>
 <pre class="r"><code># load the communities datasets
-communities &lt;- read.csv(&quot;./data/communities.csv&quot;)
-communities_employment &lt;- read.csv(&quot;http://uclspp.github.io/PUBLG100/data/communities_employment.csv&quot;)</code></pre>
+communities &lt;- read.csv(&quot;http://philippbroniecki.github.io/ML2017.io/data/communities.csv&quot;)
+communities_employment &lt;- read.csv(&quot;http://philippbroniecki.github.io/ML2017.io/data/communities_employment.csv&quot;)</code></pre>
 </div>
 <div id="dplyr-select-function" class="section level3">
 <h3>Dplyr <code>select()</code> Function</h3>
@@ -689,10 +689,10 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##        mean         sd       50%      2.5%     97.5%
-## 1 0.6869928 0.01326244 0.6872609 0.6602594 0.7121642
+## 1 0.6869573 0.01314919 0.6866511 0.6608068 0.7121642
 ## pv
-##           mean       sd       50%      2.5%    97.5%
-## [1,] 0.6982695 0.180956 0.7003287 0.3280979 1.033445
+##           mean        sd       50%      2.5%    97.5%
+## [1,] 0.6998475 0.1821476 0.7010008 0.3310775 1.037275
 ## 
 ## 
 ## [1] 0.3
@@ -701,11 +701,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean          sd       50%      2.5%     97.5%
-## 1 0.5582784 0.008675327 0.5584675 0.5406816 0.5743118
+##        mean         sd       50%      2.5%     97.5%
+## 1 0.5582694 0.00858118 0.5579761 0.5410223 0.5744027
 ## pv
-##           mean        sd       50%      2.5%     97.5%
-## [1,] 0.5521361 0.1732385 0.5539445 0.2010252 0.9113581
+##           mean        sd       50%     2.5%    97.5%
+## [1,] 0.5495204 0.1724429 0.5527406 0.196367 0.899845
 ## 
 ## 
 ## [1] 0.6
@@ -714,11 +714,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##       mean          sd       50%      2.5%     97.5%
-## 1 0.429564 0.004891248 0.4295586 0.4198681 0.4389099
+##        mean          sd       50%      2.5%     97.5%
+## 1 0.4295815 0.004823082 0.4294232 0.4201374 0.4387504
 ## pv
-##          mean        sd       50%      2.5%     97.5%
-## [1,] 0.425996 0.1678449 0.4231801 0.1139504 0.7511723
+##           mean        sd       50%      2.5%     97.5%
+## [1,] 0.4268121 0.1688864 0.4215765 0.1139504 0.7650139
 ## 
 ## 
 ## [1] 0.9
@@ -728,10 +728,10 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##        mean          sd       50%      2.5%     97.5%
-## 1 0.3008496 0.004677737 0.3008554 0.2918656 0.3102488
+## 1 0.3008935 0.004666654 0.3010842 0.2918656 0.3098368
 ## pv
-##           mean        sd       50%        2.5%    97.5%
-## [1,] 0.2990658 0.1790835 0.2869931 -0.04493099 0.660482</code></pre>
+##           mean        sd       50%        2.5%     97.5%
+## [1,] 0.2986058 0.1791411 0.2919663 -0.04495198 0.6639786</code></pre>
 <pre class="r"><code>ci.plot(s.out, xlab = &quot;Majority population (%)&quot;, ci = 95)</code></pre>
 <p><img src="day2_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
 </div>
