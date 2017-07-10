@@ -690,11 +690,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean         sd       50%    2.5%     97.5%
-## 1 0.6865548 0.01244801 0.6865302 0.66173 0.7110971
+##        mean         sd       50%      2.5%    97.5%
+## 1 0.6865625 0.01220892 0.6859012 0.6635555 0.710865
 ## pv
-##           mean        sd       50%      2.5%    97.5%
-## [1,] 0.6898726 0.1762149 0.6783406 0.3594437 1.035827
+##           mean        sd       50%      2.5%  97.5%
+## [1,] 0.6837459 0.1735017 0.6880338 0.3441714 1.0212
 ## 
 ## 
 ## [1] 0.3
@@ -704,10 +704,10 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##        mean          sd       50%      2.5%     97.5%
-## 1 0.5579973 0.008152298 0.5581367 0.5420682 0.5739605
+## 1 0.5580066 0.007984155 0.5577423 0.5426489 0.5738379
 ## pv
-##           mean        sd       50%      2.5%     97.5%
-## [1,] 0.5573415 0.1756537 0.5629558 0.2195817 0.9003465
+##           mean        sd       50%      2.5%    97.5%
+## [1,] 0.5518302 0.1710651 0.5523608 0.2141184 0.878574
 ## 
 ## 
 ## [1] 0.6
@@ -717,10 +717,10 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##        mean          sd       50%      2.5%     97.5%
-## 1 0.4294398 0.004698676 0.4295562 0.4204194 0.4384539
+## 1 0.4294508 0.004563947 0.4295812 0.4204977 0.4384122
 ## pv
-##          mean        sd       50%       2.5%     97.5%
-## [1,] 0.423759 0.1773767 0.4319374 0.07140777 0.7447297
+##           mean        sd       50%       2.5%     97.5%
+## [1,] 0.4323267 0.1777354 0.4314338 0.08615863 0.7703415
 ## 
 ## 
 ## [1] 0.9
@@ -729,11 +729,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean         sd       50%      2.5%     97.5%
-## 1 0.3008823 0.00466967 0.3008381 0.2921203 0.3100751
+##        mean          sd      50%      2.5%     97.5%
+## 1 0.3008949 0.004506257 0.300968 0.2923435 0.3093909
 ## pv
-##           mean        sd       50%        2.5%    97.5%
-## [1,] 0.3007243 0.1743377 0.3006711 -0.03721853 0.636317</code></pre>
+##           mean        sd       50%        2.5%     97.5%
+## [1,] 0.2971718 0.1779312 0.2982512 -0.05013683 0.6582584</code></pre>
 <pre class="r"><code>ci.plot(s.out, xlab = &quot;Majority population (%)&quot;, ci = 95)</code></pre>
 <p><img src="day2_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
 </div>
@@ -758,41 +758,6 @@ summary(s.out)</code></pre>
 <li>Hint: Look at the Plot window in RStudio for an option to save your plot. Alternatively, you can use the <code>png()</code> function for saving the graphics file directly from your R script.</li>
 </ul></li>
 </ol>
-<pre class="r"><code>rm(list=ls())
-detach(package:Zelig, unload = TRUE)
-detach(package:texreg, unload = TRUE)
-unloadNamespace(&quot;AER&quot;)
-unloadNamespace(&quot;maxLik&quot;)
-unloadNamespace(&quot;sandwich&quot;)
-unloadNamespace(&quot;lmtest&quot;)
-unloadNamespace(&quot;zoo&quot;)
-unloadNamespace(&quot;MatchIt&quot;)
-unloadNamespace(&quot;car&quot;)
-unloadNamespace(&quot;pbkrtest&quot;)
-unloadNamespace(&quot;lme4&quot;)
-unloadNamespace(&quot;survey&quot;)
-unloadNamespace(&quot;VGAM&quot;)
-unloadNamespace(&quot;survival&quot;)
-unloadNamespace(&quot;splines&quot;)
-unloadNamespace(&quot;MCMCpack&quot;)
-unloadNamespace(&quot;coda&quot;)
-unloadNamespace(&quot;quantreg&quot;)
-unloadNamespace(&quot;MatrixModels&quot;)
-unloadNamespace(&quot;mgcv&quot;)
-unloadNamespace(&quot;nlme&quot;)
-unloadNamespace(&quot;MASS&quot;)
-unloadNamespace(&quot;dplyr&quot;)
-unloadNamespace(&quot;R6&quot;)
-unloadNamespace(&quot;Matrix&quot;)
-unloadNamespace(&quot;lattice&quot;)
-unloadNamespace(&quot;mcmc&quot;)
-unloadNamespace(&quot;stats4&quot;)
-unloadNamespace(&quot;parallel&quot;)
-unloadNamespace(&quot;nloptr&quot;)
-unloadNamespace(&quot;Amelia&quot;)
-unloadNamespace(&quot;minqa&quot;)
-unloadNamespace(&quot;nnet&quot;)
-unloadNamespace(&quot;miscTools&quot;)</code></pre>
 </div>
 
 

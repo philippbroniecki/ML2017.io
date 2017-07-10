@@ -272,6 +272,6 @@ Let's quickly verify that the factor variables were created correctly.
 head(student_data)
 ```
 
-```{r, include=FALSE}
+```{r, echo=FALSE}
 detach(package:readxl, unload = TRUE)
 ```

@@ -254,7 +254,7 @@ ci.plot(s.out, xlab = "Majority population (%)", ci = 95)
     - Hint: Look at the Plot window in RStudio for an option to save your plot. Alternatively, you can use the
     `png()` function for saving the graphics file directly from your R script.
     
-```{r, eval=FALSE}
+```{r, echo=FALSE}
 rm(list=ls())
 detach(package:Zelig, unload = TRUE)
 detach(package:texreg, unload = TRUE)

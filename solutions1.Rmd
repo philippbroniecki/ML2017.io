@@ -46,7 +46,7 @@ mean(df$final_score)
 median(df$final_score)
 ```
 
-# There is no function for the mode. So we look at a frequency table of the `final_score` using the `table()` function. We put this inside the `which.max()` function which returns the index of the most frequent score. Finally, we index the frequency table with the id we obtained. 
+There is no function for the mode. So we look at a frequency table of the `final_score` using the `table()` function. We put this inside the `which.max()` function which returns the index of the most frequent score. Finally, we index the frequency table with the id we obtained. 
 
 ```{r}
 id.of.mode <- which.max(table(df$final_score))

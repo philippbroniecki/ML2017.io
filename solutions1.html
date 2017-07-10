@@ -388,9 +388,7 @@ library(readxl)</code></pre>
 <pre><code>## [1] 52.384</code></pre>
 <pre class="r"><code>median(df$final_score)</code></pre>
 <pre><code>## [1] 53</code></pre>
-</div>
-<div id="there-is-no-function-for-the-mode.-so-we-look-at-a-frequency-table-of-the-final_score-using-the-table-function.-we-put-this-inside-the-which.max-function-which-returns-the-index-of-the-most-frequent-score.-finally-we-index-the-frequency-table-with-the-id-we-obtained." class="section level1">
-<h1>There is no function for the mode. So we look at a frequency table of the <code>final_score</code> using the <code>table()</code> function. We put this inside the <code>which.max()</code> function which returns the index of the most frequent score. Finally, we index the frequency table with the id we obtained.</h1>
+<p>There is no function for the mode. So we look at a frequency table of the <code>final_score</code> using the <code>table()</code> function. We put this inside the <code>which.max()</code> function which returns the index of the most frequent score. Finally, we index the frequency table with the id we obtained.</p>
 <pre class="r"><code>id.of.mode &lt;- which.max(table(df$final_score))
 table(df$final_score)[id.of.mode]</code></pre>
 <pre><code>## 50.6 
