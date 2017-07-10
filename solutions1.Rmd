@@ -1,5 +1,5 @@
 ---
-title: "Lab 2  -- Solutions"
+title: "Lab 1  -- Solutions"
 author: "Philipp Broniecki and Lucas Leemann -- Machine Learning 1K"
 output: html_document
 ---
