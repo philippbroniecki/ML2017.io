@@ -108,6 +108,9 @@ my.matrix1[c(1,3),] # rows 1 and 3
 ```
 
 
+Download the foreigners data set [here](https://github.com/philippbroniecki/ML2017.io/raw/master/data/BSAS_manip.RData). Copy it to your working directory and then load the data set using the `load()` function.
+
+
 ```{r}
 # load, inspect, and manipulate data set
 load("./data/BSAS_manip.RData")
