@@ -398,7 +398,8 @@ world.data[ 1:10 , ]</code></pre>
 </div>
 <div id="dplyr-package" class="section level3">
 <h3>Dplyr Package</h3>
-<p>Today we introduce another package called <code>dplyr</code>. It is a package that makes it easier for you to work with data sets. It includes functions that let you rename variables, pick out observations that fulfill certain conditions, like <code>gender==female</code>, lets you select certain variables and many more things. From now on, we will introduce a set of new function of <code>dplyr</code> every week. But first we will install the package with <code>install.packages(&quot;dplyr&quot;)</code>. Each time you want to use the package you have to load it with <code>library(dplyr)</code>.</p>
+<p>Today we introduce another package called <code>dplyr</code>. It is a package that makes it easier for you to work with data sets. It includes functions that let you rename variables, pick out observations that fulfill certain conditions, like <code>gender==female</code>, lets you select certain variables and many more things. To install the package run <code>install.packages(&quot;dplyr&quot;)</code>. Today we will load another package called <code>Zelig</code>. Both <code>Zelig</code> and <code>dplyr</code> have a function called <code>select()</code>, so the library that we load last overwrites the previous <code>select()</code> function. In order to avoid clashes like that we will not load <code>dplyr</code> into the namespace but instead call its functions by writing <code>dplyr::function_name()</code>.</p>
+<p>Note: Install a package only once.</p>
 <pre class="r"><code>install.packages(&quot;dplyr&quot;)</code></pre>
 </div>
 <div id="dplyr-rename" class="section level3">
@@ -428,30 +429,23 @@ world.data[ 1:10 , ]</code></pre>
 </tr>
 </tbody>
 </table>
-<p>Remember, to use any of the <code>dplyr</code> functions, you must first load package with <code>library(dplyr)</code>.</p>
 <p>We want to rename the variable <code>h_j</code> which is a categorical variable, where <code>1</code> means that an independent judiciary exists and the other category means that the executive branch has some control over the judiciary. In order to save your new variable name in the dataset <code>world.data</code>, we have to assign our renamed variable to the dataset using the <code>&lt;-</code> symbol. We will now rename <code>h_j</code> into <code>judiciary</code>.</p>
-<pre class="r"><code>library(dplyr)
-# dataset.name &lt;- rename(argument1, argument2 = argument3)
-# h_j = 1 means there is an independent judiciary
-# rename h_j to judiciary
-
-# rename a variable and save the result in our data frame
-world.data &lt;- rename(world.data, judiciary = h_j)
+<pre class="r"><code># rename a variable and save the result in our data frame
+world.data &lt;- dplyr::rename(world.data, judiciary = h_j)
 
 # check the result
 names(world.data)</code></pre>
 <pre><code>## [1] &quot;judiciary&quot;   &quot;wdi_gdpc&quot;    &quot;undp_hdi&quot;    &quot;wbgi_cce&quot;    &quot;wbgi_pse&quot;   
 ## [6] &quot;former_col&quot;  &quot;lp_lat_abst&quot;</code></pre>
 </div>
-<div id="two-new-packages" class="section level3">
-<h3>Two New Packages</h3>
-<p>We’re introducing two new packages in today’s lab. The Zelig package provides functionality that simplifies some regression tasks, while texreg makes it easy to produce publication quality output from our regression models. We’ll discuss these packages in more detail as we go along but for now let’s just install them with the <code>install.packages()</code> function.</p>
+<div id="zelig-and-texreg" class="section level3">
+<h3>Zelig and texreg</h3>
+<p>We’re introducing two new packages. The Zelig package provides functionality that simplifies some regression tasks, while texreg makes it easy to produce publication quality output from our regression models. We’ll discuss these packages in more detail as we go along but for now let’s just install them with the <code>install.packages()</code> function.</p>
 <pre class="r"><code>install.packages(&quot;Zelig&quot;)
 install.packages(&quot;texreg&quot;)</code></pre>
 <p>Now, let’s load Zelig, textreg, and dplyr.</p>
 <pre class="r"><code>library(texreg)
-library(Zelig)
-library(dplyr)</code></pre>
+library(Zelig)</code></pre>
 <p>Let’s load 2 datasets into R using <code>read.csv()</code> and confirm that the <code>state</code> and <code>communityname</code> are present in each dataset. You can either directly load the dataset from the online source as shown in the code below. Alternatively, get <code>communities</code> <a href="http://philippbroniecki.github.io/ML2017.io/data/communities.csv">here</a> and <code>communitties_employment</code> <a href="http://philippbroniecki.github.io/ML2017.io/data/communities_employment.csv">here</a>, place them in your working directory and then load them from your local source.</p>
 <pre class="r"><code># load the communities datasets
 communities &lt;- read.csv(&quot;http://philippbroniecki.github.io/ML2017.io/data/communities.csv&quot;)
@@ -688,11 +682,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean         sd       50%      2.5%     97.5%
-## 1 0.6869573 0.01314919 0.6866511 0.6608068 0.7121642
+##        mean        sd       50%      2.5%     97.5%
+## 1 0.6865065 0.0127802 0.6870817 0.6612266 0.7112649
 ## pv
 ##           mean        sd       50%      2.5%    97.5%
-## [1,] 0.6998475 0.1821476 0.7010008 0.3310775 1.037275
+## [1,] 0.6823345 0.1803517 0.6824825 0.3413217 1.028553
 ## 
 ## 
 ## [1] 0.3
@@ -701,11 +695,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean         sd       50%      2.5%     97.5%
-## 1 0.5582694 0.00858118 0.5579761 0.5410223 0.5744027
+##        mean          sd       50%      2.5%     97.5%
+## 1 0.5578729 0.008253957 0.5579153 0.5415838 0.5741392
 ## pv
-##           mean        sd       50%     2.5%    97.5%
-## [1,] 0.5495204 0.1724429 0.5527406 0.196367 0.899845
+##           mean        sd       50%      2.5%     97.5%
+## [1,] 0.5635517 0.1701215 0.5607331 0.2371475 0.8930098
 ## 
 ## 
 ## [1] 0.6
@@ -715,10 +709,10 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##        mean          sd       50%      2.5%     97.5%
-## 1 0.4295815 0.004823082 0.4294232 0.4201374 0.4387504
+## 1 0.4292393 0.004490244 0.4293963 0.4202497 0.4381275
 ## pv
-##           mean        sd       50%      2.5%     97.5%
-## [1,] 0.4268121 0.1688864 0.4215765 0.1139504 0.7650139
+##           mean        sd       50%       2.5%     97.5%
+## [1,] 0.4291284 0.1738818 0.4258843 0.09840732 0.7815144
 ## 
 ## 
 ## [1] 0.9
@@ -728,10 +722,10 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##        mean          sd       50%      2.5%     97.5%
-## 1 0.3008935 0.004666654 0.3010842 0.2918656 0.3098368
+## 1 0.3006057 0.004408742 0.3005635 0.2921003 0.3092856
 ## pv
 ##           mean        sd       50%        2.5%     97.5%
-## [1,] 0.2986058 0.1791411 0.2919663 -0.04495198 0.6639786</code></pre>
+## [1,] 0.2972466 0.1720003 0.2969884 -0.03685863 0.6196741</code></pre>
 <pre class="r"><code>ci.plot(s.out, xlab = &quot;Majority population (%)&quot;, ci = 95)</code></pre>
 <p><img src="day2_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
 </div>
@@ -744,7 +738,7 @@ summary(s.out)</code></pre>
 <div id="exercises" class="section level3">
 <h3>Exercises</h3>
 <ol style="list-style-type: decimal">
-<li>Load the immigration dataset <a href="http://uclspp.github.io/PUBLG100/data/communities_immig.csv">dataset</a></li>
+<li>Load the immigration dataset <a href="http://philippbroniecki.github.io/ML2017.io/data/communities_immig.csv">dataset</a></li>
 <li>Rename the <code>PctImmigRec5</code> variable to <code>RecentImmigration5</code>.</li>
 <li>Estimate a model explaining the relationship between unemployment rate and recent immigration over the past 5 years using the variable <code>RecentImmigration5</code>.</li>
 <li>Plot the regression line of the model.</li>
@@ -756,6 +750,41 @@ summary(s.out)</code></pre>
 <li>Hint: Look at the Plot window in RStudio for an option to save your plot. Alternatively, you can use the <code>png()</code> function for saving the graphics file directly from your R script.</li>
 </ul></li>
 </ol>
+<pre class="r"><code>rm(list=ls())
+detach(package:Zelig, unload = TRUE)
+detach(package:texreg, unload = TRUE)
+unloadNamespace(&quot;AER&quot;)
+unloadNamespace(&quot;maxLik&quot;)
+unloadNamespace(&quot;sandwich&quot;)
+unloadNamespace(&quot;lmtest&quot;)
+unloadNamespace(&quot;zoo&quot;)
+unloadNamespace(&quot;MatchIt&quot;)
+unloadNamespace(&quot;car&quot;)
+unloadNamespace(&quot;pbkrtest&quot;)
+unloadNamespace(&quot;lme4&quot;)
+unloadNamespace(&quot;survey&quot;)
+unloadNamespace(&quot;VGAM&quot;)
+unloadNamespace(&quot;survival&quot;)
+unloadNamespace(&quot;splines&quot;)
+unloadNamespace(&quot;MCMCpack&quot;)
+unloadNamespace(&quot;coda&quot;)
+unloadNamespace(&quot;quantreg&quot;)
+unloadNamespace(&quot;MatrixModels&quot;)
+unloadNamespace(&quot;mgcv&quot;)
+unloadNamespace(&quot;nlme&quot;)
+unloadNamespace(&quot;MASS&quot;)
+unloadNamespace(&quot;dplyr&quot;)
+unloadNamespace(&quot;R6&quot;)
+unloadNamespace(&quot;Matrix&quot;)
+unloadNamespace(&quot;lattice&quot;)
+unloadNamespace(&quot;mcmc&quot;)
+unloadNamespace(&quot;stats4&quot;)
+unloadNamespace(&quot;parallel&quot;)
+unloadNamespace(&quot;nloptr&quot;)
+unloadNamespace(&quot;Amelia&quot;)
+unloadNamespace(&quot;minqa&quot;)
+unloadNamespace(&quot;nnet&quot;)
+unloadNamespace(&quot;miscTools&quot;)</code></pre>
 </div>
 
 

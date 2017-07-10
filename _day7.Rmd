@@ -247,23 +247,30 @@ gam1 <- lm(wage ~ bs(year, 4) + bs(age, 5) + education, data = Wage)
 
 However, the `gam` package offers a general solution to fitting GAMs and is especially useful when splines cannot be easily expressed in terms of basis functions.
 
-```{r}
-#library(gam)
-gam.m3 <- gam::gam(wage ~ ns(year, 4) + ns(age, 5) + education, data = Wage)
+```{r, eval=FALSE}
+library(gam)
+gam.m3 <- gam(wage ~ ns(year, 4) + ns(age, 5) + education, data = Wage)
+```
+
+```{r, include=FALSE}
+library(gam)
+gam.m3 <- gam(wage ~ ns(year, 4) + ns(age, 5) + education, data = Wage)
 ```
 
 The `plot()` function behaves the same way as it does with `lm()` and `glm()`.
 
-```{r, eval = FALSE}
+```{r}
 par(mfrow = c(1, 3))
-mgcv::plot.gam(gam1, se = TRUE, col = "red")
+plot(gam.m3, se = TRUE, col = "blue")
+
+plot.gam(gam1, se = TRUE, col = "red")
 ```
 
 We can use `anova()` to find the best performing model.
 
 ```{r}
-gam.m1 <- gam::gam(wage ~ ns(age, 5) + education, data = Wage)
-gam.m2 <- gam::gam(wage ~ year + ns(age, 5) + education, data = Wage)
+gam.m1 <- gam(wage ~ ns(age, 5) + education, data = Wage)
+gam.m2 <- gam(wage ~ year + ns(age, 5) + education, data = Wage)
 anova(gam.m1, gam.m2, gam.m3, test = "F")
 ```
 
@@ -276,7 +283,6 @@ summary(gam.m3)
 We can make predictions using `predict()` just as we did with linear and logistic regressions.
 
 ```{r}
-library(gam)
 preds <- predict(gam.m2, newdata = Wage)
 ```
 
@@ -289,7 +295,7 @@ plot(gam.lr, se = TRUE, col = "green")
 
 table(education, I(wage > 250))
 
-gam.lr.s <- gam::gam(I(wage > 250) ~ year + ns(age, df = 5) + education, family = binomial, data = Wage, subset = (education != "1. < HS Grad"))
+gam.lr.s <- gam(I(wage > 250) ~ year + ns(age, df = 5) + education, family = binomial, data = Wage, subset = (education != "1. < HS Grad"))
 plot(gam.lr.s, se = TRUE, col = "green")
 ```
 

@@ -41,8 +41,9 @@ world.data[ 1:10 , ]
 ```
 
 ### Dplyr Package
-Today we introduce another package called `dplyr`. It is a package that makes it easier for you to work with data sets. It includes functions that let you rename variables, pick out observations that fulfill certain conditions, like `gender==female`, lets you select certain variables and many more things. From now on, we will introduce a set of new function of `dplyr` every week. But first we will install the package with `install.packages("dplyr")`. Each time you want to use the package you have to load it with `library(dplyr)`.
+Today we introduce another package called `dplyr`. It is a package that makes it easier for you to work with data sets. It includes functions that let you rename variables, pick out observations that fulfill certain conditions, like `gender==female`, lets you select certain variables and many more things. To install the package run `install.packages("dplyr")`. Today we will load another package called `Zelig`. Both `Zelig` and `dplyr` have a function called `select()`, so the library that we load last overwrites the previous `select()` function. In order to avoid clashes like that we will not load `dplyr` into the namespace but instead call its functions by writing `dplyr::function_name()`.
 
+Note: Install a package only once.
 ```{r, eval=FALSE}
 install.packages("dplyr")
 ```
@@ -62,25 +63,18 @@ rename(dataset, expression)
 |dataset|The first argument is the name of your dataset (we have called it `world.data`).|
 |expression|The second argument is the expression that assigns a new variable name to an existing variable in our dataset. For example: <br>&bull; `new.variable = existing.variable`|
 
-Remember, to use any of the `dplyr` functions, you must first load package with `library(dplyr)`. 
-
 We want to rename the variable `h_j` which is a categorical variable, where `1` means that an independent judiciary exists and the other category means that the executive branch has some control over the judiciary. In order to save your new variable name in the dataset `world.data`, we have to assign our renamed variable to the dataset using the `<-` symbol. We will now rename `h_j` into `judiciary`. 
 
 ```{r}
-library(dplyr)
-# dataset.name <- rename(argument1, argument2 = argument3)
-# h_j = 1 means there is an independent judiciary
-# rename h_j to judiciary
-
 # rename a variable and save the result in our data frame
-world.data <- rename(world.data, judiciary = h_j)
+world.data <- dplyr::rename(world.data, judiciary = h_j)
 
 # check the result
 names(world.data)
 ```
 
-### Two New Packages
-We're introducing two new packages in today's lab. The Zelig package provides functionality that simplifies some regression tasks, while texreg makes it easy to produce publication quality output from our regression models. We'll discuss these packages in more detail as we go along but for now let's just install them with the `install.packages()` function.
+### Zelig and texreg
+We're introducing two new packages. The Zelig package provides functionality that simplifies some regression tasks, while texreg makes it easy to produce publication quality output from our regression models. We'll discuss these packages in more detail as we go along but for now let's just install them with the `install.packages()` function.
 
 ```{r, eval=FALSE}
 install.packages("Zelig")
@@ -93,7 +87,6 @@ Now, let's load Zelig, textreg, and dplyr.
 ```{r}
 library(texreg)
 library(Zelig)
-library(dplyr)
 ```
 
 Let's load 2 datasets into R using `read.csv()` and confirm that the `state` and `communityname` are present in each dataset. You can either directly load the dataset from the online source as shown in the code below. Alternatively, get `communities` [here](http://philippbroniecki.github.io/ML2017.io/data/communities.csv) and `communitties_employment` [here](http://philippbroniecki.github.io/ML2017.io/data/communities_employment.csv), place them in your working directory and then load them from your local source.
@@ -250,7 +243,7 @@ ci.plot(s.out, xlab = "Majority population (%)", ci = 95)
 
 ### Exercises
 
-1. Load the immigration dataset [dataset](http://uclspp.github.io/PUBLG100/data/communities_immig.csv)
+1. Load the immigration dataset [dataset](http://philippbroniecki.github.io/ML2017.io/data/communities_immig.csv)
 1. Rename the `PctImmigRec5` variable to `RecentImmigration5`.
 1. Estimate a model explaining the relationship between unemployment rate and recent immigration over the past 5 years using the variable `RecentImmigration5`.
 1. Plot the regression line of the model.
@@ -260,3 +253,43 @@ ci.plot(s.out, xlab = "Majority population (%)", ci = 95)
 1. Save all the plots as graphics files.
     - Hint: Look at the Plot window in RStudio for an option to save your plot. Alternatively, you can use the
     `png()` function for saving the graphics file directly from your R script.
+    
+```{r, eval=FALSE}
+rm(list=ls())
+detach(package:Zelig, unload = TRUE)
+detach(package:texreg, unload = TRUE)
+unloadNamespace("AER")
+unloadNamespace("maxLik")
+unloadNamespace("sandwich")
+unloadNamespace("lmtest")
+unloadNamespace("zoo")
+unloadNamespace("MatchIt")
+unloadNamespace("car")
+unloadNamespace("pbkrtest")
+unloadNamespace("lme4")
+unloadNamespace("survey")
+unloadNamespace("VGAM")
+unloadNamespace("survival")
+unloadNamespace("splines")
+unloadNamespace("MCMCpack")
+unloadNamespace("coda")
+unloadNamespace("quantreg")
+unloadNamespace("MatrixModels")
+unloadNamespace("mgcv")
+unloadNamespace("nlme")
+unloadNamespace("MASS")
+unloadNamespace("dplyr")
+unloadNamespace("R6")
+unloadNamespace("Matrix")
+unloadNamespace("lattice")
+unloadNamespace("mcmc")
+unloadNamespace("stats4")
+unloadNamespace("parallel")
+unloadNamespace("nloptr")
+unloadNamespace("Amelia")
+unloadNamespace("minqa")
+unloadNamespace("nnet")
+unloadNamespace("miscTools")
+```
+
+

@@ -1,0 +1,364 @@
+---
+title: "Lab 4  -- Cross-Validation"
+author: "Philipp Broniecki and Lucas Leemann -- Machine Learning 1K"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##### (based on James et al. 2013, chapter 5)
+
+We start by clearing our workspace.
+
+```{r}
+# clear workspace
+rm( list = ls() )
+```
+
+### The Validation Set Approach
+
+We use a subset of last weeks non-western immigrants data set (the version for this week includes men only). We can use the `head()` function to have a quick glance at the data. The codebook is:
+
+Let's check the codebook of our data.
+
+|Variable Name|Description|
+|--------|-----------------------------------------------------------|
+|IMMBRIT | Out of every 100 people in Britain, how many do you think are immigrants from Non-western countries?|
+|over.estimate | 1 if estimate is higher than 10.7%. |
+|RAge | Age of respondent |
+|Househld | Number of people living in respondent's household |
+|Cons, Lab, SNP, Ukip, BNP, GP, party.other | Party self-identification|
+|paper | Do you normally read any daily morning newspaper 3+ times/week? |
+|WWWhourspW | How many hours WWW per week? |
+|religious | Do you regard yourself as belonging to any particular religion? |
+|employMonths | How many mnths w. present employer? |
+|urban | Population density, 4 categories (highest density is 4, lowest is 1) |
+|health.good | How is your health in general for someone of your age? (0: bad, 1: fair, 2: fairly good, 3: good) |
+|HHInc | Income bands for household, high number = high HH income |
+
+```{r, include=FALSE}
+# load non-western foreigners data
+load("./data/BSAS_manip_men.RData")
+
+# take a look at the data
+head(data2)
+
+# you can attach a data set to call its contents directly
+attach(data2)
+```
+
+```{r, eval=FALSE}
+# load non-western foreigners data
+load("your directory/BSAS_manip_men.RData")
+
+# take a look at the data
+head(data2)
+
+# you can attach a data set to call its contents directly
+attach(data2)
+```
+
+For this exercise, we first select a random sample of 239 out of 478 observations. We initialize the random number generator with a seed using `set.seed()` to ensure that repeated runs produce consistent results.
+
+
+```{r}
+# initialize random number generator
+set.seed(1)
+
+# pick 239 numbers out of 1 to 478
+train <- sample(478, 239)
+```
+
+We then estimate the effects of age on the perceived number of immigrants per 100 Brits with `lm()` on the selected subset.
+
+```{r}
+# fit a linear regression
+lm.fit <- lm( IMMBRIT ~ RAge, data = data2, subset = train)
+```
+
+Next, we calculate the mean squared error (MSE) for the remaining observations in the validation set. The training subset is excluded from the MSE calculation using **-train** index.
+
+```{r}
+# mse in the validation set
+mse <- mean( (IMMBRIT[-train] -  predict(lm.fit, data2)[-train])^2 )
+mse # error rate
+```
+
+he error rate for a linear model is $423.1941$. We can also fit higher degree polynomials with the `poly()` function. First, let's try a quadratic model.
+
+```{r}
+# polynomials (quadratic)
+lm.fit2 <- lm( IMMBRIT ~ poly(RAge, 2), data = data2, subset = train)
+mse2  <- mean( (IMMBRIT[-train] -  predict(lm.fit2, data2)[-train])^2 )
+mse2
+```
+
+Quadratic regression performs better than a linear model and reduces the error rate to $403.8076$. Let's also try a cubic model.
+
+```{r}
+# cubic model
+lm.fit3 <- lm( IMMBRIT ~ poly(RAge, 3), data = data2, subset = train)
+mse3  <- mean( (IMMBRIT[-train] -  predict(lm.fit3, data2)[-train])^2 )
+mse3
+```
+
+We can fit these models on a different subset of training observations by initializing the random number generator with a different seed.
+
+```{r}
+# fit the models on a different training/test split
+set.seed(2)
+train <- sample(478, 239)
+lm.fit <- lm( IMMBRIT ~ RAge, data = data2, subset = train)
+
+mean( (IMMBRIT[-train] -  predict(lm.fit, data2)[-train])^2 )
+
+# quadratic
+lm.fit2 <- lm( IMMBRIT ~ poly(RAge, 2), data = data2, subset = train)
+mean( (IMMBRIT[-train] -  predict(lm.fit2, data2)[-train])^2 )
+
+# cubic
+lm.fit3 <- lm( IMMBRIT ~ poly(RAge, 3), data = data2, subset = train)
+mean( (IMMBRIT[-train] -  predict(lm.fit3, data2)[-train])^2 )
+```
+
+The error rates are different from our initial training sample but the results are consistent with previous findings. A quadratic model performs better than a linear model but there is not much improvement when we use a cubic model.
+
+
+### Leave-One-Out Cross-Validation
+
+The `glm()` function offers a generalization of the linear model while allowing for different link functions and error distributions other than gaussian. By default, `glm()` simply fits a linear model identical to the one estimated with `lm()`.
+
+```{r}
+# linear regression fitted with glm() and lm()
+glm.fit <- glm( IMMBRIT ~ RAge, data = data2)
+lm.fit <- lm( IMMBRIT ~ RAge, data = data2)
+```
+
+The `glm()` function can be used with `cv.glm()` to estimate k-fold cross-validation prediction error.
+
+```{r}
+# use cv.glm() for k-fold corss-validation on glm
+library(boot)
+cv.err <- cv.glm(data2, glm.fit)
+# cross-validation error
+cv.err$delta
+# the number of folds
+cv.err$K
+```
+
+The returned value from `cv.glm()` contains a delta vector of components - the raw cross-validation estimate and the adjusted cross-validation estimate respectively. We are interested in the raw cross-validation error.
+
+NOTE: if we do not provide the option **K** in `cv.glm()` we automatically perfrom LOOCV.
+
+We can repeat this process in a `for()` loop to compare the cross-validation error of higher-order polynomials. The following example estimates the polynomial fit of the order 1 through 7 and stores the result in a cv.error vector.
+
+```{r}
+# container for cv errors
+cv.error <- NA
+
+# loop over age raised to the power 1...7
+for (i in 1:7){
+  glm.fit <- glm( IMMBRIT ~ poly(RAge, i), data = data2 )
+  cv.error[i] <- cv.glm(data2, glm.fit)$delta[1]
+}
+cv.error
+```
+
+We plot the effect of increasing the complexity of the model
+
+```{r, non.finished.plotting}
+# plot of error rates
+plot( cv.error ~ seq(1, 7), bty = "n", pch = 20,
+      xlab = "complexity", ylab = "cross-validation error",
+      ylim = c(365, 385))
+lines( y = cv.error, x = seq(1,7), lwd = 2)
+```
+
+
+### k-Fold Cross-Validation
+
+In addition to LOOCV, `cv.glm()` can also be used to run k-fold cross-validation. In the following example, we estimate the cross-validation error of polynomials of the order $1$ through $7$ using $10$-fold cross-validation.
+
+```{r}
+# re-initialize random number generator
+set.seed(17)
+
+# container for 10-fold cross-validation errors
+cv.error.10 <- NA
+
+# loop over 7 different powers of age
+for (i in 1:7){
+  glm.fit <- glm( IMMBRIT ~ poly(RAge, i), data = data2)
+  cv.error.10[i] <- cv.glm( data2, glm.fit, K = 10)$delta[1]
+}
+cv.error.10
+```
+
+We add the results to the plot:
+
+```{r}
+<<non.finished.plotting>>
+# add to plot
+points(x = seq(1,7), y = cv.error.10, col = "red", pch = 20)
+lines( x = seq(1,7), y = cv.error.10, col = "red", lty = "dashed", lwd = 2)
+```
+
+The 10-fold cross-validation error is more wiggly. In this expample it estimates the best performance when use the fifth polynomial of age wehreas the LOOCV errror finds a minimum at the cube of age. Eyeballing the results we suggest that there are no sifnificant improvements beyond the squared term.
+
+
+### The Bootstrap
+
+In order to perform bootstrap analysis, we first create an `alpha.fn()` for estimating $\alpha$ You can think of $\alpha$ as a proxy for investment risk (see p. 187 for more details).
+
+```{r}
+library(ISLR)
+
+# function on investment risk
+alpha.fn <- function(data, index){
+  X <- data$X[index]
+  Y <- data$Y[index]
+  return( (var(Y) - cov(X,Y)) / ( var(X) + var(Y) - 2*cov(X,Y)) )
+}
+```
+
+The following example estimates $\alpha$ using observations $1$ through $100$ from the [Portfolio](http://finzi.psych.upenn.edu/library/ISLR/html/Portfolio.html) dataset.
+
+
+```{r}
+# estmate alpha based on observations 1 to 100 of Portfolio data set
+alpha.fn(Portfolio, 1: 100)
+```
+
+The subset from our dataset can also be obtained with the `sample()` function as previously discussed.
+
+```{r}
+# use the sample function to re-sample observations from Portfolio
+set.seed(1)
+alpha.fn(Portfolio, sample(100, 100, replace = TRUE))
+```
+
+Instead of manually repeating this procedure with different samples from our dataset, we can automate this process with the `boot()` function as shown below.
+
+```{r}
+# boot() function
+boot( Portfolio, alpha.fn, R = 1000 )
+```
+
+We can apply the same bootstrap approach to the Auto dataset by creating a bootstrap function that fits a linear model to our dataset.
+
+```{r}
+# bootstrap function for our linear model
+boot.fn <- function(data, index){
+  return( coef( lm(IMMBRIT ~ RAge, data = data2, subset = index) ) )
+}
+boot.fn(data2, 1:478)
+```
+
+We can run this manually on different samples from the dataset.
+
+```{r}
+set.seed(1)
+boot.fn(data2, sample( nrow(data2), nrow(data2), replace = TRUE) )
+```
+
+And we can also automate this by fitting the model on 1000 replicates from our dataset.
+
+```{r}
+boot( data2, boot.fn, 1000)
+```
+
+The `summary()` function be used to compute standard errors for the regression coefficients.
+
+```{r}
+summary(lm(IMMBRIT ~ RAge, data = data2))$coef
+```
+
+Finally, we redefine the bootstrap function to use a quadratic model and compare the standard errors that from bootstrap to the ones obtained from the `summary()` function.
+
+```{r}
+boot.fn <- function(data, index){
+  coefficients( lm( IMMBRIT ~ RAge + I(RAge^2), data = data, subset =  index) )
+}
+
+set.seed(1)
+boot(data2, boot.fn, 1000)
+
+summary( lm( IMMBRIT ~ RAge + I(RAge^2), data = data2) )$coef
+```
+
+
+### Exercises
+
+### Q1
+
+Yesterday we used logistic regression to predict the probability of overestimating the rate of non-western immigrants using the variables `RSex`, `urban` and `HHInc` on the full foeigners data set. We will now estimate the test error of this logistic regression model using the validation set approach. Do not forget to set a random seed before beginning your analysis and reload the full data set `BSAS_manip.RData`.
+
+1. Fit a logistic regression model that uses `RSex`, `urban`, and `HHInc` to predict `over.estimate`.
+
+2. Using the validation set approach, estimate the test error of this model. In order to do this, you must perform the following steps:
+   
+    a. Split the sample set into a training set and a validation set.
+    b. Fit a multiple logistic regression model using only the training observations.
+    c. Obtain a prediction for each individual in the validation set by computing the posterior probability of over estimating for that individual, and classifying the individual to the over estimating category if the posterior probability is greater than 0.5.
+    d. Compute the validation set error, which is the fraction of the observations in the validation set that are misclassified.
+
+    
+3. Repeat the process in (2) three times, using three different splits of the observations into a training set and a validation set. Comment on the results obtained.
+
+4. Now consider a logistic regression model that predicts the probability of over estimating using additional dummy variables for people who self-identify with Ukip or the BNP. Estimate the test error for this model using the validation set approach. Comment on whether or not including a dummy variable for student leads to a reduction in the test error rate.
+
+
+### Q2
+
+In the lab session for today (Sections 5.3.2 and 5.3.3 in James et al.), we saw that the `cv.glm()` function can be used in order to compute the LOOCV test error estimate. Alternatively, one could compute those quantities using just the `glm()` and `predict.glm()` functions, and a `for()` loop. You will now take this approach in order to compute the LOOCV error for a simple logistic regression model on the Weekly data set. Recall that in the context of classification problems, the LOOCV error is given in Section 5.1.5 (5.4, page 184).
+
+1. Fit a logistic regression model on `over.estimate` using `paper` and `religious`.
+
+2. Fit a logistic regression model that predicts `over.estimate` using `paper` and `religious` using all but the first observation.
+
+3. Use the model from (2) to predict the direction of the first observation.
+You can do this by predicting that the first observation will over estimate if  $P(over.estimate == 1 | paper, religious) > 0.5$. Was this observation correctly classified?
+
+4. Write a for loop from $i=1$ to $i=n$, where $n$ is the number of observations in the data set, that performs each of the following steps:
+
+    a. Fit a logistic regression model using all but the $i^{th}$ observation to predict `over.estimate` using `paper` and `religious`.
+    b. Compute the posterior probability that the person over estimates the rate of immigrants for the $i^{th}$ observation.
+    c. Use the posterior probability for the $i^{th}$ observation in order to predict whether or not the person over-estimates the rate of immigrants.
+    d. Determine whether or not an error was made in predicting the direction for the $i^{th}$ observation. If an error was made, then indicate this as a $1$, and otherwise indicate it as a $0$.
+   
+5. Take the average of the n numbers obtained in 4.d. in order to obtain the LOOCV estimate for the test error. Comment on the results.   
+   
+   
+### Q3
+
+We will now perform cross-validation on a simulated data set.
+
+1. Generate a simulated data set as follows:
+
+```{r}
+set.seed(1)
+y <- rnorm(100)
+x <- rnorm(100)
+y <- x -2*x^2 + rnorm(100)
+```
+
+In this data set, what is $n$ and what is $p$? Write out the model used to generate the data in equation form.
+
+2. Create a scatterplot of $X$ against $Y$. Comment on what you find.
+    
+3. Set a random seed, and then compute the LOOCV errors that result from fitting the following four models using least squares:
+
+    a. $Y=\beta_{0}+\beta_{1}X+\epsilon$
+    b. $Y=\beta_{0}+\beta_{1}X+\beta_{2}X_{2}+\epsilon$
+    c. $Y=\beta_{0}+\beta_{1}X+\beta_{2}X_{2}+\beta_{3}X_{3}+\epsilon$
+    d. $Y=\beta_{0}+\beta_{1}X+\beta_{2}X_{2}+\beta_{3}X_{3}+\beta_{4}X_{4}+\epsilon$
+   
+Note, you may find it helpful to use the `data.frame()` function to create a single data set containing both $X$ and $Y$.
+
+4. Repeat the last task using another random seed, and report your results. Are your results the same as what you got 3.? Why? 
+   
+5. Which of the models in 3. had the smallest LOOCV error? Is this what you expected? Explain your answer.
+   
+6. Comment on the statistical significance of the coefficient estimates that results from fitting each of the models in 3. using least squares. Do these results agree with the conclusions drawn based on the cross-validation results?
+   

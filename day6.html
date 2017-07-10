@@ -412,9 +412,14 @@ y &lt;- data2$IMMBRIT</code></pre>
 <div id="ridge-regression" class="section level4">
 <h4>Ridge Regression</h4>
 <p>The <code>glmnet</code> package provides functionality to fit ridge regression and lasso models. We load the package and call <code>glmnet()</code> to perform ridge regression.</p>
-<pre class="r"><code>library(glmnet)
-
-# tuning parameter
+<pre class="r"><code>library(glmnet)</code></pre>
+<pre><code>## Loading required package: Matrix</code></pre>
+<pre><code>## Loading required package: foreach</code></pre>
+<pre><code>## foreach: simple, scalable parallel programming from Revolution Analytics
+## Use Revolution R for scalability, fault tolerance and more.
+## http://www.revolutionanalytics.com</code></pre>
+<pre><code>## Loaded glmnet 2.0-10</code></pre>
+<pre class="r"><code># tuning parameter
 grid &lt;- 10^seq(4, -2, length = 100)
 plot(grid, bty = &quot;n&quot;, pch = 19,
      main = expression(paste(&quot;Grid of Tuning Parameters &quot;, lambda)))</code></pre>
@@ -615,6 +620,26 @@ lasso.coef</code></pre>
 <li>Propose a model (or set of models) that seem to perform well on this data set, and justify your answer. Make sure that you are evaluating model performance using validation set error, cross-validation, or some other reasonable alternative, as opposed to using training error.</li>
 <li>Does your chosen model involve all of the features in the data set? Why or why not?</li>
 </ol>
+<pre class="r"><code>detachAllPackages &lt;- function() {
+  
+  basic.packages &lt;- c(&quot;package:stats&quot;,&quot;package:graphics&quot;,&quot;package:grDevices&quot;,&quot;package:utils&quot;,&quot;package:datasets&quot;,&quot;package:methods&quot;,&quot;package:base&quot;)
+  
+  package.list &lt;- search()[ifelse(unlist(gregexpr(&quot;package:&quot;,search()))==1,TRUE,FALSE)]
+  
+  package.list &lt;- setdiff(package.list,basic.packages)
+  
+  if (length(package.list)&gt;0)  for (package in package.list) detach(package, character.only=TRUE)
+  
+}
+detachAllPackages()
+
+# keep on detaching namespaces
+unloadNamespace(&quot;AER&quot;)
+unloadNamespace(&quot;car&quot;)
+unloadNamespace(&quot;mgcv&quot;)
+unloadNamespace(&quot;Amelia&quot;)
+unloadNamespace(&quot;pbkrtest&quot;)
+unloadNamespace(&quot;lme4&quot;)</code></pre>
 </div>
 </div>
 </div>
