@@ -444,21 +444,9 @@ names(world.data)</code></pre>
 <pre class="r"><code>install.packages(&quot;Zelig&quot;)
 install.packages(&quot;texreg&quot;)</code></pre>
 <p>Now, let’s load Zelig, textreg, and dplyr.</p>
-<pre class="r"><code>library(texreg)</code></pre>
-<pre><code>## Warning: package &#39;texreg&#39; was built under R version 3.4.1</code></pre>
-<pre><code>## Version:  1.36.23
-## Date:     2017-03-03
-## Author:   Philip Leifeld (University of Glasgow)
-## 
-## Please cite the JSS article in your publications -- see citation(&quot;texreg&quot;).</code></pre>
-<pre class="r"><code>library(Zelig)</code></pre>
-<pre><code>## Warning: package &#39;Zelig&#39; was built under R version 3.4.1</code></pre>
-<pre><code>## Loading required package: survival</code></pre>
-<pre><code>## 
-## Attaching package: &#39;survival&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:boot&#39;:
-## 
-##     aml</code></pre>
+<pre class="r"><code>library(texreg)
+library(Zelig)</code></pre>
+<p>We will use a new dataset that comes from the 1990 US Census and provides demographic and socio-economic data in multiple files. The dataset includes observations from 1,994 communities with each observation identified by a <code>state</code> and <code>communityname</code> variable.</p>
 <p>Let’s load 2 datasets into R using <code>read.csv()</code> and confirm that the <code>state</code> and <code>communityname</code> are present in each dataset. You can either directly load the dataset from the online source as shown in the code below. Alternatively, get <code>communities</code> <a href="http://philippbroniecki.github.io/ML2017.io/data/communities.csv">here</a> and <code>communitties_employment</code> <a href="http://philippbroniecki.github.io/ML2017.io/data/communities_employment.csv">here</a>, place them in your working directory and then load them from your local source.</p>
 <pre class="r"><code># load the communities datasets
 communities &lt;- read.csv(&quot;http://philippbroniecki.github.io/ML2017.io/data/communities.csv&quot;)
@@ -479,7 +467,7 @@ communities_employment &lt;- read.csv(&quot;http://philippbroniecki.github.io/ML
      xlab = &quot;Adults without High School education (%)&quot;,
      ylab = &quot;Unemployment Rate&quot;,
      bty = &quot;n&quot;)</code></pre>
-<p><img src="day2_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p><img src="day2_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 <p>In order to answer that question empirically, we will run linear regression using the <code>lm()</code> function in R. The <code>lm()</code> function needs to know the relationship we’re trying to model and the dataset for our observations. The two arguments we need to provide to the <code>lm()</code> function are described below.</p>
 <table style="width:96%;">
 <colgroup>
@@ -581,7 +569,7 @@ communities_employment &lt;- read.csv(&quot;http://philippbroniecki.github.io/ML
      xlab = &quot;Adults without High School education (%)&quot;,
      ylab = &quot;Unemployment Rate&quot;)
 abline(model1, col = &quot;red&quot;)</code></pre>
-<p><img src="day2_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p><img src="day2_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 <p>While the <code>summary()</code> function provides a slew of information about a fitted regression model, we often need to present our findings in easy to read tables similar to what you see in journal publications. The texreg package we installed earlier allows us to do just that.</p>
 <p>Let’s take a look at how to display the output of a regression model on the screen using the <code>screenreg()</code> function from texreg.</p>
 <pre class="r"><code>screenreg(model1)</code></pre>
@@ -629,7 +617,7 @@ summary(model2)</code></pre>
      xlab = &quot;Minority population (%)&quot;,
      ylab = &quot;Unemployment Rate&quot;)
 abline(model2, col = &quot;blue&quot;)</code></pre>
-<p><img src="day2_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p><img src="day2_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
 <p>Does <code>model2</code> offer a better fit than <code>model1</code>? Maybe we can answer that question by looking at the regression tables instead. Let’s print the two models side-by-side in a single table with <code>screenreg()</code>.</p>
 <pre class="r"><code>screenreg(list(model1, model2))</code></pre>
 <pre><code>## 
@@ -695,11 +683,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##      mean         sd      50%     2.5%     97.5%
-## 1 0.68691 0.01297505 0.686924 0.661544 0.7121637
+##        mean         sd       50%      2.5%     97.5%
+## 1 0.6863815 0.01271762 0.6864839 0.6613206 0.7105074
 ## pv
-##          mean        sd       50%     2.5%    97.5%
-## [1,] 0.692866 0.1648238 0.6929996 0.374112 1.015317
+##           mean        sd       50%      2.5%    97.5%
+## [1,] 0.6896947 0.1674615 0.6876244 0.3600678 1.000536
 ## 
 ## 
 ## [1] 0.3
@@ -708,11 +696,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean          sd       50%      2.5%     97.5%
-## 1 0.5581401 0.008462655 0.5583113 0.5419306 0.5745705
+##        mean          sd       50%     2.5%     97.5%
+## 1 0.5578355 0.008294485 0.5579552 0.541913 0.5741985
 ## pv
-##           mean        sd       50%     2.5%     97.5%
-## [1,] 0.5572104 0.1720337 0.5571758 0.214799 0.8827391
+##           mean        sd       50%      2.5%     97.5%
+## [1,] 0.5557688 0.1727056 0.5580691 0.2194661 0.8852778
 ## 
 ## 
 ## [1] 0.6
@@ -721,11 +709,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean         sd       50%      2.5%     97.5%
-## 1 0.4293701 0.00470812 0.4294969 0.4198393 0.4384724
+##        mean          sd       50%      2.5%     97.5%
+## 1 0.4292894 0.004637949 0.4292761 0.4202088 0.4385109
 ## pv
-##           mean        sd      50%       2.5%     97.5%
-## [1,] 0.4266729 0.1789059 0.435008 0.05935325 0.7645092
+##           mean        sd       50%       2.5%     97.5%
+## [1,] 0.4299385 0.1766752 0.4351285 0.08652453 0.7652499
 ## 
 ## 
 ## [1] 0.9
@@ -735,12 +723,12 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##        mean          sd       50%      2.5%     97.5%
-## 1 0.3006002 0.004472306 0.3004253 0.2923056 0.3094671
+## 1 0.3007433 0.004458033 0.3007372 0.2918797 0.3093314
 ## pv
 ##           mean        sd       50%        2.5%     97.5%
-## [1,] 0.3085718 0.1713272 0.3090097 -0.01461866 0.6323666</code></pre>
+## [1,] 0.2964347 0.1721332 0.2945646 -0.04225583 0.6124899</code></pre>
 <pre class="r"><code>ci.plot(s.out, xlab = &quot;Majority population (%)&quot;, ci = 95)</code></pre>
-<p><img src="day2_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+<p><img src="day2_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
 </div>
 <div id="additional-resources" class="section level3">
 <h3>Additional Resources</h3>

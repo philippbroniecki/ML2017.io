@@ -83,11 +83,17 @@ install.packages("texreg")
 
 Now, let's load Zelig, textreg, and dplyr.
 
+```{r, include=FALSE}
+library(texreg, quietly=TRUE)
+library(Zelig, quietly=FALSE)
+```
 
-```{r}
+```{r,eval=FALSE}
 library(texreg)
 library(Zelig)
 ```
+
+We will use a new dataset that comes from the 1990 US Census and provides demographic and socio-economic data in multiple files. The dataset includes observations from 1,994 communities with each observation identified by a `state` and `communityname` variable.
 
 Let's load 2 datasets into R using `read.csv()` and confirm that the `state` and `communityname` are present in each dataset. You can either directly load the dataset from the online source as shown in the code below. Alternatively, get `communities` [here](http://philippbroniecki.github.io/ML2017.io/data/communities.csv) and `communitties_employment` [here](http://philippbroniecki.github.io/ML2017.io/data/communities_employment.csv), place them in your working directory and then load them from your local source.
 

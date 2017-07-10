@@ -412,9 +412,14 @@ y &lt;- data2$IMMBRIT</code></pre>
 <div id="ridge-regression" class="section level4">
 <h4>Ridge Regression</h4>
 <p>The <code>glmnet</code> package provides functionality to fit ridge regression and lasso models. We load the package and call <code>glmnet()</code> to perform ridge regression.</p>
-<pre class="r"><code>library(glmnet)
-
-# tuning parameter
+<pre class="r"><code>library(glmnet)</code></pre>
+<pre><code>## Loading required package: Matrix</code></pre>
+<pre><code>## Loading required package: foreach</code></pre>
+<pre><code>## foreach: simple, scalable parallel programming from Revolution Analytics
+## Use Revolution R for scalability, fault tolerance and more.
+## http://www.revolutionanalytics.com</code></pre>
+<pre><code>## Loaded glmnet 2.0-10</code></pre>
+<pre class="r"><code># tuning parameter
 grid &lt;- 10^seq(4, -2, length = 100)
 plot(grid, bty = &quot;n&quot;, pch = 19,
      main = expression(paste(&quot;Grid of Tuning Parameters &quot;, lambda)))</code></pre>
@@ -523,12 +528,12 @@ mean( (lm.p - y.test)^2 )</code></pre>
 <pre class="r"><code>set.seed(1)
 # training data for CV to find optimal lambda, but then test data to estimate test error
 cv.out &lt;- cv.glmnet(x[train, ], y[train], alpha = 0)
-plot(cv.out)
-# best performing model&#39;s lambda value
+plot(cv.out)</code></pre>
+<p><img src="day6_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<pre class="r"><code># best performing model&#39;s lambda value
 bestlam &lt;- cv.out$lambda.min
 bestlam</code></pre>
 <pre><code>## [1] 4.661975</code></pre>
-<p><img src="day6_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
 <p>The best performing model is the one with <span class="math inline">\(\lambda = 4.661975\)</span></p>
 <pre class="r"><code># predict outcomes using best cross-validated lambda
 ridge.pred &lt;- predict(ridge.mod, s = bestlam, newx = x[-train, ])
@@ -563,12 +568,12 @@ plot(lasso.mod)</code></pre>
 <pre class="r"><code># cross-validation to pick lambda
 set.seed(1)
 cv.out &lt;- cv.glmnet(x[train, ], y[train], alpha = 1)
-plot(cv.out)
-bestlam &lt;- cv.out$lambda.min
+plot(cv.out)</code></pre>
+<p><img src="day6_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<pre class="r"><code>bestlam &lt;- cv.out$lambda.min
 lasso.pred &lt;- predict(lasso.mod, s = bestlam, newx = x[-train, ])
 mean((lasso.pred - y.test)^2)</code></pre>
 <pre><code>## [1] 394.6538</code></pre>
-<p><img src="day6_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
 <p>We can compare these results with ridge regression by examining the coefficient estimates.</p>
 <pre class="r"><code># compare to ridge regression
 out &lt;- glmnet(x, y, alpha = 1, lambda = grid)
