@@ -77,6 +77,10 @@ navbar:
           href: "./slides/D9%20-%20Unsupervised%20Learning.pdf"
         - text: "Solutions"
           href: solutions9.html
+    - text: "More"
+      menu:
+        - text: "Simulation"
+          href: simulation.html
 output:
   html_document:
     theme: sandstone

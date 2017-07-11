@@ -9,9 +9,10 @@
 <meta name="generator" content="pandoc" />
 
 
+<meta name="author" content="Philipp Broniecki and Lucas Leemann – Machine Learning 1K" />
 
 
-<title>1K Machine Learning</title>
+<title>How to Simulate without Zelig</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -365,28 +366,90 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">1K Machine Learning</h1>
+<h1 class="title toc-ignore">How to Simulate without Zelig</h1>
+<h4 class="author"><em>Philipp Broniecki and Lucas Leemann – Machine Learning 1K</em></h4>
 
 </div>
 
 
-<div class="figure">
-<img src="img/lleeman-218x218.jpg" />
+<p>Simulation can be done in a few steps without the need for the Zelig package. If you make a prediction, you want to be able to quantify your uncertainty of that prediction. This lets other people assess the quality of your prediction and makes the process transparent.</p>
+<p>Simulation is the Swiss army knive of statistics. Quantifying the uncertainty of an outcome can be tough or even impossible algebraically. Even for the linear model you need to consider the standard errors of all coeffience and their covariances. The formulas can be tedious and may be different from one model to the next.</p>
+<p><strong>For simulation, the process is always the same regardless of the model.</strong></p>
+<p>We start by loading data and fitting a linear model on the unemployment rate.</p>
+<pre class="r"><code># clear workspace
+rm(list=ls())
+# load data
+df &lt;- read.csv(&quot;http://philippbroniecki.github.io/ML2017.io/data/communities.csv&quot;)</code></pre>
+<p><strong>Simulation step 1:</strong> Coefficients follow a sampling distribution. Because the covary, they jointly follow a multivariate distribution which is assumed to be multivariate normal.</p>
+<p>To draw from the multivarate normal we need to get the mean of distribution. That is the vector of our mean coefficient estimates. We extract that using <code>coef(model_name)</code>. And we need the model uncertainty which lives in the variance-covariance matrix. We extract it with <code>vcov(model_name)</code>.</p>
+<p>As we draw randomly from a distribution we want to set the random number generator with <code>set.seed()</code> and we pick the number of coefficients to draw form the distribution.</p>
+<pre class="r"><code># run a model
+m1 &lt;- lm(PctUnemployed ~ pctUrban + householdsize + racePctWhite, data = df)
 
-</div>
-<div id="course-content" class="section level3">
-<h3>Course Content</h3>
-<p>This course will introduce participants to a fascinating field of statistics. We will see how we can rely on statistical models to gain a deep understanding from data. This often involves finding optimal predictions and classifications. Machine Learning (also known as Statistical Learning) is quickly developing and is being applied in various fields such as business analytics, political science, sociology, and elsewhere.</p>
-</div>
-<div id="course-objectives" class="section level3">
-<h3>Course Objectives</h3>
-<p>This course aims to provide an introduction to the data science approach to the quantitative analysis of data using the methods of statistical learning, an approach blending classical statistical methods with recent advances in computational and machine learning. The course will cover the main analytical methods from this field with hands-on applications using example datasets. This will allow students to gain experience with and confidence in using the methods we cover.</p>
-<p>Students will know how to successfully apply a number of tools and models for supervised and unsupervised learning. After a short probability refresher, students will learn how to evaluate various methods based on cross-validation. We will then see how we can create optimal prediction models. Creating a good prediction model requires choosing an optimal set of explanatory variables. To this end, we will rely on subset selection, shrinkage methods, lasso, and ridge regression. Classification is another prominent topic and we will use decision trees and random forests to solve such problems. Finally, in terms of data reduction, we will rely on principle component analysis. All these tools provide the foundation for students to then solve real-world problems, potentially by combining these various approaches. The focus of this class is on giving the students sufficient practical training such that they can fruitfully apply these methods in their own work.</p>
-</div>
-<div id="course-prerequisites" class="section level3">
-<h3>Course Prerequisites</h3>
-<p>Students are expected to have a solid understanding of linear regression models and preferably know binary models. Some prior exposure to statistical software is beneficial but not required. The course will also provide a short introduction to RStudio at the beginning. More important than prior training will be a willingness to engage with the topics of the class.</p>
-</div>
+# set the random number generator to some value
+set.seed(123)
+
+# pick how many coefficients you want to draw from the distribution
+n.sim &lt;- 1000
+
+# draw coefficients from the multivariate normal
+S &lt;- MASS::mvrnorm(n.sim, coef(m1), vcov(m1))</code></pre>
+<p><strong>Simulation step 2:</strong> Choose a scenario for which you want to make a prediction. That means we have to set our covariates to some value. We will vary the percentage of the urban population and keep all other covariates constant. We also check the range of the variable of interest so that we don’t extrapolate to something that is outside of our data range.</p>
+<pre class="r"><code># choose a scenario to predict the outcome for
+summary(df$pctUrban)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##  0.0000  0.0000  1.0000  0.6963  1.0000  1.0000</code></pre>
+<pre class="r"><code># set the covariates (predictions for changes in pctUrban)
+X &lt;- cbind( constant = 1,
+            urban = seq(from = 0, to = 1, by = .1),
+            householdsize = mean(df$householdsize),
+            pctwhite = mean(df$racePctWhite))
+
+# check covariates
+X            </code></pre>
+<pre><code>##       constant urban householdsize  pctwhite
+##  [1,]        1   0.0     0.4633952 0.7537161
+##  [2,]        1   0.1     0.4633952 0.7537161
+##  [3,]        1   0.2     0.4633952 0.7537161
+##  [4,]        1   0.3     0.4633952 0.7537161
+##  [5,]        1   0.4     0.4633952 0.7537161
+##  [6,]        1   0.5     0.4633952 0.7537161
+##  [7,]        1   0.6     0.4633952 0.7537161
+##  [8,]        1   0.7     0.4633952 0.7537161
+##  [9,]        1   0.8     0.4633952 0.7537161
+## [10,]        1   0.9     0.4633952 0.7537161
+## [11,]        1   1.0     0.4633952 0.7537161</code></pre>
+<p><strong>Simulation step 3:</strong> Predict the outcome. We have set our covariates and we have our coefficients. This is all we need to predict y. This is similar for all generalized liner model. Depending on the model you would have to send your y through the approriate link function to get the final prediction. In logistic regression the latent y would have to be send trough the logit link function: <span class="math inline">\(\frac{1}{1 + exp^{-y}}\)</span>. Here, we ran a simple linear model so in linear algebra notation our prediction is simply <span class="math inline">\(Y=X\beta\)</span>.</p>
+<p>We create <code>y_hat</code> as a matrix with as many rows as we have different covariate scenarios. The number of columns is the number of simulations. Then we multiply our covariates with our betas in a loop where on loop iteration is one scenario.</p>
+<pre class="r"><code># predict outcome, ie X * betas for all scenarios
+y_hat &lt;- matrix(NA, nrow = nrow(X), ncol =  n.sim)
+
+# start estimating y
+for (idx in 1:nrow(X) ){
+  y_hat[idx, ] &lt;- S %*% as.matrix(X[idx, ]) 
+}</code></pre>
+<p>Finally, all that is left is the interpretation of the result. You can simply look at the numerical outcomes similar to the using the <code>summary()</code> function on the Zelig simulation object.</p>
+<pre class="r"><code># output like the zelig summary (including estimation uncertainty)
+apply(y_hat, 1, quantile, probs = c(.025, .5, .975))</code></pre>
+<pre><code>##            [,1]      [,2]      [,3]      [,4]      [,5]      [,6]
+## 2.5%  0.4316010 0.4214979 0.4105675 0.4000181 0.3893180 0.3784349
+## 50%   0.4450405 0.4332109 0.4215157 0.4097547 0.3981805 0.3864607
+## 97.5% 0.4584981 0.4454806 0.4327917 0.4198413 0.4070521 0.3945582
+##            [,7]      [,8]      [,9]     [,10]     [,11]
+## 2.5%  0.3672170 0.3557150 0.3439413 0.3318641 0.3196062
+## 50%   0.3747705 0.3630690 0.3512949 0.3396307 0.3279723
+## 97.5% 0.3823658 0.3703668 0.3586515 0.3473086 0.3363178</code></pre>
+<p>You can also draw a plot that shows your mean prediction and the uncertainty around in a few lines.</p>
+<pre class="r"><code># plot like zelig&#39;s ci plot
+par( mfrow = c(1,1))
+plot(0, bty = &quot;n&quot;, xlab = &quot;Pct Urban&quot;, ylab = &quot;Unemployment Rate&quot;, 
+     ylim = c(0.3, 0.5), xlim = c(0,1), pch =&quot;&quot;)
+ci &lt;- apply(y_hat, 1, quantile, probs = c(.025, .975))
+polygon(x =  c(rev(X[,&quot;urban&quot;]), X[,&quot;urban&quot;]), 
+        y = c(rev(t(ci)[,2]), t(ci)[,1]), border = NA,
+        col = &quot;lightblue&quot;)
+lines(x = X[,&quot;urban&quot;], y = apply(y_hat, 1, quantile, probs = .5), lwd = 1)</code></pre>
+<p><img src="simulation_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 
 
 

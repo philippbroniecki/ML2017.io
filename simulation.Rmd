@@ -1,0 +1,94 @@
+---
+title: "How to Simulate without Zelig"
+author: "Philipp Broniecki and Lucas Leemann -- Machine Learning 1K"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Simulation can be done in a few steps without the need for the Zelig package. If you make a prediction, you want to be able to quantify your uncertainty of that prediction. This lets other people assess the quality of your prediction and makes the process transparent.
+
+Simulation is the Swiss army knive of statistics. Quantifying the uncertainty of an outcome can be tough or even impossible algebraically. Even for the linear model you need to consider the standard errors of all coeffience and their covariances. The formulas can be tedious and may be different from one model to the next.
+
+**For simulation, the process is always the same regardless of the model.**
+
+We start by loading data and fitting a linear model on the unemployment rate.
+```{r}
+# clear workspace
+rm(list=ls())
+# load data
+df <- read.csv("http://philippbroniecki.github.io/ML2017.io/data/communities.csv")
+```
+
+**Simulation step 1:** Coefficients follow a sampling distribution. Because the covary, they jointly follow a multivariate distribution which is assumed to be multivariate normal.
+
+To draw from the multivarate normal we need to get the mean of distribution. That is the vector of our mean coefficient estimates. We extract that using `coef(model_name)`. And we need the model uncertainty which lives in the variance-covariance matrix. We extract it with `vcov(model_name)`.
+
+As we draw randomly from a distribution we want to set the random number generator with `set.seed()` and we pick the number of coefficients to draw form the distribution.
+
+```{r}
+# run a model
+m1 <- lm(PctUnemployed ~ pctUrban + householdsize + racePctWhite, data = df)
+
+# set the random number generator to some value
+set.seed(123)
+
+# pick how many coefficients you want to draw from the distribution
+n.sim <- 1000
+
+# draw coefficients from the multivariate normal
+S <- MASS::mvrnorm(n.sim, coef(m1), vcov(m1))
+```
+
+**Simulation step 2:** Choose a scenario for which you want to make a prediction. That means we have to set our covariates to some value. We will vary the percentage of the urban population and keep all other covariates constant. We also check the range of the variable of interest so that we don't extrapolate to something that is outside of our data range.
+
+```{r}
+# choose a scenario to predict the outcome for
+summary(df$pctUrban)
+
+# set the covariates (predictions for changes in pctUrban)
+X <- cbind( constant = 1,
+            urban = seq(from = 0, to = 1, by = .1),
+            householdsize = mean(df$householdsize),
+            pctwhite = mean(df$racePctWhite))
+
+# check covariates
+X            
+```
+
+
+**Simulation step 3:** Predict the outcome. We have set our covariates and we have our coefficients. This is all we need to predict y. This is similar for all generalized liner model. Depending on the model you would have to send your y through the approriate link function to get the final prediction. In logistic regression the latent y would have to be send trough the logit link function: $\frac{1}{1 + exp^{-y}}$. Here, we ran a simple linear model so in linear algebra notation our prediction is simply $Y=X\beta$.
+
+We create `y_hat` as a matrix with as many rows as we have different covariate scenarios. The number of columns is the number of simulations. Then we multiply our covariates with our betas in a loop where on loop iteration is one scenario.
+```{r}
+# predict outcome, ie X * betas for all scenarios
+y_hat <- matrix(NA, nrow = nrow(X), ncol =  n.sim)
+
+# start estimating y
+for (idx in 1:nrow(X) ){
+  y_hat[idx, ] <- S %*% as.matrix(X[idx, ]) 
+}
+```
+
+Finally, all that is left is the interpretation of the result. You can simply look at the numerical outcomes similar to the using the `summary()` function on the Zelig simulation object.
+
+```{r}
+# output like the zelig summary (including estimation uncertainty)
+apply(y_hat, 1, quantile, probs = c(.025, .5, .975))
+```
+
+You can also draw a plot that shows your mean prediction and the uncertainty around in a few lines.
+
+```{r}
+# plot like zelig's ci plot
+par( mfrow = c(1,1))
+plot(0, bty = "n", xlab = "Pct Urban", ylab = "Unemployment Rate", 
+     ylim = c(0.3, 0.5), xlim = c(0,1), pch ="")
+ci <- apply(y_hat, 1, quantile, probs = c(.025, .975))
+polygon(x =  c(rev(X[,"urban"]), X[,"urban"]), 
+        y = c(rev(t(ci)[,2]), t(ci)[,1]), border = NA,
+        col = "lightblue")
+lines(x = X[,"urban"], y = apply(y_hat, 1, quantile, probs = .5), lwd = 1)
+```
+
