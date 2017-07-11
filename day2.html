@@ -447,10 +447,9 @@ install.packages(&quot;texreg&quot;)</code></pre>
 <pre class="r"><code>library(texreg)
 library(Zelig)</code></pre>
 <p>We will use a new dataset that comes from the 1990 US Census and provides demographic and socio-economic data in multiple files. The dataset includes observations from 1,994 communities with each observation identified by a <code>state</code> and <code>communityname</code> variable.</p>
-<p>Let’s load 2 datasets into R using <code>read.csv()</code> and confirm that the <code>state</code> and <code>communityname</code> are present in each dataset. You can either directly load the dataset from the online source as shown in the code below. Alternatively, get <code>communities</code> <a href="http://philippbroniecki.github.io/ML2017.io/data/communities.csv">here</a> and <code>communitties_employment</code> <a href="http://philippbroniecki.github.io/ML2017.io/data/communities_employment.csv">here</a>, place them in your working directory and then load them from your local source.</p>
+<p>Let’s load 1 dataset into R using <code>read.csv()</code> and confirm that the <code>state</code> and <code>communityname</code> are present in each dataset. You can either directly load the dataset from the online source as shown in the code below. Alternatively, get <code>communities</code> <a href="http://philippbroniecki.github.io/ML2017.io/data/communities.csv">here</a>.</p>
 <pre class="r"><code># load the communities datasets
-communities &lt;- read.csv(&quot;http://philippbroniecki.github.io/ML2017.io/data/communities.csv&quot;)
-communities_employment &lt;- read.csv(&quot;http://philippbroniecki.github.io/ML2017.io/data/communities_employment.csv&quot;)</code></pre>
+communities &lt;- read.csv(&quot;http://philippbroniecki.github.io/ML2017.io/data/communities.csv&quot;)</code></pre>
 </div>
 <div id="dplyr-select-function" class="section level3">
 <h3>Dplyr <code>select()</code> Function</h3>
@@ -683,11 +682,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean         sd       50%      2.5%     97.5%
-## 1 0.6863815 0.01271762 0.6864839 0.6613206 0.7105074
+##       mean        sd       50%      2.5%     97.5%
+## 1 0.686811 0.0126072 0.6863526 0.6622854 0.7115023
 ## pv
 ##           mean        sd       50%      2.5%    97.5%
-## [1,] 0.6896947 0.1674615 0.6876244 0.3600678 1.000536
+## [1,] 0.6921317 0.1736318 0.6933753 0.3436496 1.039791
 ## 
 ## 
 ## [1] 0.3
@@ -696,11 +695,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean          sd       50%     2.5%     97.5%
-## 1 0.5578355 0.008294485 0.5579552 0.541913 0.5741985
+##       mean          sd       50%      2.5%     97.5%
+## 1 0.558116 0.008193077 0.5578479 0.5419401 0.5739425
 ## pv
 ##           mean        sd       50%      2.5%     97.5%
-## [1,] 0.5557688 0.1727056 0.5580691 0.2194661 0.8852778
+## [1,] 0.5652768 0.1719234 0.5595203 0.2340388 0.8994224
 ## 
 ## 
 ## [1] 0.6
@@ -710,10 +709,10 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##        mean          sd       50%      2.5%     97.5%
-## 1 0.4292894 0.004637949 0.4292761 0.4202088 0.4385109
+## 1 0.4294209 0.004542989 0.4294711 0.4207407 0.4377695
 ## pv
-##           mean        sd       50%       2.5%     97.5%
-## [1,] 0.4299385 0.1766752 0.4351285 0.08652453 0.7652499
+##           mean       sd       50%       2.5%     97.5%
+## [1,] 0.4269502 0.168812 0.4220842 0.09314447 0.7466767
 ## 
 ## 
 ## [1] 0.9
@@ -722,11 +721,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean          sd       50%      2.5%     97.5%
-## 1 0.3007433 0.004458033 0.3007372 0.2918797 0.3093314
+##        mean          sd      50%      2.5%     97.5%
+## 1 0.3007259 0.004413418 0.300735 0.2923287 0.3089364
 ## pv
-##           mean        sd       50%        2.5%     97.5%
-## [1,] 0.2964347 0.1721332 0.2945646 -0.04225583 0.6124899</code></pre>
+##           mean        sd       50%        2.5%    97.5%
+## [1,] 0.2890589 0.1718188 0.2898388 -0.06058682 0.634022</code></pre>
 <pre class="r"><code>ci.plot(s.out, xlab = &quot;Majority population (%)&quot;, ci = 95)</code></pre>
 <p><img src="day2_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
 </div>
@@ -739,7 +738,10 @@ summary(s.out)</code></pre>
 <div id="exercises" class="section level3">
 <h3>Exercises</h3>
 <ol style="list-style-type: decimal">
-<li>Load the immigration dataset <a href="http://philippbroniecki.github.io/ML2017.io/data/communities_immig.csv">dataset</a></li>
+<li>Load the immigration dataset <a href="http://philippbroniecki.github.io/ML2017.io/data/communities_immig.csv">dataset</a> and the employment <a href="http://philippbroniecki.github.io/ML2017.io/data/communities_employment.csv">dataset</a> and merge them to the communities dataset from the seminar.
+<ul>
+<li>You can merge using the <code>merge()</code> function.</li>
+</ul></li>
 <li>Rename the <code>PctImmigRec5</code> variable to <code>RecentImmigration5</code>.</li>
 <li>Estimate a model explaining the relationship between unemployment rate and recent immigration over the past 5 years using the variable <code>RecentImmigration5</code>.</li>
 <li>Plot the regression line of the model.</li>
