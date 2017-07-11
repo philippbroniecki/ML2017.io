@@ -88,11 +88,17 @@ sd(df$final_score[df$schtyp == "Public schools"])
 We use the `which.min()` and `which.max()` functions again to get the index numbers of the correct students.
 
 ```{r}
-# best student's id
-df$id[ which.max(df$final_score) ]
+# best student's id from private school
+df$id[ which.max(df$final_score[ df$schtyp == "Private schools" ]) ]
 
-# worst student's id
-df$id[ which.min(df$final_score)]
+# best student's id from public school
+df$id[ which.max(df$final_score[ df$schtyp == "Private schools" ]) ]
+
+# worst student's id from private school
+df$id[ which.min(df$final_score[df$schtyp == "Private schools"])]
+
+# worst student's id from private school
+df$id[ which.min(df$final_score[df$schtyp == "Public schools"])]
 ```
 
 10. Find out the 20th, 40th, 60th and 80th percentiles of final_score.

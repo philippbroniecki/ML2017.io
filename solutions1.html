@@ -427,12 +427,18 @@ sd(df$final_score[df$schtyp == &quot;Private schools&quot;])</code></pre>
 <li>Find out the ID of the students with the highest and lowest <code>final_score</code> from each school type.</li>
 </ol>
 <p>We use the <code>which.min()</code> and <code>which.max()</code> functions again to get the index numbers of the correct students.</p>
-<pre class="r"><code># best student&#39;s id
-df$id[ which.max(df$final_score) ]</code></pre>
-<pre><code>## [1] 132</code></pre>
-<pre class="r"><code># worst student&#39;s id
-df$id[ which.min(df$final_score)]</code></pre>
-<pre><code>## [1] 45</code></pre>
+<pre class="r"><code># best student&#39;s id from private school
+df$id[ which.max(df$final_score[ df$schtyp == &quot;Private schools&quot; ]) ]</code></pre>
+<pre><code>## [1] 76</code></pre>
+<pre class="r"><code># best student&#39;s id from public school
+df$id[ which.max(df$final_score[ df$schtyp == &quot;Private schools&quot; ]) ]</code></pre>
+<pre><code>## [1] 76</code></pre>
+<pre class="r"><code># worst student&#39;s id from private school
+df$id[ which.min(df$final_score[df$schtyp == &quot;Private schools&quot;])]</code></pre>
+<pre><code>## [1] 86</code></pre>
+<pre class="r"><code># worst student&#39;s id from private school
+df$id[ which.min(df$final_score[df$schtyp == &quot;Public schools&quot;])]</code></pre>
+<pre><code>## [1] 162</code></pre>
 <ol start="10" style="list-style-type: decimal">
 <li>Find out the 20th, 40th, 60th and 80th percentiles of final_score.</li>
 </ol>
