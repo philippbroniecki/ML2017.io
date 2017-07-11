@@ -5,45 +5,60 @@ author: "Philipp Broniecki and Lucas Leemann -- Machine Learning 1K"
 
 ### Solution Lab 2
 
-1. Load the immigration dataset dataset
+1. Load the immigration dataset [dataset](http://philippbroniecki.github.io/ML2017.io/data/communities_immig.csv) and the employment [dataset](http://philippbroniecki.github.io/ML2017.io/data/communities_employment.csv) and merge them to the communities dataset from the seminar.
+    - You can merge using the `merge()` function.
 
 ```{r}
 # clear workspace
 rm(list=ls())
 
-# read in various datasets and combine them 
+# re-load the communities data set from the lab
+com <- read.csv("C:/Users/phili/Dropbox/Essex 2017 ML/Day 2/Lab/communities.csv")
+
+# read in the immigration dataset
 immi <- read.csv("http://uclspp.github.io/PUBLG100/data/communities_immig.csv")
 
+# load data set on employment
+empl <- read.csv("http://uclspp.github.io/PUBLG100/data/communities_employment.csv")
+```
+
+The 2 variables that identify an observation are `state` and `communityname`. We need these variables in our seperate data sets to merge. We drop other overlapping variables but that is not necessary. If you don't, R will paste the `.x` and `.y` to the variable names. You can drop by looking up which variables overlap and deleting them from one dataset by hand. Below is a way to automate this.
+
+```{r}
+# the names of the dataset com excluding state and communityname
+ivs.empl <- names(empl)[!names(empl) %in% c("state", "communityname")]
+
+# the names of the dataset com excluding state and communityname
+ivs.com <- names(com)[!names(com) %in% c("state", "communityname")]
+
+# overlaps 
+drop <- ivs.empl[ivs.empl %in% ivs.com]
+
+# drop variables that are in both datasets
+empl[, drop] <- NULL
+
+# 1) merge com and empl:
+com <- merge(com, empl, by = c("state", "communityname"))
+
+# 2) merge immi to the data sets
+com <- merge(com, immi, by = c("state", "communityname"))
+
+# remove the now unecessary data sets immi and empl
+rm(immi, empl, drop, ivs.com, ivs.empl)
 ```
 
 
 2. Rename the `PctImmigRec5` variable to `RecentImmigration5`.
 
-Here, we use `select()` from `dplyr`. Sometimes different packages provide packages with similar names. Both `dplyr` and `Zelig` have functions called `select()` for example. This can cause conflicts. If we have a package installed, we can call a function from it directly without loading the function of that package into the current namespace. The following code does this. We also have to merge some data sets.
-
+We use `select()` from `dplyr` to rename the variables and make the data set a litte bit smaller and easier to deal with.
 
 ```{r}
-# load original communities data set
-com <- read.csv("C:/Users/phili/Dropbox/Essex 2017 ML/Day 2/Lab/communities.csv")
-
-# load data set on employment
-empl <- read.csv("http://uclspp.github.io/PUBLG100/data/communities_employment.csv")
-
-# merge data sets
-# com and empl
-com <- merge(com, empl, by = c("state", "communityname"))
-# merge immi to the data sets
-com <- merge(com, immi, by = c("state", "communityname"))
-# remove the now unecessary data sets immi and empl
-rm(immi, empl)
-
 com <- dplyr::select(com,
                      community = communityname,
-                     unemploymentrate = PctUnemployed.y,
+                     unemploymentrate = PctUnemployed,
                      nohighschool = PctNotHSGrad,
                      white = racePctWhite,
-                     recentimmigration5 = PctImmigRec5
-                     )
+                     recentimmigration5 = PctImmigRec5)
 ```
 
 3. Estimate a model explaining the relationship between unemployment rate and recent immigration over the past 5 years using the variable `RecentImmigration5`.
@@ -92,12 +107,12 @@ texreg::htmlreg(list(m_edu, m_minority, m_immi), file = "Lab2_model_comparison.d
 library(Zelig)
 z.out <- zelig(unemploymentrate ~ recentimmigration5, data = com, model = "ls")
 x.out <- setx(z.out, recentimmigration5 = seq(0, 1, 0.1))
-s.out <- sim(z.out, x = x.out, n=10000)
+s.out <- sim(z.out, x = x.out, n=1000)
 ```
 
 8. Save all the plots as graphics files.
 ```{r}
-png("plot.png")
+png("task8_plot.png")
 ci.plot(s.out, xlab = "Recent Immigration (last 5 years)", ci = 95)
 dev.off()
 ```

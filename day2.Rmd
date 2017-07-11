@@ -211,7 +211,7 @@ screenreg(list(model1, model2))
 
 Finally, let's save the same output as a Microsoft Word document using `htmlreg()`.
 
-```{r}
+```{r, eval=FALSE}
 htmlreg(list(model1, model2), file = "lab4_model_comparison.doc")
 ```
 

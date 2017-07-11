@@ -485,9 +485,18 @@ names(df)</code></pre>
 ##  3rd Qu.:3.000   3rd Qu.:3.000   3rd Qu.:13.000  
 ##  Max.   :4.000   Max.   :3.000   Max.   :17.000</code></pre>
 <pre class="r"><code># data manipulation
-df$urban &lt;- factor(df$urban, labels = c(&quot;rural&quot;, &quot;more rural&quot;, &quot;more urban&quot;, &quot;urban&quot;))
 df$RSex &lt;- factor(df$RSex, labels = c(&quot;Male&quot;, &quot;Female&quot;))
 df$health.good &lt;- factor(df$health.good, labels = c(&quot;bad&quot;, &quot;fair&quot;, &quot;fairly good&quot;, &quot;good&quot;) )
+
+# urban to dummies (for knn later)
+table(df$urban) # 3 is the modal category (keep as baseline) but we create all categories</code></pre>
+<pre><code>## 
+##   1   2   3   4 
+## 214 281 298 256</code></pre>
+<pre class="r"><code>df$rural &lt;- ifelse( df$urban == 1, yes = 1, no = 0)
+df$partly.rural &lt;- ifelse( df$urban == 2, yes = 1, no = 0)
+df$partly.urban &lt;- ifelse( df$urban == 3, yes = 1, no = 0)
+df$urban &lt;- ifelse( df$urban == 4, yes = 1, no = 0)
 
 # pairwise comparisons (for a managable subset of the data)
 pairs(df[, c(&quot;IMMBRIT&quot;, &quot;RAge&quot;, &quot;Househld&quot;, &quot;employMonths&quot;, &quot;WWWhourspW&quot;, &quot;HHInc&quot;)])</code></pre>
@@ -526,8 +535,22 @@ boxplot(df$IMMBRIT[ df$BNP == 1], frame.plot = FALSE, main = &quot;BNP&quot;, co
 </div>
 <div id="logistic-regression" class="section level3">
 <h3>Logistic Regression</h3>
-<p>We want to predict whether respondents over-estimate immigration from non-western contexts. We begin by looking at the distribution of the dependent variable. We check how well we could predict misperception of immigration in our sample without a statistical model.</p>
-<pre class="r"><code># predict whether poeple overestimate rate of immigrants (i.e. more than 10.7%)
+<p>We want to predict whether respondents over-estimate immigration from non-western contexts. We begin by normalizing our variables. Then we look at the distribution of the dependent variable. We check how well we could predict misperception of immigration in our sample without a statistical model.</p>
+<pre class="r"><code># create a copy of the original IMMBRIT variable (needed for classification with lm)
+df$IMMBRIT_original_scale &lt;- df$IMMBRIT
+
+# our function for normalization
+our.norm &lt;- function(x){
+  return((x - mean(x)) / sd(x))
+}
+
+# continuous variables
+c.vars &lt;- c(&quot;IMMBRIT&quot;, &quot;RAge&quot;, &quot;Househld&quot;, &quot;HHInc&quot;, &quot;employMonths&quot;, &quot;WWWhourspW&quot;)
+
+# normalize
+df[, c.vars] &lt;- apply( df[, c.vars], 2, our.norm )
+
+# predict whether poeple overestimate rate of immigrants (i.e. more than 10.7%)
 table(df$over.estimate)</code></pre>
 <pre><code>## 
 ##   0   1 
@@ -542,43 +565,44 @@ median(df$over.estimate)</code></pre>
 <pre class="r"><code># run logistic regression
 m.log &lt;- glm(over.estimate ~ RSex + RAge + Househld + Lab + SNP + Ukip + BNP + 
                GP + party.other + paper + WWWhourspW +  religious + 
-               employMonths + urban + health.good + HHInc, data = df,
+               employMonths + rural + partly.rural + urban + 
+               health.good + HHInc, data = df,
              family = binomial(link = &quot;logit&quot;))
 summary(m.log)</code></pre>
 <pre><code>## 
 ## Call:
 ## glm(formula = over.estimate ~ RSex + RAge + Househld + Lab + 
 ##     SNP + Ukip + BNP + GP + party.other + paper + WWWhourspW + 
-##     religious + employMonths + urban + health.good + HHInc, family = binomial(link = &quot;logit&quot;), 
-##     data = df)
+##     religious + employMonths + rural + partly.rural + urban + 
+##     health.good + HHInc, family = binomial(link = &quot;logit&quot;), data = df)
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
 ## -2.2342  -1.1328   0.6142   0.8262   1.3815  
 ## 
 ## Coefficients:
-##                          Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)             1.2908359  0.5269689   2.450   0.0143 *  
-## RSexFemale              0.6402959  0.1505657   4.253 2.11e-05 ***
-## RAge                    0.0005869  0.0051629   0.114   0.9095    
-## Househld                0.0208592  0.0606329   0.344   0.7308    
-## Lab                    -0.3157714  0.1996362  -1.582   0.1137    
-## SNP                     1.8551303  1.0560289   1.757   0.0790 .  
-## Ukip                    0.0560439  0.4484618   0.125   0.9005    
-## BNP                     0.9213103  0.5730484   1.608   0.1079    
-## GP                     -0.5131484  0.4657417  -1.102   0.2706    
-## party.other             0.1254213  0.1876025   0.669   0.5038    
-## paper                   0.1485517  0.1521012   0.977   0.3287    
-## WWWhourspW             -0.0032539  0.0100313  -0.324   0.7457    
-## religious               0.0513879  0.1527385   0.336   0.7365    
-## employMonths            0.0002652  0.0009945   0.267   0.7897    
-## urbanmore rural        -0.0288113  0.2049791  -0.141   0.8882    
-## urbanmore urban         0.3509666  0.2100675   1.671   0.0948 .  
-## urbanurban              0.4782831  0.2267105   2.110   0.0349 *  
-## health.goodfair        -0.0953404  0.3385583  -0.282   0.7782    
-## health.goodfairly good  0.1166949  0.3123972   0.374   0.7087    
-## health.goodgood         0.0274371  0.3189533   0.086   0.9314    
-## HHInc                  -0.1045647  0.0182074  -5.743 9.30e-09 ***
+##                        Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)             0.72437    0.36094   2.007   0.0448 *  
+## RSexFemale              0.64030    0.15057   4.253 2.11e-05 ***
+## RAge                    0.01031    0.09073   0.114   0.9095    
+## Househld                0.02794    0.08121   0.344   0.7308    
+## Lab                    -0.31577    0.19964  -1.582   0.1137    
+## SNP                     1.85513    1.05603   1.757   0.0790 .  
+## Ukip                    0.05604    0.44846   0.125   0.9005    
+## BNP                     0.92131    0.57305   1.608   0.1079    
+## GP                     -0.51315    0.46574  -1.102   0.2706    
+## party.other             0.12542    0.18760   0.669   0.5038    
+## paper                   0.14855    0.15210   0.977   0.3287    
+## WWWhourspW             -0.02598    0.08008  -0.324   0.7457    
+## religious               0.05139    0.15274   0.336   0.7365    
+## employMonths            0.01899    0.07122   0.267   0.7897    
+## rural                  -0.35097    0.21007  -1.671   0.0948 .  
+## partly.rural           -0.37978    0.19413  -1.956   0.0504 .  
+## urban                   0.12732    0.21202   0.601   0.5482    
+## health.goodfair        -0.09534    0.33856  -0.282   0.7782    
+## health.goodfairly good  0.11669    0.31240   0.374   0.7087    
+## health.goodgood         0.02744    0.31895   0.086   0.9314    
+## HHInc                  -0.48513    0.08447  -5.743 9.30e-09 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
@@ -593,57 +617,57 @@ summary(m.log)</code></pre>
 <pre class="r"><code># extract coeffiecients only
 coef(m.log)</code></pre>
 <pre><code>##            (Intercept)             RSexFemale                   RAge 
-##           1.2908358907           0.6402959296           0.0005869125 
+##             0.72437209             0.64029593             0.01031349 
 ##               Househld                    Lab                    SNP 
-##           0.0208591784          -0.3157713704           1.8551303100 
+##             0.02793778            -0.31577137             1.85513031 
 ##                   Ukip                    BNP                     GP 
-##           0.0560439011           0.9213102747          -0.5131484487 
+##             0.05604390             0.92131027            -0.51314845 
 ##            party.other                  paper             WWWhourspW 
-##           0.1254212704           0.1485517394          -0.0032539450 
-##              religious           employMonths        urbanmore rural 
-##           0.0513879498           0.0002651681          -0.0288113412 
-##        urbanmore urban             urbanurban        health.goodfair 
-##           0.3509665515           0.4782830875          -0.0953403512 
+##             0.12542127             0.14855174            -0.02597660 
+##              religious           employMonths                  rural 
+##             0.05138795             0.01898927            -0.35096655 
+##           partly.rural                  urban        health.goodfair 
+##            -0.37977789             0.12731654            -0.09534035 
 ## health.goodfairly good        health.goodgood                  HHInc 
-##           0.1166949207           0.0274371430          -0.1045647469</code></pre>
+##             0.11669492             0.02743714            -0.48513120</code></pre>
 <pre class="r"><code># only estimates table of summary
 summary(m.log)$coef</code></pre>
-<pre><code>##                             Estimate   Std. Error     z value     Pr(&gt;|z|)
-## (Intercept)             1.2908358907 0.5269688602  2.44954871 1.430354e-02
-## RSexFemale              0.6402959296 0.1505656608  4.25260266 2.113003e-05
-## RAge                    0.0005869125 0.0051629119  0.11367858 9.094926e-01
-## Househld                0.0208591784 0.0606328525  0.34402436 7.308280e-01
-## Lab                    -0.3157713704 0.1996361888 -1.58173411 1.137103e-01
-## SNP                     1.8551303100 1.0560288510  1.75670419 7.896824e-02
-## Ukip                    0.0560439011 0.4484617839  0.12496918 9.005480e-01
-## BNP                     0.9213102747 0.5730484405  1.60773542 1.078931e-01
-## GP                     -0.5131484487 0.4657417045 -1.10178763 2.705540e-01
-## party.other             0.1254212704 0.1876024786  0.66854805 5.037838e-01
-## paper                   0.1485517394 0.1521012139  0.97666373 3.287357e-01
-## WWWhourspW             -0.0032539450 0.0100313328 -0.32437813 7.456518e-01
-## religious               0.0513879498 0.1527385094  0.33644397 7.365361e-01
-## employMonths            0.0002651681 0.0009944704  0.26664249 7.897444e-01
-## urbanmore rural        -0.0288113412 0.2049790820 -0.14055747 8.882195e-01
-## urbanmore urban         0.3509665515 0.2100674697  1.67073251 9.477452e-02
-## urbanurban              0.4782830875 0.2267105175  2.10966431 3.488728e-02
-## health.goodfair        -0.0953403512 0.3385583495 -0.28160685 7.782450e-01
-## health.goodfairly good  0.1166949207 0.3123971704  0.37354666 7.087416e-01
-## health.goodgood         0.0274371430 0.3189532689  0.08602245 9.314486e-01
-## HHInc                  -0.1045647469 0.0182074014 -5.74298026 9.302457e-09</code></pre>
+<pre><code>##                           Estimate Std. Error     z value     Pr(&gt;|z|)
+## (Intercept)             0.72437209 0.36093823  2.00691428 4.475879e-02
+## RSexFemale              0.64029593 0.15056566  4.25260266 2.113003e-05
+## RAge                    0.01031349 0.09072502  0.11367858 9.094926e-01
+## Househld                0.02793778 0.08120874  0.34402436 7.308280e-01
+## Lab                    -0.31577137 0.19963619 -1.58173411 1.137103e-01
+## SNP                     1.85513031 1.05602885  1.75670419 7.896824e-02
+## Ukip                    0.05604390 0.44846178  0.12496918 9.005480e-01
+## BNP                     0.92131027 0.57304844  1.60773542 1.078931e-01
+## GP                     -0.51314845 0.46574170 -1.10178763 2.705540e-01
+## party.other             0.12542127 0.18760248  0.66854805 5.037838e-01
+## paper                   0.14855174 0.15210121  0.97666373 3.287357e-01
+## WWWhourspW             -0.02597660 0.08008122 -0.32437813 7.456518e-01
+## religious               0.05138795 0.15273851  0.33644397 7.365361e-01
+## employMonths            0.01898927 0.07121623  0.26664249 7.897444e-01
+## rural                  -0.35096655 0.21006747 -1.67073251 9.477452e-02
+## partly.rural           -0.37977789 0.19413416 -1.95626517 5.043393e-02
+## urban                   0.12731654 0.21201600  0.60050437 5.481701e-01
+## health.goodfair        -0.09534035 0.33855835 -0.28160685 7.782450e-01
+## health.goodfairly good  0.11669492 0.31239717  0.37354666 7.087416e-01
+## health.goodgood         0.02743714 0.31895327  0.08602245 9.314486e-01
+## HHInc                  -0.48513120 0.08447377 -5.74298026 9.302457e-09</code></pre>
 <pre class="r"><code># display p-values only
 summary(m.log)$coef[, 4]</code></pre>
 <pre><code>##            (Intercept)             RSexFemale                   RAge 
-##           1.430354e-02           2.113003e-05           9.094926e-01 
+##           4.475879e-02           2.113003e-05           9.094926e-01 
 ##               Househld                    Lab                    SNP 
 ##           7.308280e-01           1.137103e-01           7.896824e-02 
 ##                   Ukip                    BNP                     GP 
 ##           9.005480e-01           1.078931e-01           2.705540e-01 
 ##            party.other                  paper             WWWhourspW 
 ##           5.037838e-01           3.287357e-01           7.456518e-01 
-##              religious           employMonths        urbanmore rural 
-##           7.365361e-01           7.897444e-01           8.882195e-01 
-##        urbanmore urban             urbanurban        health.goodfair 
-##           9.477452e-02           3.488728e-02           7.782450e-01 
+##              religious           employMonths                  rural 
+##           7.365361e-01           7.897444e-01           9.477452e-02 
+##           partly.rural                  urban        health.goodfair 
+##           5.043393e-02           5.481701e-01           7.782450e-01 
 ## health.goodfairly good        health.goodgood                  HHInc 
 ##           7.087416e-01           9.314486e-01           9.302457e-09</code></pre>
 <p>The parameters may be of interest if inference is our goal. But if we are just interested in classification we would like to make predictions. This can be done directly by using the predict() function:</p>
@@ -682,12 +706,13 @@ train.ids &lt;- sample(nrow(df), size = as.integer( (nrow(df)*.80) ), replace = 
 # the validation data 
 df.test &lt;- df[ -train.ids, ]
 dim(df.test)</code></pre>
-<pre><code>## [1] 210  19</code></pre>
+<pre><code>## [1] 210  23</code></pre>
 <p>Now we fit the model using the training data only and then test its performance on the test data.</p>
 <pre class="r"><code># re-fit the model on the raining data
 m.log &lt;- glm(over.estimate ~ RSex + RAge + Househld + Lab + SNP + Ukip + BNP + 
                GP + party.other + paper + WWWhourspW +  religious + 
-               employMonths + urban + health.good + HHInc, data = df, subset = train.ids, 
+               employMonths + rural + partly.rural + urban + health.good + 
+               HHInc, data = df, subset = train.ids, 
              family = binomial(link = &quot;logit&quot;))
 
 # predict probabilities of over-estimating but for the unseen data
@@ -706,9 +731,9 @@ table( prediction = exp.out, truth = df.test$over.estimate)</code></pre>
 mean( exp.out == df.test$over.estimate )</code></pre>
 <pre><code>## [1] 0.6809524</code></pre>
 <p>We see that the classification accuracy is too high in the training dataset. The accuracy on the test dataset provides a good estimate of the model’s abbility to correctly identify observations.</p>
-<p>Let’s try to improve the classification model by relying on the strongest predictors.</p>
-<pre class="r"><code># try to improve the prediction model by relying on strong predictors
-m.log &lt;- glm(over.estimate ~ RSex + urban + HHInc, 
+<p>Let’s try to improve the classification model by relying on the best predictors.</p>
+<pre class="r"><code># try to improve the prediction model by relying on &quot;good&quot; predictors
+m.log &lt;- glm(over.estimate ~ RSex + rural + partly.rural + urban + HHInc, 
              data = df, subset = train.ids, family = binomial(link = &quot;logit&quot;))
 pred.probs &lt;- predict(m.log, newdata = df.test, type = &quot;response&quot;)
 exp.out &lt;- ifelse( pred.probs &gt; 0.5, yes = 1, no = 0)
@@ -722,37 +747,41 @@ table( prediction = exp.out, truth = df.test$over.estimate )</code></pre>
 <p>We see that the classification model’s accurcy increases when we only rely the strongest predictors.</p>
 <p>You can also make predictions for specific settings:</p>
 <pre class="r"><code># prediction for a specific setting
-predict(m.log, newdata = data.frame( RSex = c(&quot;Male&quot;, &quot;Female&quot;), 
-                                     urban = c(&quot;urban&quot;, &quot;urban&quot;),
+predict(m.log, newdata = data.frame( RSex = c(&quot;Male&quot;, &quot;Female&quot;),
+                                     rural = c(0, 0),
+                                     partly.rural = c(0, 0),
+                                     urban = c(0, 0),
                                      HHInc = c(9, 9)), type = &quot;response&quot;)</code></pre>
-<pre><code>##         1         2 
-## 0.7221946 0.8443793</code></pre>
+<pre><code>##          1          2 
+## 0.03624398 0.07277939</code></pre>
 </div>
 <div id="linear-discriminant-analysis" class="section level3">
 <h3>Linear Discriminant Analysis</h3>
 <pre class="r"><code>library(MASS)</code></pre>
 <pre class="r"><code># fit model
-m.lda &lt;- lda( over.estimate ~ RSex + urban + HHInc, data = df, subset = train.ids)
+m.lda &lt;- lda( over.estimate ~ RSex + rural + partly.rural + urban + HHInc, 
+              data = df, subset = train.ids)
 m.lda</code></pre>
 <pre><code>## Call:
-## lda(over.estimate ~ RSex + urban + HHInc, data = df, subset = train.ids)
+## lda(over.estimate ~ RSex + rural + partly.rural + urban + HHInc, 
+##     data = df, subset = train.ids)
 ## 
 ## Prior probabilities of groups:
 ##         0         1 
 ## 0.2669845 0.7330155 
 ## 
 ## Group means:
-##   RSexFemale urbanmore rural urbanmore urban urbanurban     HHInc
-## 0  0.3973214       0.2946429       0.2678571  0.2008929 11.156250
-## 1  0.5967480       0.2520325       0.2894309  0.2699187  8.993496
+##   RSexFemale     rural partly.rural     urban      HHInc
+## 0  0.3973214 0.2366071    0.2946429 0.2008929  0.3383915
+## 1  0.5967480 0.1886179    0.2520325 0.2699187 -0.1277666
 ## 
 ## Coefficients of linear discriminants:
-##                        LD1
-## RSexFemale       1.2069339
-## urbanmore rural -0.1094889
-## urbanmore urban  0.3129345
-## urbanurban       0.4823726
-## HHInc           -0.1569342</code></pre>
+##                     LD1
+## RSexFemale    1.2069339
+## rural        -0.3129345
+## partly.rural -0.4224235
+## urban         0.1694380
+## HHInc        -0.7281010</code></pre>
 <pre class="r"><code># predict outcomes on test set
 lda.pred &lt;- predict(m.lda, newdata = df.test)
 
@@ -788,8 +817,8 @@ sum( pred.probs &gt;= .40 ) # over-estimates</code></pre>
 <pre class="r"><code>library(class)
 
 # training &amp; test data set of predictor variables only
-train.X &lt;- cbind( df$RSex, df$urban, df$HHInc )[train.ids, ]
-test.X &lt;- cbind( df$RSex, df$urban, df$HHInc )[-train.ids, ]
+train.X &lt;- cbind( df$RSex, df$rural, df$partly.rural, df$urban, df$HHInc )[train.ids, ]
+test.X &lt;- cbind( df$RSex, df$rural, df$partly.rural, df$urban, df$HHInc )[-train.ids, ]
 
 # response variable for training observations
 train.Y &lt;- df$over.estimate[ train.ids ]
@@ -804,37 +833,46 @@ knn.out &lt;- knn(train.X, test.X, train.Y, k = 1)
 table( prediction = knn.out, truth = df.test$over.estimate )</code></pre>
 <pre><code>##           truth
 ## prediction   0   1
-##          0   8  12
-##          1  58 132</code></pre>
+##          0   8  10
+##          1  58 134</code></pre>
 <pre class="r"><code># percent correctly classified
 mean( knn.out == df.test$over.estimate )</code></pre>
-<pre><code>## [1] 0.6666667</code></pre>
+<pre><code>## [1] 0.6761905</code></pre>
 <p>We can try and increase the accuracy by changing the number of nearest neighbors we are using:</p>
 <pre class="r"><code># try to increae accuracy by varying k
-knn.out &lt;- knn(train.X, test.X, train.Y, k = 11)
+knn.out &lt;- knn(train.X, test.X, train.Y, k = 7)
 mean( knn.out == df.test$over.estimate )</code></pre>
-<pre><code>## [1] 0.7</code></pre>
+<pre><code>## [1] 0.6952381</code></pre>
 </div>
 <div id="model-the-underlying-continuous-process" class="section level3">
 <h3>Model the Underlying Continuous Process</h3>
 <p>Lastly, we can try to model the underlying process and classify afterwards. By doing that, the depdendent variable provides more information. In effect we turn our classification problem into a regression problem.</p>
 <pre class="r"><code># fit the linear model on the numer of immigrants per 100 Brits
-m.lm &lt;- glm(IMMBRIT ~ RSex + urban + HHInc, data = df, subset = train.ids, family = gaussian())
+m.lm &lt;- lm(IMMBRIT ~ RSex + rural + partly.rural + urban + HHInc, 
+            data = df, subset = train.ids)
 
-# predictions
-beta_hats &lt;- as.matrix(coef(m.lm))
-X &lt;- cbind( 1, 
-            df.test$RSex == &quot;Female&quot;, 
-            df.test$urban == &quot;more rural&quot;,
-            df.test$urban == &quot;more urban&quot;,
-            df.test$urban == &quot;urban&quot;,
+# predictions by &quot;hand&quot;
+betas &lt;- as.matrix(coef(m.lm))
+X &lt;- cbind( 1, df.test$RSex == &quot;Female&quot;, 
+            df.test$rural,
+            df.test$partly.rural,
+            df.test$urban,
             df.test$HHInc)
 
-# yhats (y_hat = X * beta_hats)
-y_hats &lt;- X %*% beta_hats
+# yhat (y_hat = X * betas)
+y_hat &lt;- X %*% betas
+
+# alternatively using predict
+y_hat2 &lt;- predict(m.lm, newdata = df.test)
+
+# check that both are similar
+all(y_hat == y_hat2)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code># threshold for classfication
+threshold &lt;- (10.7 - mean(df$IMMBRIT_original_scale)) / sd(df$IMMBRIT_original_scale)
 
 # now we do the classfication 
-exp.out &lt;- ifelse( y_hats &gt; 10.7, yes = 1, no = 0)
+exp.out &lt;- ifelse( y_hat &gt; threshold, yes = 1, no = 0)
 
 # confusion matrix
 table( prediction = exp.out, truth = df.test$over.estimate)</code></pre>

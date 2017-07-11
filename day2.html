@@ -638,7 +638,6 @@ abline(model2, col = &quot;blue&quot;)</code></pre>
 ## *** p &lt; 0.001, ** p &lt; 0.01, * p &lt; 0.05</code></pre>
 <p>Finally, let’s save the same output as a Microsoft Word document using <code>htmlreg()</code>.</p>
 <pre class="r"><code>htmlreg(list(model1, model2), file = &quot;lab4_model_comparison.doc&quot;)</code></pre>
-<pre><code>## The table was written to the file &#39;lab4_model_comparison.doc&#39;.</code></pre>
 </div>
 <div id="predictions-and-confidence-interval" class="section level3">
 <h3>Predictions and Confidence Interval</h3>
@@ -682,11 +681,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean         sd       50%      2.5%     97.5%
-## 1 0.6866578 0.01279186 0.6868752 0.6609752 0.7108787
+##        mean         sd       50%     2.5%     97.5%
+## 1 0.6863453 0.01282516 0.6861629 0.660547 0.7119972
 ## pv
-##           mean        sd       50%      2.5%   97.5%
-## [1,] 0.6821612 0.1780675 0.6744201 0.3311517 1.02568
+##           mean        sd       50%      2.5%    97.5%
+## [1,] 0.6840614 0.1740508 0.6815387 0.3345703 1.031841
 ## 
 ## 
 ## [1] 0.3
@@ -696,10 +695,10 @@ summary(s.out)</code></pre>
 ##  -----
 ## ev
 ##       mean          sd       50%      2.5%     97.5%
-## 1 0.558092 0.008222994 0.5581109 0.5415884 0.5738071
+## 1 0.557829 0.008413514 0.5577364 0.5412555 0.5744918
 ## pv
-##           mean        sd       50%      2.5%     97.5%
-## [1,] 0.5614812 0.1721066 0.5619296 0.2332745 0.9058583
+##          mean        sd       50%      2.5%     97.5%
+## [1,] 0.555884 0.1704407 0.5628254 0.2206084 0.8873722
 ## 
 ## 
 ## [1] 0.6
@@ -708,11 +707,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean          sd      50%      2.5%     97.5%
-## 1 0.4295263 0.004518413 0.429616 0.4209861 0.4382669
+##        mean          sd       50%      2.5%     97.5%
+## 1 0.4293127 0.004713547 0.4291247 0.4200675 0.4385167
 ## pv
-##           mean        sd       50%       2.5%    97.5%
-## [1,] 0.4360337 0.1758154 0.4389517 0.09033808 0.777331
+##           mean        sd       50%       2.5%     97.5%
+## [1,] 0.4269677 0.1708485 0.4300531 0.07518792 0.7435192
 ## 
 ## 
 ## [1] 0.9
@@ -721,11 +720,11 @@ summary(s.out)</code></pre>
 ##  sim range :
 ##  -----
 ## ev
-##        mean         sd       50%     2.5%     97.5%
-## 1 0.3009605 0.00469328 0.3010064 0.291814 0.3103534
+##        mean          sd      50%      2.5%     97.5%
+## 1 0.3007964 0.004333078 0.300791 0.2926022 0.3097089
 ## pv
 ##           mean        sd       50%        2.5%     97.5%
-## [1,] 0.3033264 0.1770137 0.3061261 -0.04952434 0.6546083</code></pre>
+## [1,] 0.3025863 0.1768183 0.3015077 -0.05159648 0.6482412</code></pre>
 <pre class="r"><code>ci.plot(s.out, xlab = &quot;Majority population (%)&quot;, ci = 95)</code></pre>
 <p><img src="day2_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
 </div>

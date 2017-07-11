@@ -48,13 +48,18 @@ dim(df)
 summary(df)
 
 # data manipulation
-df$urban <- factor(df$urban, labels = c("rural", "more rural", "more urban", "urban"))
 df$RSex <- factor(df$RSex, labels = c("Male", "Female"))
 df$health.good <- factor(df$health.good, labels = c("bad", "fair", "fairly good", "good") )
 
+# urban to dummies (for knn later)
+table(df$urban) # 3 is the modal category (keep as baseline) but we create all categories
+df$rural <- ifelse( df$urban == 1, yes = 1, no = 0)
+df$partly.rural <- ifelse( df$urban == 2, yes = 1, no = 0)
+df$partly.urban <- ifelse( df$urban == 3, yes = 1, no = 0)
+df$urban <- ifelse( df$urban == 4, yes = 1, no = 0)
+
 # pairwise comparisons (for a managable subset of the data)
 pairs(df[, c("IMMBRIT", "RAge", "Househld", "employMonths", "WWWhourspW", "HHInc")])
-
 
 # correlations
 cor(df[,c("IMMBRIT", "RAge", "Househld", "employMonths", "WWWhourspW",  "HHInc")])
@@ -78,9 +83,23 @@ boxplot(df$IMMBRIT[ df$BNP == 1], frame.plot = FALSE, main = "BNP", col = "#AA77
 
 ### Logistic Regression
 
-We want to predict whether respondents over-estimate immigration from non-western contexts. We begin by looking at the distribution of the dependent variable. We check how well we could predict misperception of immigration in our sample without a statistical model.
+We want to predict whether respondents over-estimate immigration from non-western contexts. We begin by normalizing our variables. Then we look at the distribution of the dependent variable. We check how well we could predict misperception of immigration in our sample without a statistical model.
 
 ```{r}
+# create a copy of the original IMMBRIT variable (needed for classification with lm)
+df$IMMBRIT_original_scale <- df$IMMBRIT
+
+# our function for normalization
+our.norm <- function(x){
+  return((x - mean(x)) / sd(x))
+}
+
+# continuous variables
+c.vars <- c("IMMBRIT", "RAge", "Househld", "HHInc", "employMonths", "WWWhourspW")
+
+# normalize
+df[, c.vars] <- apply( df[, c.vars], 2, our.norm )
+
 # predict whether poeple overestimate rate of immigrants (i.e. more than 10.7%)
 table(df$over.estimate)
 
@@ -97,7 +116,8 @@ Now, we fit a logistic regression.
 # run logistic regression
 m.log <- glm(over.estimate ~ RSex + RAge + Househld + Lab + SNP + Ukip + BNP + 
                GP + party.other + paper + WWWhourspW +  religious + 
-               employMonths + urban + health.good + HHInc, data = df,
+               employMonths + rural + partly.rural + urban + 
+               health.good + HHInc, data = df,
              family = binomial(link = "logit"))
 summary(m.log)
 ```
@@ -168,7 +188,8 @@ Now we fit the model using the training data only and then test its performance 
 # re-fit the model on the raining data
 m.log <- glm(over.estimate ~ RSex + RAge + Househld + Lab + SNP + Ukip + BNP + 
                GP + party.other + paper + WWWhourspW +  religious + 
-               employMonths + urban + health.good + HHInc, data = df, subset = train.ids, 
+               employMonths + rural + partly.rural + urban + health.good + 
+               HHInc, data = df, subset = train.ids, 
              family = binomial(link = "logit"))
 
 # predict probabilities of over-estimating but for the unseen data
@@ -186,11 +207,11 @@ mean( exp.out == df.test$over.estimate )
 
 We see that the classification accuracy is too high in the training dataset. The accuracy on the test dataset provides a good estimate of the model's abbility to correctly identify observations.
 
-Let's try to improve the classification model by relying on the strongest predictors.
+Let's try to improve the classification model by relying on the best predictors.
 
 ```{r}
-# try to improve the prediction model by relying on strong predictors
-m.log <- glm(over.estimate ~ RSex + urban + HHInc, 
+# try to improve the prediction model by relying on "good" predictors
+m.log <- glm(over.estimate ~ RSex + rural + partly.rural + urban + HHInc, 
              data = df, subset = train.ids, family = binomial(link = "logit"))
 pred.probs <- predict(m.log, newdata = df.test, type = "response")
 exp.out <- ifelse( pred.probs > 0.5, yes = 1, no = 0)
@@ -204,8 +225,10 @@ You can also make predictions for specific settings:
 
 ```{r}
 # prediction for a specific setting
-predict(m.log, newdata = data.frame( RSex = c("Male", "Female"), 
-                                     urban = c("urban", "urban"),
+predict(m.log, newdata = data.frame( RSex = c("Male", "Female"),
+                                     rural = c(0, 0),
+                                     partly.rural = c(0, 0),
+                                     urban = c(0, 0),
                                      HHInc = c(9, 9)), type = "response")
 ```
 
@@ -217,7 +240,8 @@ library(MASS)
 
 ```{r}
 # fit model
-m.lda <- lda( over.estimate ~ RSex + urban + HHInc, data = df, subset = train.ids)
+m.lda <- lda( over.estimate ~ RSex + rural + partly.rural + urban + HHInc, 
+              data = df, subset = train.ids)
 m.lda
 
 # predict outcomes on test set
@@ -257,8 +281,8 @@ For KNN we need to provide the data in a slightly different format:
 library(class)
 
 # training & test data set of predictor variables only
-train.X <- cbind( df$RSex, df$urban, df$HHInc )[train.ids, ]
-test.X <- cbind( df$RSex, df$urban, df$HHInc )[-train.ids, ]
+train.X <- cbind( df$RSex, df$rural, df$partly.rural, df$urban, df$HHInc )[train.ids, ]
+test.X <- cbind( df$RSex, df$rural, df$partly.rural, df$urban, df$HHInc )[-train.ids, ]
 
 # response variable for training observations
 train.Y <- df$over.estimate[ train.ids ]
@@ -280,7 +304,7 @@ We can try and increase the accuracy by changing the number of nearest neighbors
 
 ```{r}
 # try to increae accuracy by varying k
-knn.out <- knn(train.X, test.X, train.Y, k = 11)
+knn.out <- knn(train.X, test.X, train.Y, k = 7)
 mean( knn.out == df.test$over.estimate )
 ```
 
@@ -290,22 +314,31 @@ Lastly, we can try to model the underlying process and classify afterwards. By d
 
 ```{r}
 # fit the linear model on the numer of immigrants per 100 Brits
-m.lm <- glm(IMMBRIT ~ RSex + urban + HHInc, data = df, subset = train.ids, family = gaussian())
+m.lm <- lm(IMMBRIT ~ RSex + rural + partly.rural + urban + HHInc, 
+            data = df, subset = train.ids)
 
-# predictions
-beta_hats <- as.matrix(coef(m.lm))
-X <- cbind( 1, 
-            df.test$RSex == "Female", 
-            df.test$urban == "more rural",
-            df.test$urban == "more urban",
-            df.test$urban == "urban",
+# predictions by "hand"
+betas <- as.matrix(coef(m.lm))
+X <- cbind( 1, df.test$RSex == "Female", 
+            df.test$rural,
+            df.test$partly.rural,
+            df.test$urban,
             df.test$HHInc)
 
-# yhats (y_hat = X * beta_hats)
-y_hats <- X %*% beta_hats
+# yhat (y_hat = X * betas)
+y_hat <- X %*% betas
+
+# alternatively using predict
+y_hat2 <- predict(m.lm, newdata = df.test)
+
+# check that both are similar
+all(y_hat == y_hat2)
+
+# threshold for classfication
+threshold <- (10.7 - mean(df$IMMBRIT_original_scale)) / sd(df$IMMBRIT_original_scale)
 
 # now we do the classfication 
-exp.out <- ifelse( y_hats > 10.7, yes = 1, no = 0)
+exp.out <- ifelse( y_hat > threshold, yes = 1, no = 0)
 
 # confusion matrix
 table( prediction = exp.out, truth = df.test$over.estimate)
