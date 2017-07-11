@@ -58,7 +58,7 @@ X <- cbind( constant = 1,
 X            
 ```
 
-**Simulation step 3:** **Simulation step 3:** Predict the outcome. We have set our covariates and we drawn our coefficients. This is all we need to predict y. Depending on the flavour of generalized liner model, y may have to be sent through a link function. In logistic regression we would send latent y trough the logit link function: $\frac{1}{1 + exp^{-y}}$ to get probabilities y is 1. Here, we ran a simple linear model so in linear algebra notation our prediction is simply $Y=X\beta$.
+**Simulation step 3:** Predict the outcome. We have set our covariates and we have drawn our coefficients. This is all we need to predict $y$. Depending on the flavour of generalized linear model, $y$ may have to be sent through a link function. In logistic regression we would send latent $y$ trough the logit link function: $\frac{1}{1 + exp^{-y}}$ to get probabilities that $y$ is 1. Here, we ran a simple linear model so in linear algebra notation our prediction is simply $Y=X\beta$.
 
 We create `y_hat` as a matrix with as many rows as we have different covariate scenarios. The number of columns is the number of simulations. Then we multiply our covariates with our betas in a loop where one loop iteration is one scenario.
 
