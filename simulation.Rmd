@@ -7,9 +7,10 @@ author: "Philipp Broniecki and Lucas Leemann -- Machine Learning 1K"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Simulation can be done in a few steps without the need for the Zelig package. If you make a prediction, you want to be able to quantify your uncertainty of that prediction. This lets other people assess the quality of your prediction and makes the process transparent.
+Simulation can be done in a few steps even without the Zelig package. If we make a prediction, we want to be able to quantify our uncertainty of that prediction. This makes it transparent how well we are able to predict.
 
-Simulation is the Swiss army knive of statistics. Quantifying the uncertainty of an outcome can be tough or even impossible algebraically. Even for the linear model you need to consider the standard errors of all coeffience and their covariances. The formulas can be tedious and may be different from one model to the next.
+Simulation is the Swiss army knife of statistics. Quantifying the uncertainty of an outcome can be tough or even impossible algebraically. Even for the linear model we need to consider the standard errors of all coefficients and their covariance. The formulas can be tedious..
+
 
 **For simulation, the process is always the same regardless of the model.**
 
@@ -21,11 +22,11 @@ rm(list=ls())
 df <- read.csv("http://philippbroniecki.github.io/ML2017.io/data/communities.csv")
 ```
 
-**Simulation step 1:** Coefficients follow a sampling distribution. Because the covary, they jointly follow a multivariate distribution which is assumed to be multivariate normal.
+**Simulation step 1:** Our coefficients each follow a sampling distribution. Jointly, they follow a multivariate distribution which is assumed to be multivariate normal.
 
-To draw from the multivarate normal we need to get the mean of distribution. That is the vector of our mean coefficient estimates. We extract that using `coef(model_name)`. And we need the model uncertainty which lives in the variance-covariance matrix. We extract it with `vcov(model_name)`.
+To characterize the shape of the distribution we need to know its mean and its variance. The mean is our vector of coefficient point estimates. We extract it using `coef(model_name)`. The variance is the model uncertainty which lives in the variance-covariance matrix. We extract it with `vcov(model_name)`.
 
-As we draw randomly from a distribution we want to set the random number generator with `set.seed()` and we pick the number of coefficients to draw form the distribution.
+As we draw randomly from a distribution we want to set the random number generator with `set.seed()` to make our results replicable and we pick the number of coefficients to draw form the distribution (the number of simulations).
 
 ```{r}
 # run a model
@@ -57,10 +58,11 @@ X <- cbind( constant = 1,
 X            
 ```
 
+**Simulation step 3:** **Simulation step 3:** Predict the outcome. We have set our covariates and we drawn our coefficients. This is all we need to predict y. Depending on the flavour of generalized liner model, y may have to be sent through a link function. In logistic regression we would send latent y trough the logit link function: $\frac{1}{1 + exp^{-y}}$ to get probabilities y is 1. Here, we ran a simple linear model so in linear algebra notation our prediction is simply $Y=X\beta$.
 
-**Simulation step 3:** Predict the outcome. We have set our covariates and we have our coefficients. This is all we need to predict y. This is similar for all generalized liner model. Depending on the model you would have to send your y through the approriate link function to get the final prediction. In logistic regression the latent y would have to be send trough the logit link function: $\frac{1}{1 + exp^{-y}}$. Here, we ran a simple linear model so in linear algebra notation our prediction is simply $Y=X\beta$.
+We create `y_hat` as a matrix with as many rows as we have different covariate scenarios. The number of columns is the number of simulations. Then we multiply our covariates with our betas in a loop where one loop iteration is one scenario.
 
-We create `y_hat` as a matrix with as many rows as we have different covariate scenarios. The number of columns is the number of simulations. Then we multiply our covariates with our betas in a loop where on loop iteration is one scenario.
+
 ```{r}
 # predict outcome, ie X * betas for all scenarios
 y_hat <- matrix(NA, nrow = nrow(X), ncol =  n.sim)
@@ -71,14 +73,14 @@ for (idx in 1:nrow(X) ){
 }
 ```
 
-Finally, all that is left is the interpretation of the result. You can simply look at the numerical outcomes similar to the using the `summary()` function on the Zelig simulation object.
+Finally, all that is left is the interpretation of the result. We can simply look at the numerical outcomes similar to using the `summary()` function on the Zelig simulation object.
 
 ```{r}
 # output like the zelig summary (including estimation uncertainty)
 apply(y_hat, 1, quantile, probs = c(.025, .5, .975))
 ```
 
-You can also draw a plot that shows your mean prediction and the uncertainty around in a few lines.
+We can also draw a plot that shows our mean prediction and the uncertainty around in a few lines.
 
 ```{r}
 # plot like zelig's ci plot
