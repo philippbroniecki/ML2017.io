@@ -373,7 +373,7 @@ $(document).ready(function () {
 
 
 <p>Simulation can be done in a few steps even without the Zelig package. If we make a prediction, we want to be able to quantify our uncertainty of that prediction. This makes it transparent how well we are able to predict.</p>
-<p>Simulation is the Swiss army knife of statistics. Quantifying the uncertainty of an outcome can be tough or even impossible algebraically. Even for the linear model we need to consider the standard errors of all coefficients and their covariance. The formulas can be tedious..</p>
+<p>Simulation is the Swiss army knife of statistics. Quantifying the uncertainty of an outcome can be tough or even impossible algebraically. Even for the linear model we need to consider the standard errors of all coefficients and their covariance. The formulas can be tedious…</p>
 <p><strong>For simulation, the process is always the same regardless of the model.</strong></p>
 <p>We start by loading data and fitting a linear model on the unemployment rate.</p>
 <pre class="r"><code># clear workspace
@@ -420,8 +420,8 @@ X            </code></pre>
 ## [10,]        1   0.9     0.4633952 0.7537161
 ## [11,]        1   1.0     0.4633952 0.7537161</code></pre>
 <p><strong>Simulation step 3:</strong> Predict the outcome. We have set our covariates and we have drawn our coefficients. This is all we need to predict <span class="math inline">\(y\)</span>. Depending on the flavour of generalized linear model, <span class="math inline">\(y\)</span> may have to be sent through a link function. In logistic regression we would send latent <span class="math inline">\(y\)</span> trough the logit link function: <span class="math inline">\(\frac{1}{1 + exp^{-y}}\)</span> to get probabilities that <span class="math inline">\(y\)</span> is 1. Here, we ran a simple linear model so in linear algebra notation our prediction is simply <span class="math inline">\(Y=X\beta\)</span>.</p>
-<p>We create <code>y_hat</code> as a matrix with as many rows as we have different covariate scenarios. The number of columns is the number of simulations. Then we multiply our covariates with our betas in a loop where one loop iteration is one scenario.</p>
-<pre class="r"><code># predict outcome, ie X * betas for all scenarios
+<p>We estimate <code>y_hat</code> as a matrix where its rows are the number of simulations and its columns are the different covariate scenarios.</p>
+<pre class="r"><code># predict outcome, ie betas * X for all scenarios
 y_hat &lt;- S %*% t(as.matrix(X))</code></pre>
 <p>Finally, all that is left is the interpretation of the result. We can simply look at the numerical outcomes similar to using the <code>summary()</code> function on the Zelig simulation object.</p>
 <pre class="r"><code># output like the zelig summary (including estimation uncertainty)
