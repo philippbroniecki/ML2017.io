@@ -372,17 +372,17 @@ $(document).ready(function () {
 </div>
 
 
-<p>Simulation can be done in a few steps even without the Zelig package. If we make a prediction, we want to be able to quantify our uncertainty of that prediction. This makes it transparent how well we are able to predict.</p>
-<p>Simulation is the Swiss army knife of statistics. Quantifying the uncertainty of an outcome can be tough or even impossible algebraically. Even for the linear model we need to consider the standard errors of all coefficients and their covariance. The formulas can be tedious..</p>
+<p>Simulation can be done in a few steps without the need for the Zelig package. If you make a prediction, you want to be able to quantify your uncertainty of that prediction. This lets other people assess the quality of your prediction and makes the process transparent.</p>
+<p>Simulation is the Swiss army knive of statistics. Quantifying the uncertainty of an outcome can be tough or even impossible algebraically. Even for the linear model you need to consider the standard errors of all coeffience and their covariances. The formulas can be tedious and may be different from one model to the next.</p>
 <p><strong>For simulation, the process is always the same regardless of the model.</strong></p>
 <p>We start by loading data and fitting a linear model on the unemployment rate.</p>
 <pre class="r"><code># clear workspace
 rm(list=ls())
 # load data
 df &lt;- read.csv(&quot;http://philippbroniecki.github.io/ML2017.io/data/communities.csv&quot;)</code></pre>
-<p><strong>Simulation step 1:</strong> Our coefficients each follow a sampling distribution. Jointly, they follow a multivariate distribution which is assumed to be multivariate normal.</p>
-<p>To characterize the shape of the distribution we need to know its mean and its variance. The mean is our vector of coefficient point estimates. We extract it using <code>coef(model_name)</code>. The variance is the model uncertainty which lives in the variance-covariance matrix. We extract it with <code>vcov(model_name)</code>.</p>
-<p>As we draw randomly from a distribution we want to set the random number generator with <code>set.seed()</code> to make our results replicable and we pick the number of coefficients to draw form the distribution (the number of simulations).</p>
+<p><strong>Simulation step 1:</strong> Coefficients follow a sampling distribution. Because the covary, they jointly follow a multivariate distribution which is assumed to be multivariate normal.</p>
+<p>To draw from the multivarate normal we need to get the mean of distribution. That is the vector of our mean coefficient estimates. We extract that using <code>coef(model_name)</code>. And we need the model uncertainty which lives in the variance-covariance matrix. We extract it with <code>vcov(model_name)</code>.</p>
+<p>As we draw randomly from a distribution we want to set the random number generator with <code>set.seed()</code> and we pick the number of coefficients to draw form the distribution.</p>
 <pre class="r"><code># run a model
 m1 &lt;- lm(PctUnemployed ~ pctUrban + householdsize + racePctWhite, data = df)
 
@@ -419,18 +419,13 @@ X            </code></pre>
 ##  [9,]        1   0.8     0.4633952 0.7537161
 ## [10,]        1   0.9     0.4633952 0.7537161
 ## [11,]        1   1.0     0.4633952 0.7537161</code></pre>
-<p><strong>Simulation step 3:</strong> Predict the outcome. We have set our covariates and we have drawn our coefficients. This is all we need to predict <span class="math inline">\(y\)</span>. Depending on the flavour of generalized linear model, <span class="math inline">\(y\)</span> may have to be sent through a link function. In logistic regression we would send latent <span class="math inline">\(y\)</span> trough the logit link function: <span class="math inline">\(\frac{1}{1 + exp^{-y}}\)</span> to get probabilities that <span class="math inline">\(y\)</span> is 1. Here, we ran a simple linear model so in linear algebra notation our prediction is simply <span class="math inline">\(Y=X\beta\)</span>.</p>
-<p>We create <code>y_hat</code> as a matrix with as many rows as we have different covariate scenarios. The number of columns is the number of simulations. Then we multiply our covariates with our betas in a loop where one loop iteration is one scenario.</p>
+<p><strong>Simulation step 3:</strong> Predict the outcome. We have set our covariates and we have our coefficients. This is all we need to predict y. This is similar for all generalized liner model. Depending on the model you would have to send your y through the approriate link function to get the final prediction. In logistic regression the latent y would have to be send trough the logit link function: $ $. Here, we ran a simple linear model so in linear algebra notation our prediction is simply <span class="math inline">\(Y=X\beta\)</span>.</p>
+<p>We estimate <code>y_hat</code> as a matrix with as many rows as we have simulations and as many columns as we have scenarios. We do matrix multiplication where our betas are <code>S</code> and our scenarios are in <code>X</code>.</p>
 <pre class="r"><code># predict outcome, ie X * betas for all scenarios
-y_hat &lt;- matrix(NA, nrow = nrow(X), ncol =  n.sim)
-
-# start estimating y
-for (idx in 1:nrow(X) ){
-  y_hat[idx, ] &lt;- S %*% as.matrix(X[idx, ]) 
-}</code></pre>
-<p>Finally, all that is left is the interpretation of the result. We can simply look at the numerical outcomes similar to using the <code>summary()</code> function on the Zelig simulation object.</p>
+y_hat &lt;- S %*% t(as.matrix(X))</code></pre>
+<p>Finally, all that is left is the interpretation of the result. You can simply look at the numerical outcomes similar to the using the <code>summary()</code> function on the Zelig simulation object.</p>
 <pre class="r"><code># output like the zelig summary (including estimation uncertainty)
-apply(y_hat, 1, quantile, probs = c(.025, .5, .975))</code></pre>
+apply(y_hat, 2, quantile, probs = c(.025, .5, .975))</code></pre>
 <pre><code>##            [,1]      [,2]      [,3]      [,4]      [,5]      [,6]
 ## 2.5%  0.4316010 0.4214979 0.4105675 0.4000181 0.3893180 0.3784349
 ## 50%   0.4450405 0.4332109 0.4215157 0.4097547 0.3981805 0.3864607
@@ -439,16 +434,16 @@ apply(y_hat, 1, quantile, probs = c(.025, .5, .975))</code></pre>
 ## 2.5%  0.3672170 0.3557150 0.3439413 0.3318641 0.3196062
 ## 50%   0.3747705 0.3630690 0.3512949 0.3396307 0.3279723
 ## 97.5% 0.3823658 0.3703668 0.3586515 0.3473086 0.3363178</code></pre>
-<p>We can also draw a plot that shows our mean prediction and the uncertainty around in a few lines.</p>
+<p>You can also draw a plot that shows your mean prediction and the uncertainty around in a few lines.</p>
 <pre class="r"><code># plot like zelig&#39;s ci plot
 par( mfrow = c(1,1))
 plot(0, bty = &quot;n&quot;, xlab = &quot;Pct Urban&quot;, ylab = &quot;Unemployment Rate&quot;, 
      ylim = c(0.3, 0.5), xlim = c(0,1), pch =&quot;&quot;)
-ci &lt;- apply(y_hat, 1, quantile, probs = c(.025, .975))
+ci &lt;- apply(y_hat, 2, quantile, probs = c(.025, .975))
 polygon(x =  c(rev(X[,&quot;urban&quot;]), X[,&quot;urban&quot;]), 
         y = c(rev(t(ci)[,2]), t(ci)[,1]), border = NA,
         col = &quot;lightblue&quot;)
-lines(x = X[,&quot;urban&quot;], y = apply(y_hat, 1, quantile, probs = .5), lwd = 1)</code></pre>
+lines(x = X[,&quot;urban&quot;], y = apply(y_hat, 2, quantile, probs = .5), lwd = 1)</code></pre>
 <p><img src="simulation_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 
 
