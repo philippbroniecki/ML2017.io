@@ -19,9 +19,9 @@ rm( list = ls() )
 
 ### Subset Selection Methods
 
-We use a modified data set on non-western immigrants (we inserted some missings).The codebook is:
+We use a modified data set on non-western immigrants (we inserted some missings). Download the data [here](http://philippbroniecki.github.io/ML2017.io/data/BSAS_manip_missings.RData).
 
-Let's check the codebook of our data.
+The codebook is:
 
 |Variable Name|Description|
 |--------|-----------------------------------------------------------|
