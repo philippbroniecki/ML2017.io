@@ -452,7 +452,7 @@ rm( list = ls() )</code></pre>
 load(&quot;your directory/BSAS_manip_missings.RData&quot;)</code></pre>
 <p>We check our data set for missing values variable by variable using <code>apply()</code>, <code>is.na()</code>, and <code>table()</code>.</p>
 <pre class="r"><code># check for missing values
-apply(data2, 2, function(x) table(is.na(x))[&quot;TRUE&quot;] )</code></pre>
+apply(df, 2, function(x) table(is.na(x))[&quot;TRUE&quot;] )</code></pre>
 <pre><code>##       IMMBRIT over.estimate          RSex          RAge      Househld 
 ##             8            NA            NA            NA            NA 
 ##          Cons           Lab           SNP          Ukip           BNP 
@@ -462,17 +462,16 @@ apply(data2, 2, function(x) table(is.na(x))[&quot;TRUE&quot;] )</code></pre>
 ##  employMonths         urban   health.good         HHInc 
 ##            NA            NA            NA            NA</code></pre>
 <pre class="r"><code>#  immbrit has missings which we drop
-data2 &lt;- data2[ !is.na(data2$IMMBRIT), ]</code></pre>
+df &lt;- df[ !is.na(df$IMMBRIT), ]</code></pre>
 <p>We now declare the categorical variables to be factors and create a copy of the main data set that excludes <code>over.estimate</code>.</p>
 <pre class="r"><code># declare factor variables
-data2$urban &lt;- factor(data2$urban, labels = c(&quot;rural&quot;, &quot;more rural&quot;, &quot;more urban&quot;, &quot;urban&quot;))
-data2$RSex &lt;- factor(data2$RSex, labels = c(&quot;Male&quot;, &quot;Female&quot;))
-data2$health.good &lt;- factor(data2$health.good, labels = c(&quot;bad&quot;, &quot;fair&quot;, &quot;fairly good&quot;, &quot;good&quot;) )
+df$urban &lt;- factor(df$urban, labels = c(&quot;rural&quot;, &quot;more rural&quot;, &quot;more urban&quot;, &quot;urban&quot;))
+df$RSex &lt;- factor(df$RSex, labels = c(&quot;Male&quot;, &quot;Female&quot;))
+df$health.good &lt;- factor(df$health.good, labels = c(&quot;bad&quot;, &quot;fair&quot;, &quot;fairly good&quot;, &quot;good&quot;) )
 
-# keep only variables to use for subset selection 
-df &lt;- dplyr::select(data2, IMMBRIT, RSex, RAge, Househld, Lab, SNP, Ukip,
-                    BNP, GP, party.other, paper, WWWhourspW, religious, employMonths,
-                    urban, health.good, HHInc)</code></pre>
+# drop the binary response coded 1 if IMMBRIT &gt; 10.7 
+df$over.estimate &lt;- NULL
+df$Cons &lt;- NULL</code></pre>
 </div>
 <div id="best-subset-selection" class="section level3">
 <h3>Best Subset Selection</h3>
@@ -564,7 +563,7 @@ plot(reg.summary$adjr2, xlab = &quot;Number of Variables&quot;, ylab = &quot;Adj
 adjr2.max &lt;- which.max( reg.summary$adjr2 )
 points(adjr2.max, reg.summary$adjr2[adjr2.max], col = &quot;red&quot;, pch = 20, cex = 2)</code></pre>
 <p><img src="day5_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
-<p>We can also plot the the <span class="math inline">\(C_{p}\)</span> statistic and <span class="math inline">\(BIC\)</span> and identify the minimum points for each statistic using the <span class="math inline">\(which.min()\)</span> function.</p>
+<p>We can also plot the <span class="math inline">\(C_{p}\)</span> statistic and <span class="math inline">\(BIC\)</span> and identify the minimum points for each statistic using the <span class="math inline">\(which.min()\)</span> function.</p>
 <pre class="r"><code># cp
 plot(reg.summary$cp, xlab = &quot;Number of Variables&quot;, ylab = &quot;Cp&quot;, type = &quot;l&quot;)
 cp.min &lt;- which.min(reg.summary$cp)
@@ -899,23 +898,6 @@ folds &lt;- sample(1:k, nrow(df), replace = TRUE)
 # container for cross-validation errors
 cv.errors &lt;- matrix(NA, nrow = k, ncol = 20, dimnames = list(NULL, paste(1:20)))</code></pre>
 <p>We then run through each fold in a <code>for()</code> loop and predict the salary using our predict function. We then calculate the validation error for each fold and save them in the matrix created above.</p>
-<pre class="r"><code># loop over folds
-for (a in 1:k){
-  
-  # best subset selection on training data
-  best.fit &lt;- regsubsets(IMMBRIT ~ ., data = df[ folds != a, ], nvmax = 20)
-  
-  # loop over the 20 subsets
-  for (b in 1:20){
-    
-    # predict response for test set for current subset
-    pred &lt;- predict(best.fit, df[ folds == a ,], id = b )
-    
-    # MSE into container; rows are folds; columns are subsets
-    cv.errors[a, b] &lt;- mean( (df$IMMBRIT[folds==a] - pred)^2 )
-    
-  } # end of loop over the 20 subsets
-} # end of loop over folds</code></pre>
 <p>We calculate the mean error for all subsets by applying mean to each column using the <code>apply()</code> function.</p>
 <pre class="r"><code># average cross-validation errors over the folds
 mean.cv.errors &lt;- apply(cv.errors, 2, mean)
@@ -949,7 +931,7 @@ coef(reg.best, which.min(mean.cv.errors))</code></pre>
 <h4>Q1</h4>
 <p>In this exercise, we will generate simulated data, and will then use this data to perform best subset selection.</p>
 <ol style="list-style-type: decimal">
-<li>Use the <code>rnorm()</code> function to generate a predictor <span class="math inline">\(X\)</span> of length <span class="math inline">\(n=100\)</span>, as well as a noise vector &amp;&amp; of length <span class="math inline">\(n=100\)</span>.</li>
+<li>Use the <code>rnorm()</code> function to generate a predictor <span class="math inline">\(X\)</span> of length <span class="math inline">\(n=100\)</span>, as well as a noise vector <span class="math inline">\(\epsilon\)</span> of length <span class="math inline">\(n=100\)</span>.</li>
 <li>Generate a response vector <span class="math inline">\(Y\)</span> of length <span class="math inline">\(n=100\)</span> according to the model <span class="math display">\[ Y = \beta_{0} + \beta_{1} X + \beta_{2} X^{2} + \beta_{3} X^{3} + \epsilon,\]</span> where <span class="math inline">\(\beta_{0},\: \beta_{1}, \: \beta_{2}, \: \beta_{3}\)</span> are constants of your choice.</li>
 <li>Use the <code>regsubsets()</code> function to perform best subset selection in order to choose the best model containing the predictors <span class="math inline">\(X, X^2,\ldots,X^{10}\)</span>. What is the best model obtained according to <span class="math inline">\(C_{p}\)</span>, <span class="math inline">\(BIC\)</span>, and adjusted <span class="math inline">\(R^2\)</span> Show some plots to provide evidence for your answer, and report the coefficients of the best model obtained. Note you will need to use the <code>data.frame()</code> function to create a single data set containing both <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>.</li>
 <li>Repeat (3), using forward stepwise selection and also using backwards stepwise selection. How does your answer compare to the results in (3)?</li>

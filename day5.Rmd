@@ -47,32 +47,32 @@ load("your directory/BSAS_manip_missings.RData")
 ```{r, include=FALSE}
 # load foreigners data
 load("./data/BSAS_manip_missings.RData")
+df <- data2
+rm(data2)
 ```
 
 We check our data set for missing values variable by variable using `apply()`, `is.na()`, and `table()`.
 
 ```{r}
 # check for missing values
-apply(data2, 2, function(x) table(is.na(x))["TRUE"] )
+apply(df, 2, function(x) table(is.na(x))["TRUE"] )
 
 #  immbrit has missings which we drop
-data2 <- data2[ !is.na(data2$IMMBRIT), ]
+df <- df[ !is.na(df$IMMBRIT), ]
 ```
 
 We now declare the categorical variables to be factors and create a copy of the main data set that excludes `over.estimate`.
 
 ```{r}
 # declare factor variables
-data2$urban <- factor(data2$urban, labels = c("rural", "more rural", "more urban", "urban"))
-data2$RSex <- factor(data2$RSex, labels = c("Male", "Female"))
-data2$health.good <- factor(data2$health.good, labels = c("bad", "fair", "fairly good", "good") )
+df$urban <- factor(df$urban, labels = c("rural", "more rural", "more urban", "urban"))
+df$RSex <- factor(df$RSex, labels = c("Male", "Female"))
+df$health.good <- factor(df$health.good, labels = c("bad", "fair", "fairly good", "good") )
 
-# keep only variables to use for subset selection 
-df <- dplyr::select(data2, IMMBRIT, RSex, RAge, Househld, Lab, SNP, Ukip,
-                    BNP, GP, party.other, paper, WWWhourspW, religious, employMonths,
-                    urban, health.good, HHInc)
+# drop the binary response coded 1 if IMMBRIT > 10.7 
+df$over.estimate <- NULL
+df$Cons <- NULL
 ```
-
 
 
 ### Best Subset Selection
@@ -293,7 +293,7 @@ cv.errors <- matrix(NA, nrow = k, ncol = 20, dimnames = list(NULL, paste(1:20)))
 
 We then run through each fold in a `for()` loop and predict the salary using our predict function. We then calculate the validation error for each fold and save them in the matrix created above.
 
-```{r}
+```{r, echo=FALSE}
 # loop over folds
 for (a in 1:k){
   
@@ -340,11 +340,11 @@ coef(reg.best, which.min(mean.cv.errors))
 
 In this exercise, we will generate simulated data, and will then use this data to perform best subset selection.
 
-1. Use the `rnorm()` function to generate a predictor $X$ of length $n=100$, as well as a noise vector &\epsilon& of length $n=100$.
-1. Generate a response vector $Y$ of length $n=100$ according to the model $$ Y = \beta_{0} + \beta_{1} X + \beta_{2} X^{2} + \beta_{3} X^{3} + \epsilon,$$
+1. Use the `rnorm()` function to generate a predictor $X$ of length $n=100$, as well as a noise vector $\epsilon$ of length $n=100$.
+2. Generate a response vector $Y$ of length $n=100$ according to the model $$ Y = \beta_{0} + \beta_{1} X + \beta_{2} X^{2} + \beta_{3} X^{3} + \epsilon,$$
 where $\beta_{0},\: \beta_{1}, \: \beta_{2}, \: \beta_{3}$ are constants of your choice.
-1. Use the `regsubsets()` function to perform best subset selection in order to choose the best model containing the predictors $X, X^2,\ldots,X^{10}$. What is the best model obtained according to $C_{p}$, $BIC$, and adjusted $R^2$ Show some plots to provide evidence for your answer, and report the coefficients of the best model obtained. Note you will need to use the `data.frame()` function to create a single data set containing both $X$ and $Y$.
-1. Repeat (3), using forward stepwise selection and also using backwards stepwise selection. How does your answer compare to the results in (3)?
+3. Use the `regsubsets()` function to perform best subset selection in order to choose the best model containing the predictors $X, X^2,\ldots,X^{10}$. What is the best model obtained according to $C_{p}$, $BIC$, and adjusted $R^2$ Show some plots to provide evidence for your answer, and report the coefficients of the best model obtained. Note you will need to use the `data.frame()` function to create a single data set containing both $X$ and $Y$.
+4. Repeat (3), using forward stepwise selection and also using backwards stepwise selection. How does your answer compare to the results in (3)?
 
 #### Q2
 

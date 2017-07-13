@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Philipp Broniecki and Lucas Leemann – Machine Learning 1K" />
+
+
+<title>Solution Day 4 - Resampling Methods</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Essex 2017 Machine Learning</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 1
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day1.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D1%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions1.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 2
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day2.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D2%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions2.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 3
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day3.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D3%20-%20Classification.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions3.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 4
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day4.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D4%20-%20Resampling.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions4.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 5
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day5.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D5%20-%20Model%20Selection%20I.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions5.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 6
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day6.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D6%20-%20Model%20Selection%20II.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions6.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 7
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day7.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D7%20-%20Polynomial%20Models.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions7.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 8
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day8.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D8%20-%20Tree-Based%20Methods.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions8.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 9
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day9.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D9%20-%20Unsupervised%20Learning.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions9.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    More
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="simulation.html">Simulation</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Solution Day 4 - Resampling Methods</h1>
+<h4 class="author"><em>Philipp Broniecki and Lucas Leemann – Machine Learning 1K</em></h4>
+
+</div>
+
+
+<div id="q1" class="section level3">
+<h3>Q1</h3>
+<p>Load the full data set.</p>
+<pre class="r"><code>load(&quot;./data/BSAS_manip.RData&quot;) 
+df &lt;- data2 # make copy with shorter name
+rm(data2) # remove original</code></pre>
+<ol style="list-style-type: decimal">
+<li>Fit a logistic regression model that uses <code>RSex</code>, <code>urban</code>, and <code>HHInc</code> to predict <code>over.estimate</code>.</li>
+</ol>
+<p>Note, <code>RSex</code> and <code>urban</code> are categorical variables. Categorical variables with more than 2 categories have to be declared factor variables or broken up into dummy variables manually. We show both below but breaking up <code>RSex</code> is not necessary because it has only 2 categories.</p>
+<pre class="r"><code># declaring factor
+df$urban &lt;- factor(df$urban, labels = c(&quot;rural&quot;, &quot;partly rural&quot;, &quot;partly urban&quot;, &quot;urban&quot;))
+
+# manual dummy coding
+df$female &lt;- ifelse(df$RSex == 2, yes = 1, no = 0)
+
+set.seed(666)
+glm.fit &lt;- glm(over.estimate ~ female + urban + HHInc, data = df, family = binomial(link = &quot;logit&quot;))
+summary(glm.fit)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = over.estimate ~ female + urban + HHInc, family = binomial(link = &quot;logit&quot;), 
+##     data = df)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.1204  -1.1808   0.6304   0.8285   1.2889  
+## 
+## Coefficients:
+##                   Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)        1.56226    0.24685   6.329 2.47e-10 ***
+## female             0.58640    0.14355   4.085 4.41e-05 ***
+## urbanpartly rural -0.05894    0.20121  -0.293   0.7696    
+## urbanpartly urban  0.29876    0.20443   1.461   0.1439    
+## urbanurban         0.36467    0.21759   1.676   0.0937 .  
+## HHInc             -0.10362    0.01600  -6.477 9.34e-11 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 1236.9  on 1048  degrees of freedom
+## Residual deviance: 1161.4  on 1043  degrees of freedom
+## AIC: 1173.4
+## 
+## Number of Fisher Scoring iterations: 4</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Using the validation set approach, estimate the test error of this model. In order to do this, you must perform the following steps:
+<ol style="list-style-type: lower-alpha">
+<li>Split the sample set into a training set and a validation set.</li>
+<li>Fit a multiple logistic regression model using only the training observations.</li>
+<li>Obtain a prediction for each individual in the validation set by computing the posterior probability of over estimating for that individual, and classifying the individual to the over estimating category if the posterior probability is greater than 0.5.</li>
+<li>Compute the validation set error, which is the fraction of the observations in the validation set that are misclassified.</li>
+</ol></li>
+</ol>
+<pre class="r"><code>val.err &lt;- function(df){
+  
+  # a. 
+  train &lt;- sample(nrow(df), size = nrow(df) *.5, replace = FALSE )
+  
+  # b.
+  m &lt;- glm(over.estimate ~ female + urban + HHInc, data = df, 
+           family = binomial(link = &quot;logit&quot;), subset = train)
+  
+  # c.
+  p &lt;- predict(m, newdata = df[-train,], type = &quot;response&quot;)
+  out &lt;- ifelse( p &gt; 0.5, yes = 1, no = 0)
+  
+  # d.
+  return( mean( out != df$over.estimate[-train]) )
+}
+
+# call the function (the only argument it needs is the name of the data set)
+val.err( df = df)</code></pre>
+<pre><code>## [1] 0.2628571</code></pre>
+<p><strong>The error rate in the test set is <span class="math inline">\(25\%\)</span>.</strong></p>
+<ol start="3" style="list-style-type: decimal">
+<li>Repeat the process in (2) three times, using three different splits of the observations into a training set and a validation set. Comment on the results obtained.</li>
+</ol>
+<pre class="r"><code>for (a in 1:3) print(val.err( df = df))</code></pre>
+<pre><code>## [1] 0.28
+## [1] 0.2457143
+## [1] 0.2971429</code></pre>
+<p><strong>The error rate averages to roughly <span class="math inline">\(27\%\)</span> in the three trials.</strong></p>
+<ol start="4" style="list-style-type: decimal">
+<li>Now consider a logistic regression model that predicts the probability of over estimating using additional dummy variables for people who self-identify with Ukip or the BNP. Estimate the test error for this model using the validation set approach. Comment on whether or not including dummy variables for Ukip and BNP leads to a reduction in the test error rate.</li>
+</ol>
+<pre class="r"><code>train &lt;- sample(nrow(df), size = nrow(df) *.5, replace = FALSE)
+m2 &lt;- glm(over.estimate ~ female + urban + HHInc + Ukip + BNP,
+          data = df, family = binomial, subset = train)
+p &lt;- predict( m2, newdata = df[-train, ], type = &quot;response&quot;)
+out &lt;- ifelse( p &gt; 0.5, yes = 1, no = 0)
+mean( out != df$over.estimate[-train] )</code></pre>
+<pre><code>## [1] 0.2914286</code></pre>
+<p><strong>The error rate remains at roughly <span class="math inline">\(27\%\)</span>. Adding the two dummies did not appear to improve prediction accuracy.</strong></p>
+</div>
+<div id="q2" class="section level3">
+<h3>Q2</h3>
+<ol style="list-style-type: decimal">
+<li>Fit a logistic regression model on <code>over.estimate</code> using <code>paper</code> and <code>religious</code>.</li>
+</ol>
+<pre class="r"><code>m1 &lt;- glm(over.estimate ~ paper + religious, data = df, family = binomial)
+summary(m1)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = over.estimate ~ paper + religious, family = binomial, 
+##     data = df)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.6602  -1.5519   0.7734   0.8325   0.8445  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  0.84767    0.11092   7.642 2.13e-14 ***
+## paper        0.03381    0.13939   0.243    0.808    
+## religious    0.20616    0.13890   1.484    0.138    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 1236.9  on 1048  degrees of freedom
+## Residual deviance: 1234.6  on 1046  degrees of freedom
+## AIC: 1240.6
+## 
+## Number of Fisher Scoring iterations: 4</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Fit a logistic regression model that predicts <code>over.estimate</code> using <code>paper</code> and <code>religious</code> using all but the first observation.</li>
+</ol>
+<pre class="r"><code>m2 &lt;- glm(over.estimate ~ paper + religious, data = df[-1, ], family = binomial)
+summary(m2)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = over.estimate ~ paper + religious, family = binomial, 
+##     data = df[-1, ])
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.6589  -1.5558   0.7725   0.8315   0.8414  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  0.85632    0.11122   7.699 1.37e-14 ***
+## paper        0.02819    0.13951   0.202     0.84    
+## religious    0.20027    0.13903   1.440     0.15    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 1234.3  on 1047  degrees of freedom
+## Residual deviance: 1232.2  on 1045  degrees of freedom
+## AIC: 1238.2
+## 
+## Number of Fisher Scoring iterations: 4</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Use the model from (2) to predict the direction of the first observation. You can do this by predicting that the first observation will over estimate if <span class="math inline">\(P(over.estimate == 1 | paper, religious) &gt; 0.5\)</span>. Was this observation correctly classified?</li>
+</ol>
+<pre class="r"><code>p &lt;- predict(m2, newdata = df[1,], type = &quot;response&quot;)
+out &lt;- ifelse( p &gt; 0.5, yes = 1, no = 0)
+out == df$over.estimate[1]</code></pre>
+<pre><code>##     1 
+## FALSE</code></pre>
+<p><strong>The first observation was classified incorrectly.</strong></p>
+<ol start="4" style="list-style-type: decimal">
+<li><p>Write a for loop from <span class="math inline">\(i=1\)</span> to <span class="math inline">\(i=n\)</span>, where <span class="math inline">\(n\)</span> is the number of observations in the data set, that performs each of the following steps:</p>
+<ol style="list-style-type: lower-alpha">
+<li>Fit a logistic regression model using all but the <span class="math inline">\(i^{th}\)</span> observation to predict <code>over.estimate</code> using <code>paper</code> and <code>religious</code>.</li>
+<li>Compute the posterior probability that the person over-estimates the rate of immigrants for the <span class="math inline">\(i^{th}\)</span> observation.</li>
+<li>Use the posterior probability for the <span class="math inline">\(i^{th}\)</span> observation in order to predict whether or not the person over-estimates the rate of immigrants.</li>
+<li>Determine whether or not an error was made in predicting the direction for the <span class="math inline">\(i^{th}\)</span> observation. If an error was made, then indicate this as a <span class="math inline">\(1\)</span>, and otherwise indicate it as a <span class="math inline">\(0\)</span>.</li>
+</ol></li>
+</ol>
+<pre class="r"><code>pred.all &lt;- function(df, idx){
+  
+  # a.
+  m &lt;- glm(over.estimate ~ paper + religious, data = df[-idx,], family = binomial)
+  
+  # b.
+  p &lt;- predict(m, newdata = df[idx, ], type = &quot;response&quot;)
+  
+  # c.
+  exp.out &lt;- ifelse( p &gt; 0.5, yes = 1, no = 0)
+  
+  # d.
+  return(ifelse( exp.out != df$over.estimate[idx], yes = 1, no = 0))
+}
+
+n.misclassifications &lt;- 0
+for (a in 1: nrow(df)) n.misclassifications &lt;- n.misclassifications + pred.all(df, a)
+n.misclassifications</code></pre>
+<pre><code>##   1 
+## 290</code></pre>
+<p><strong>We make 290 errors.</strong></p>
+<ol start="5" style="list-style-type: decimal">
+<li>Take the average of the n numbers obtained in 4.d. in order to obtain the LOOCV estimate for the test error. Comment on the results.</li>
+</ol>
+<pre class="r"><code>n.misclassifications / nrow(df)</code></pre>
+<pre><code>##         1 
+## 0.2764538</code></pre>
+<p><strong>We misclassify <span class="math inline">\(28\%\)</span> of the cases according to LOOCV.</strong></p>
+</div>
+<div id="q3" class="section level3">
+<h3>Q3</h3>
+<ol style="list-style-type: decimal">
+<li>Generate a simulated data set as follows:</li>
+</ol>
+<pre class="r"><code>set.seed(1)
+y &lt;- rnorm(100)
+x &lt;- rnorm(100)
+y &lt;- x -2*x^2 + rnorm(100)</code></pre>
+<p>In this data set, what is <span class="math inline">\(n\)</span> and what is <span class="math inline">\(p\)</span>? Write out the model used to generate the data in equation form.</p>
+<p><strong><span class="math inline">\(n = 100\)</span>, <span class="math inline">\(p = 2\)</span>; <span class="math inline">\(Y=X-2X^{2}+\epsilon\)</span></strong></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Create a scatterplot of <span class="math inline">\(X\)</span> against <span class="math inline">\(Y\)</span>. Comment on what you find.</li>
+</ol>
+<pre class="r"><code>plot( y ~ x, bty = &quot;n&quot;, pch = 20)</code></pre>
+<p><img src="solutions4_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p><strong>Quadratic plot. <span class="math inline">\(X\)</span> from about <span class="math inline">\(-2\)</span> to <span class="math inline">\(2\)</span>. <span class="math inline">\(Y\)</span> from about <span class="math inline">\(-8\)</span> to <span class="math inline">\(2\)</span>.</strong></p>
+<ol start="3" style="list-style-type: decimal">
+<li><p>Set a random seed, and then compute the LOOCV errors that result from fitting the following four models using least squares:</p>
+<ol style="list-style-type: lower-alpha">
+<li><span class="math inline">\(Y=\beta_{0}+\beta_{1}X+\epsilon\)</span></li>
+<li><span class="math inline">\(Y=\beta_{0}+\beta_{1}X+\beta_{2}X_{2}+\epsilon\)</span></li>
+<li><span class="math inline">\(Y=\beta_{0}+\beta_{1}X+\beta_{2}X_{2}+\beta_{3}X_{3}+\epsilon\)</span></li>
+<li><span class="math inline">\(Y=\beta_{0}+\beta_{1}X+\beta_{2}X_{2}+\beta_{3}X_{3}+\beta_{4}X_{4}+\epsilon\)</span></li>
+</ol></li>
+</ol>
+<p>Note, you may find it helpful to use the <code>data.frame()</code> function to create a single data set containing both <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>.</p>
+<pre class="r"><code>library(boot)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;boot&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:survival&#39;:
+## 
+##     aml</code></pre>
+<pre class="r"><code>dat &lt;- data.frame(x,y)
+set.seed(1)
+
+# a.
+m &lt;- glm(y ~ x)
+cv.glm( dat, m)$delta</code></pre>
+<pre><code>## [1] 5.890979 5.888812</code></pre>
+<pre class="r"><code># b.
+m &lt;- glm( y ~ poly(x,2))
+cv.glm(dat, m)$delta</code></pre>
+<pre><code>## [1] 1.086596 1.086326</code></pre>
+<pre class="r"><code># c.
+m &lt;- glm( y ~ poly(x, 3) )
+cv.glm(dat, m)$delta</code></pre>
+<pre><code>## [1] 1.102585 1.102227</code></pre>
+<pre class="r"><code># d.
+m &lt;- glm( y ~ poly(x, 4) )
+cv.glm( dat, m)$delta</code></pre>
+<pre><code>## [1] 1.114772 1.114334</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li>Repeat the last task using another random seed, and report your results. Are your results the same as what you got 3.? Why?</li>
+</ol>
+<pre class="r"><code>set.seed(10)
+
+# a.
+m &lt;- glm(y ~ x)
+cv.glm( dat, m)$delta</code></pre>
+<pre><code>## [1] 5.890979 5.888812</code></pre>
+<pre class="r"><code># b.
+m &lt;- glm( y ~ poly(x,2))
+cv.glm(dat, m)$delta</code></pre>
+<pre><code>## [1] 1.086596 1.086326</code></pre>
+<pre class="r"><code># c.
+m &lt;- glm( y ~ poly(x, 3) )
+cv.glm(dat, m)$delta</code></pre>
+<pre><code>## [1] 1.102585 1.102227</code></pre>
+<pre class="r"><code># d.
+m &lt;- glm( y ~ poly(x, 4) )
+cv.glm( dat, m)$delta</code></pre>
+<pre><code>## [1] 1.114772 1.114334</code></pre>
+<p><strong>Exact same, because LOOCV will be the same since it evaluates <span class="math inline">\(n\)</span> folds of a single observation.</strong></p>
+<ol start="5" style="list-style-type: decimal">
+<li>Which of the models in 3. had the smallest LOOCV error? Is this what you expected? Explain your answer.</li>
+</ol>
+<p><strong>The quadratic polynomial had the lowest LOOCV test error rate. This was expected because it matches the true form of <span class="math inline">\(Y\)</span>.</strong></p>
+<ol start="6" style="list-style-type: decimal">
+<li>Comment on the statistical significance of the coefficient estimates that results from fitting each of the models in 3. using least squares. Do these results agree with the conclusions drawn based on the cross-validation results?</li>
+</ol>
+<pre class="r"><code>summary(m)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = y ~ poly(x, 4))
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.8914  -0.5244   0.0749   0.5932   2.7796  
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  -1.8277     0.1041 -17.549   &lt;2e-16 ***
+## poly(x, 4)1   2.3164     1.0415   2.224   0.0285 *  
+## poly(x, 4)2 -21.0586     1.0415 -20.220   &lt;2e-16 ***
+## poly(x, 4)3  -0.3048     1.0415  -0.293   0.7704    
+## poly(x, 4)4  -0.4926     1.0415  -0.473   0.6373    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for gaussian family taken to be 1.084654)
+## 
+##     Null deviance: 552.21  on 99  degrees of freedom
+## Residual deviance: 103.04  on 95  degrees of freedom
+## AIC: 298.78
+## 
+## Number of Fisher Scoring iterations: 2</code></pre>
+<p><strong>p-values show statistical significance of linear and quadratic terms, which agrees with the CV results.</strong></p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
