@@ -544,7 +544,7 @@ summary(regfit.full)</code></pre>
 ## 6  ( 1 ) &quot;*&quot;  
 ## 7  ( 1 ) &quot;*&quot;  
 ## 8  ( 1 ) &quot;*&quot;</code></pre>
-<p>The <code>nvmax</code> parameter can be use to control the number of variables in the model. The default used by <code>regsubsets()</code> is 8.</p>
+<p>With the <code>nvmax</code> parameter we control the number of variables in the model. The default used by <code>regsubsets()</code> is 8.</p>
 <pre class="r"><code># increase the max number of variables
 regfit.full &lt;- regsubsets(IMMBRIT ~ ., data = df, nvmax = 20)
 reg.summary &lt;- summary(regfit.full)</code></pre>
@@ -563,16 +563,9 @@ plot(reg.summary$adjr2, xlab = &quot;Number of Variables&quot;, ylab = &quot;Adj
 # find the peak of adj. R^2
 adjr2.max &lt;- which.max( reg.summary$adjr2 )
 points(adjr2.max, reg.summary$adjr2[adjr2.max], col = &quot;red&quot;, pch = 20, cex = 2)</code></pre>
-<p><img src="day5_files/figure-html/more.plotting-1.png" width="672" /></p>
+<p><img src="day5_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 <p>We can also plot the the <span class="math inline">\(C_{p}\)</span> statistic and <span class="math inline">\(BIC\)</span> and identify the minimum points for each statistic using the <span class="math inline">\(which.min()\)</span> function.</p>
-<pre class="r"><code>par( mfrow =  c(2,2) ) # 2 row, 2 columns in plot window
-plot(reg.summary$rss, xlab = &quot;Number of Variables&quot;, ylab = &quot;Residual Sum of Squares&quot;, type = &quot;l&quot;)
-plot(reg.summary$adjr2, xlab = &quot;Number of Variables&quot;, ylab = &quot;Adjusted R^2&quot;, type = &quot;l&quot;)
-
-# find the peak of adj. R^2
-adjr2.max &lt;- which.max( reg.summary$adjr2 )
-points(adjr2.max, reg.summary$adjr2[adjr2.max], col = &quot;red&quot;, pch = 20, cex = 2)
-# cp
+<pre class="r"><code># cp
 plot(reg.summary$cp, xlab = &quot;Number of Variables&quot;, ylab = &quot;Cp&quot;, type = &quot;l&quot;)
 cp.min &lt;- which.min(reg.summary$cp)
 points(cp.min, reg.summary$cp[cp.min], col = &quot;red&quot;, cex = 2, pch = 20)
@@ -581,22 +574,22 @@ points(cp.min, reg.summary$cp[cp.min], col = &quot;red&quot;, cex = 2, pch = 20)
 bic.min &lt;- which.min(reg.summary$bic)
 plot(reg.summary$bic, xlab = &quot;Number of Variables&quot;, ylab = &quot;BIC&quot;, type = &quot;l&quot;)
 points(bic.min, reg.summary$bic[bic.min], col = &quot;red&quot;, cex = 2, pch = 20)</code></pre>
-<p><img src="day5_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p><img src="day5_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 <p>The estimated models from <code>regsubsets()</code> can be directly plotted to compare the differences based on the values of <span class="math inline">\(R^2\)</span>, adjusted <span class="math inline">\(R^2\)</span>, <span class="math inline">\(C_{p}\)</span> and <span class="math inline">\(BIC\)</span> statistics.</p>
 <pre class="r"><code>par( mfrow = c(1,1), oma = c(3,0,0,0))
 
 # plot model comparison based on R^2
 plot(regfit.full, scale = &quot;r2&quot;)</code></pre>
-<p><img src="day5_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="day5_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 <pre class="r"><code># plot model comparison based on adjusted R^2
 plot(regfit.full, scale = &quot;adjr2&quot;)</code></pre>
-<p><img src="day5_files/figure-html/unnamed-chunk-10-2.png" width="672" /></p>
+<p><img src="day5_files/figure-html/unnamed-chunk-13-2.png" width="672" /></p>
 <pre class="r"><code># plot model comparison based on adjusted CP
 plot(regfit.full, scale = &quot;Cp&quot;)</code></pre>
-<p><img src="day5_files/figure-html/unnamed-chunk-10-3.png" width="672" /></p>
+<p><img src="day5_files/figure-html/unnamed-chunk-13-3.png" width="672" /></p>
 <pre class="r"><code># plot model comparison based on adjusted BIC
 plot(regfit.full, scale = &quot;bic&quot;)</code></pre>
-<p><img src="day5_files/figure-html/unnamed-chunk-10-4.png" width="672" /></p>
+<p><img src="day5_files/figure-html/unnamed-chunk-13-4.png" width="672" /></p>
 <p>To show the coefficients associated with the model with the lowest <span class="math inline">\(BIC\)</span>, we use the <code>coef()</code> function.</p>
 <pre class="r"><code>coef(regfit.full, bic.min)</code></pre>
 <pre><code>## (Intercept)  RSexFemale    Househld         BNP       HHInc 
@@ -936,7 +929,7 @@ mean.cv.errors</code></pre>
 <pre class="r"><code># visualize
 par( mfrow = c(1,1) , oma = c(0,0,0,0))
 plot( mean.cv.errors, type = &quot;b&quot; )</code></pre>
-<p><img src="day5_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p><img src="day5_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
 <p>Finally, we run <code>regsubsets()</code> on the full dataset and show the coefficients for the best performing model.</p>
 <pre class="r"><code># run regsubsets on full data set
 reg.best &lt;- regsubsets(IMMBRIT ~ ., data = df, nvmax = 20)

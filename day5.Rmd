@@ -87,7 +87,7 @@ regfit.full <- regsubsets(IMMBRIT ~ ., data = df)
 summary(regfit.full)
 ```
 
-The `nvmax` parameter can be use to control the number of variables in the model. The default used by `regsubsets()` is 8.
+With the `nvmax` parameter we control the number of variables in the model. The default used by `regsubsets()` is 8.
 
 ```{r}
 # increase the max number of variables
@@ -104,7 +104,7 @@ reg.summary$rsq
 
 Next, we plot the $RSS$ and adjusted $R^2$ and add a point where $R^2$ is at its maximum using the `which.max()` function.
 
-```{r, more.plotting}
+```{r, eval=FALSE}
 par( mfrow =  c(2,2) ) # 2 row, 2 columns in plot window
 plot(reg.summary$rss, xlab = "Number of Variables", ylab = "Residual Sum of Squares", type = "l")
 plot(reg.summary$adjr2, xlab = "Number of Variables", ylab = "Adjusted R^2", type = "l")
@@ -114,10 +114,39 @@ adjr2.max <- which.max( reg.summary$adjr2 )
 points(adjr2.max, reg.summary$adjr2[adjr2.max], col = "red", pch = 20, cex = 2)
 ```
 
-We can also plot the the $C_{p}$ statistic and $BIC$ and identify the minimum points for each statistic using the $which.min()$ function.
+```{r, echo=FALSE, fig.height=3}
+par( mfrow =  c(1,2) ) # 2 row, 2 columns in plot window
+plot(reg.summary$rss, xlab = "Number of Variables", ylab = "Residual Sum of Squares", type = "l")
+plot(reg.summary$adjr2, xlab = "Number of Variables", ylab = "Adjusted R^2", type = "l")
 
-```{r}
-<<more.plotting>>
+# find the peak of adj. R^2
+adjr2.max <- which.max( reg.summary$adjr2 )
+points(adjr2.max, reg.summary$adjr2[adjr2.max], col = "red", pch = 20, cex = 2)
+```
+
+We can also plot the $C_{p}$ statistic and $BIC$ and identify the minimum points for each statistic using the $which.min()$ function.
+
+```{r, eval=FALSE}
+# cp
+plot(reg.summary$cp, xlab = "Number of Variables", ylab = "Cp", type = "l")
+cp.min <- which.min(reg.summary$cp)
+points(cp.min, reg.summary$cp[cp.min], col = "red", cex = 2, pch = 20)
+
+# bic
+bic.min <- which.min(reg.summary$bic)
+plot(reg.summary$bic, xlab = "Number of Variables", ylab = "BIC", type = "l")
+points(bic.min, reg.summary$bic[bic.min], col = "red", cex = 2, pch = 20)
+```
+
+```{r, echo=FALSE}
+par( mfrow =  c(2,2) ) # 2 row, 2 columns in plot window
+plot(reg.summary$rss, xlab = "Number of Variables", ylab = "Residual Sum of Squares", type = "l")
+plot(reg.summary$adjr2, xlab = "Number of Variables", ylab = "Adjusted R^2", type = "l")
+
+# find the peak of adj. R^2
+adjr2.max <- which.max( reg.summary$adjr2 )
+points(adjr2.max, reg.summary$adjr2[adjr2.max], col = "red", pch = 20, cex = 2)
+
 # cp
 plot(reg.summary$cp, xlab = "Number of Variables", ylab = "Cp", type = "l")
 cp.min <- which.min(reg.summary$cp)
