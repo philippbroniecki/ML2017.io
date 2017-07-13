@@ -18,7 +18,7 @@ rm( list = ls() )
 
 ### The Validation Set Approach
 
-We use a subset of last weeks non-western immigrants data set (the version for this week includes men only). We can use the `head()` function to have a quick glance at the data. Download the data [here]("http://philippbroniecki.github.io/ML2017.io/data/BSAS_manip_men.RData")
+We use a subset of last weeks non-western immigrants data set (the version for this week includes men only). We can use the `head()` function to have a quick glance at the data. Download the data [here](http://philippbroniecki.github.io/ML2017.io/data/BSAS_manip_men.RData)
 
 The codebook is:
 
