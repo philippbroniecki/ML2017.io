@@ -37,6 +37,8 @@ Let's check the codebook of our data.
 |health.good | How is your health in general for someone of your age? (0: bad, 1: fair, 2: fairly good, 3: good) |
 |HHInc | Income bands for household, high number = high HH income |
 
+Load the dataset [here](http://philippbroniecki.github.io/ML2017.io/data/BSAS_manip.RData).
+
 ```{r}
 # load non-western foreigners data set
 load("./data/BSAS_manip.RData")
