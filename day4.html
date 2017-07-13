@@ -674,12 +674,12 @@ boot(data2, boot.fn, 1000)</code></pre>
 <li>Compute the validation set error, which is the fraction of the observations in the validation set that are misclassified.</li>
 </ol></li>
 <li><p>Repeat the process in (2) three times, using three different splits of the observations into a training set and a validation set. Comment on the results obtained.</p></li>
-<li><p>Now consider a logistic regression model that predicts the probability of over estimating using additional dummy variables for people who self-identify with Ukip or the BNP. Estimate the test error for this model using the validation set approach. Comment on whether or not including a dummy variable for student leads to a reduction in the test error rate.</p></li>
+<li><p>Now consider a logistic regression model that predicts the probability of over estimating using additional dummy variables for people who self-identify with Ukip or the BNP. Estimate the test error for this model using the validation set approach. Comment on whether or not including dummy variables for Ukip and BNP leads to a reduction in the test error rate.</p></li>
 </ol>
 </div>
 <div id="q2" class="section level3">
 <h3>Q2</h3>
-<p>In the lab session for today (Sections 5.3.2 and 5.3.3 in James et al.), we saw that the <code>cv.glm()</code> function can be used in order to compute the LOOCV test error estimate. Alternatively, one could compute those quantities using just the <code>glm()</code> and <code>predict.glm()</code> functions, and a <code>for()</code> loop. You will now take this approach in order to compute the LOOCV error for a simple logistic regression model on the Weekly data set. Recall that in the context of classification problems, the LOOCV error is given in Section 5.1.5 (5.4, page 184).</p>
+<p>In the lab session for today (Sections 5.3.2 and 5.3.3 in James et al.), we saw that the <code>cv.glm()</code> function can be used in order to compute the LOOCV test error estimate. Alternatively, one could compute those quantities using just the <code>glm()</code> and <code>predict.glm()</code> functions, and a <code>for()</code> loop. You will now take this approach in order to compute the LOOCV error for a simple logistic regression model. Recall that in the context of classification problems, the LOOCV error is given in Section 5.1.5 (5.4, page 184).</p>
 <ol style="list-style-type: decimal">
 <li><p>Fit a logistic regression model on <code>over.estimate</code> using <code>paper</code> and <code>religious</code>.</p></li>
 <li><p>Fit a logistic regression model that predicts <code>over.estimate</code> using <code>paper</code> and <code>religious</code> using all but the first observation.</p></li>
