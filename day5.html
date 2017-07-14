@@ -263,6 +263,9 @@ $(document).ready(function () {
       <a href="day5.html">Lab</a>
     </li>
     <li>
+      <a href="labs/Lab%Code%5.R">plain R-Code</a>
+    </li>
+    <li>
       <a href="./slides/D5%20-%20Model%20Selection%20I.pdf">Slides</a>
     </li>
     <li>
@@ -461,8 +464,11 @@ apply(df, 2, function(x) table(is.na(x))[&quot;TRUE&quot;] )</code></pre>
 ##            NA            NA            NA            NA            NA 
 ##  employMonths         urban   health.good         HHInc 
 ##            NA            NA            NA            NA</code></pre>
-<pre class="r"><code>#  immbrit has missings which we drop
-df &lt;- df[ !is.na(df$IMMBRIT), ]</code></pre>
+<pre class="r"><code># we drop missings in IMMBRIT
+df &lt;- df[ !is.na(df$IMMBRIT), ]
+
+# to drop variables on the entire dataset (uncomment next line)
+#df &lt;- na.omit(df)</code></pre>
 <p>We now declare the categorical variables to be factors and create a copy of the main data set that excludes <code>over.estimate</code>.</p>
 <pre class="r"><code># declare factor variables
 df$urban &lt;- factor(df$urban, labels = c(&quot;rural&quot;, &quot;more rural&quot;, &quot;more urban&quot;, &quot;urban&quot;))
@@ -545,7 +551,7 @@ summary(regfit.full)</code></pre>
 ## 8  ( 1 ) &quot;*&quot;</code></pre>
 <p>With the <code>nvmax</code> parameter we control the number of variables in the model. The default used by <code>regsubsets()</code> is 8.</p>
 <pre class="r"><code># increase the max number of variables
-regfit.full &lt;- regsubsets(IMMBRIT ~ ., data = df, nvmax = 20)
+regfit.full &lt;- regsubsets(IMMBRIT ~ ., data = df, nvmax = 16)
 reg.summary &lt;- summary(regfit.full)</code></pre>
 <p>We can look at the components of the <code>reg.summary</code> object using the <code>names()</code> function and examine the <span class="math inline">\(R^2\)</span> statistic stored in <code>rsq</code>.</p>
 <pre class="r"><code>names(reg.summary)</code></pre>
@@ -553,7 +559,7 @@ reg.summary &lt;- summary(regfit.full)</code></pre>
 <pre class="r"><code>reg.summary$rsq</code></pre>
 <pre><code>##  [1] 0.1040145 0.1316228 0.1469748 0.1546376 0.1595363 0.1621379 0.1650727
 ##  [8] 0.1672137 0.1689371 0.1699393 0.1708328 0.1717100 0.1721041 0.1723151
-## [15] 0.1725153 0.1726176 0.1726758 0.1726769 0.1726772 0.1726772</code></pre>
+## [15] 0.1725153 0.1726176</code></pre>
 <p>Next, we plot the <span class="math inline">\(RSS\)</span> and adjusted <span class="math inline">\(R^2\)</span> and add a point where <span class="math inline">\(R^2\)</span> is at its maximum using the <code>which.max()</code> function.</p>
 <pre class="r"><code>par( mfrow =  c(2,2) ) # 2 row, 2 columns in plot window
 plot(reg.summary$rss, xlab = &quot;Number of Variables&quot;, ylab = &quot;Residual Sum of Squares&quot;, type = &quot;l&quot;)
@@ -598,10 +604,10 @@ plot(regfit.full, scale = &quot;bic&quot;)</code></pre>
 <h3>Forward and Backward Stepwise Selection</h3>
 <p>The default method used by <code>regsubsets()</code> is exhaustive but we can change it to forward or backward and compare the results.</p>
 <pre class="r"><code># run forward selection
-regfit.fwd &lt;- regsubsets(IMMBRIT ~ ., data = df, nvmax = 20, method = &quot;forward&quot;)
+regfit.fwd &lt;- regsubsets(IMMBRIT ~ ., data = df, nvmax = 16, method = &quot;forward&quot;)
 summary(regfit.fwd)</code></pre>
 <pre><code>## Subset selection object
-## Call: regsubsets.formula(IMMBRIT ~ ., data = df, nvmax = 20, method = &quot;forward&quot;)
+## Call: regsubsets.formula(IMMBRIT ~ ., data = df, nvmax = 16, method = &quot;forward&quot;)
 ## 20 Variables  (and intercept)
 ##                        Forced in Forced out
 ## RSexFemale                 FALSE      FALSE
@@ -624,7 +630,7 @@ summary(regfit.fwd)</code></pre>
 ## health.goodfairly good     FALSE      FALSE
 ## health.goodgood            FALSE      FALSE
 ## HHInc                      FALSE      FALSE
-## 1 subsets of each size up to 20
+## 1 subsets of each size up to 16
 ## Selection Algorithm: forward
 ##           RSexFemale RAge Househld Lab SNP Ukip BNP GP  party.other paper
 ## 1  ( 1 )  &quot; &quot;        &quot; &quot;  &quot; &quot;      &quot; &quot; &quot; &quot; &quot; &quot;  &quot; &quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
@@ -643,10 +649,6 @@ summary(regfit.fwd)</code></pre>
 ## 14  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
 ## 15  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
 ## 16  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
-## 17  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot;*&quot;         &quot;*&quot;  
-## 18  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot;*&quot;         &quot;*&quot;  
-## 19  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot;*&quot;         &quot;*&quot;  
-## 20  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot;*&quot;         &quot;*&quot;  
 ##           WWWhourspW religious employMonths urbanmore rural
 ## 1  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
 ## 2  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
@@ -664,10 +666,6 @@ summary(regfit.fwd)</code></pre>
 ## 14  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
 ## 15  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
 ## 16  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot;*&quot;          &quot; &quot;            
-## 17  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot;*&quot;          &quot; &quot;            
-## 18  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot;*&quot;          &quot; &quot;            
-## 19  ( 1 ) &quot;*&quot;        &quot;*&quot;       &quot;*&quot;          &quot; &quot;            
-## 20  ( 1 ) &quot;*&quot;        &quot;*&quot;       &quot;*&quot;          &quot;*&quot;            
 ##           urbanmore urban urbanurban health.goodfair
 ## 1  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
 ## 2  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
@@ -685,10 +683,6 @@ summary(regfit.fwd)</code></pre>
 ## 14  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
 ## 15  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
 ## 16  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
-## 17  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
-## 18  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
-## 19  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
-## 20  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
 ##           health.goodfairly good health.goodgood HHInc
 ## 1  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
 ## 2  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
@@ -705,16 +699,12 @@ summary(regfit.fwd)</code></pre>
 ## 13  ( 1 ) &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
 ## 14  ( 1 ) &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
 ## 15  ( 1 ) &quot; &quot;                    &quot;*&quot;             &quot;*&quot;  
-## 16  ( 1 ) &quot; &quot;                    &quot;*&quot;             &quot;*&quot;  
-## 17  ( 1 ) &quot; &quot;                    &quot;*&quot;             &quot;*&quot;  
-## 18  ( 1 ) &quot;*&quot;                    &quot;*&quot;             &quot;*&quot;  
-## 19  ( 1 ) &quot;*&quot;                    &quot;*&quot;             &quot;*&quot;  
-## 20  ( 1 ) &quot;*&quot;                    &quot;*&quot;             &quot;*&quot;</code></pre>
+## 16  ( 1 ) &quot; &quot;                    &quot;*&quot;             &quot;*&quot;</code></pre>
 <pre class="r"><code># run backward selection
-regfit.bwd &lt;- regsubsets(IMMBRIT ~ ., data = df, nvmax = 20, method = &quot;backward&quot;)
+regfit.bwd &lt;- regsubsets(IMMBRIT ~ ., data = df, nvmax = 16, method = &quot;backward&quot;)
 summary(regfit.bwd)</code></pre>
 <pre><code>## Subset selection object
-## Call: regsubsets.formula(IMMBRIT ~ ., data = df, nvmax = 20, method = &quot;backward&quot;)
+## Call: regsubsets.formula(IMMBRIT ~ ., data = df, nvmax = 16, method = &quot;backward&quot;)
 ## 20 Variables  (and intercept)
 ##                        Forced in Forced out
 ## RSexFemale                 FALSE      FALSE
@@ -737,7 +727,7 @@ summary(regfit.bwd)</code></pre>
 ## health.goodfairly good     FALSE      FALSE
 ## health.goodgood            FALSE      FALSE
 ## HHInc                      FALSE      FALSE
-## 1 subsets of each size up to 20
+## 1 subsets of each size up to 16
 ## Selection Algorithm: backward
 ##           RSexFemale RAge Househld Lab SNP Ukip BNP GP  party.other paper
 ## 1  ( 1 )  &quot; &quot;        &quot; &quot;  &quot; &quot;      &quot; &quot; &quot; &quot; &quot; &quot;  &quot; &quot; &quot; &quot; &quot; &quot;         &quot; &quot;  
@@ -756,10 +746,6 @@ summary(regfit.bwd)</code></pre>
 ## 14  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
 ## 15  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
 ## 16  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot; &quot;         &quot;*&quot;  
-## 17  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot;*&quot;         &quot;*&quot;  
-## 18  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot;*&quot;         &quot;*&quot;  
-## 19  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot;*&quot;         &quot;*&quot;  
-## 20  ( 1 ) &quot;*&quot;        &quot;*&quot;  &quot;*&quot;      &quot;*&quot; &quot;*&quot; &quot;*&quot;  &quot;*&quot; &quot;*&quot; &quot;*&quot;         &quot;*&quot;  
 ##           WWWhourspW religious employMonths urbanmore rural
 ## 1  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
 ## 2  ( 1 )  &quot; &quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
@@ -777,10 +763,6 @@ summary(regfit.bwd)</code></pre>
 ## 14  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
 ## 15  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot; &quot;          &quot; &quot;            
 ## 16  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot;*&quot;          &quot; &quot;            
-## 17  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot;*&quot;          &quot; &quot;            
-## 18  ( 1 ) &quot;*&quot;        &quot; &quot;       &quot;*&quot;          &quot; &quot;            
-## 19  ( 1 ) &quot;*&quot;        &quot;*&quot;       &quot;*&quot;          &quot; &quot;            
-## 20  ( 1 ) &quot;*&quot;        &quot;*&quot;       &quot;*&quot;          &quot;*&quot;            
 ##           urbanmore urban urbanurban health.goodfair
 ## 1  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
 ## 2  ( 1 )  &quot; &quot;             &quot; &quot;        &quot; &quot;            
@@ -798,10 +780,6 @@ summary(regfit.bwd)</code></pre>
 ## 14  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
 ## 15  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
 ## 16  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
-## 17  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
-## 18  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
-## 19  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
-## 20  ( 1 ) &quot;*&quot;             &quot;*&quot;        &quot;*&quot;            
 ##           health.goodfairly good health.goodgood HHInc
 ## 1  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
 ## 2  ( 1 )  &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
@@ -818,11 +796,7 @@ summary(regfit.bwd)</code></pre>
 ## 13  ( 1 ) &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
 ## 14  ( 1 ) &quot; &quot;                    &quot; &quot;             &quot;*&quot;  
 ## 15  ( 1 ) &quot; &quot;                    &quot;*&quot;             &quot;*&quot;  
-## 16  ( 1 ) &quot; &quot;                    &quot;*&quot;             &quot;*&quot;  
-## 17  ( 1 ) &quot; &quot;                    &quot;*&quot;             &quot;*&quot;  
-## 18  ( 1 ) &quot;*&quot;                    &quot;*&quot;             &quot;*&quot;  
-## 19  ( 1 ) &quot;*&quot;                    &quot;*&quot;             &quot;*&quot;  
-## 20  ( 1 ) &quot;*&quot;                    &quot;*&quot;             &quot;*&quot;</code></pre>
+## 16  ( 1 ) &quot; &quot;                    &quot;*&quot;             &quot;*&quot;</code></pre>
 <pre class="r"><code># mdoel coefficients of best 7-variable models
 coef(regfit.full, 7)</code></pre>
 <pre><code>## (Intercept)  RSexFemale        RAge    Househld         Lab         BNP 
@@ -849,14 +823,14 @@ train &lt;- sample( c(TRUE, FALSE), size = nrow(df), replace = TRUE )
 # the complement
 test &lt;- (!train)</code></pre>
 <p>We use <code>regsubsets()</code> as we did in the last section, but limit the estimation to the training subset.</p>
-<pre class="r"><code>regfit.best &lt;- regsubsets(IMMBRIT ~ ., data = df[train, ], nvmax = 20)</code></pre>
-<p>We create a matrix from the test subset using <code>model.matrix()</code>.</p>
+<pre class="r"><code>regfit.best &lt;- regsubsets(IMMBRIT ~ ., data = df[train, ], nvmax = 16)</code></pre>
+<p>We create a matrix from the test subset using <code>model.matrix()</code>. Model matrix takes the dependent variable out of the data and adds an intercept to it.</p>
 <pre class="r"><code># test data
 test.mat &lt;- model.matrix(IMMBRIT ~., data = df[test, ])</code></pre>
 <p>Next, we compute the validation error for each model.</p>
 <pre class="r"><code># validation error for each model
 val.errors &lt;- NA
-for (i in 1:20 ){
+for (i in 1:16 ){
   coefi &lt;- coef(regfit.best, id = i)
   y_hat &lt;- test.mat[, names(coefi)] %*% coefi
   val.errors[i] &lt;- mean(  (df$IMMBRIT[test] - y_hat)^2   )
@@ -865,7 +839,7 @@ for (i in 1:20 ){
 <pre class="r"><code>val.errors</code></pre>
 <pre><code>##  [1] 378.8917 383.0225 368.8723 372.9856 367.8958 371.1948 374.5266
 ##  [8] 374.7800 374.4518 378.2256 376.5576 376.5623 375.7109 376.6845
-## [15] 375.4616 375.3801 375.2315 375.0680 375.8331 375.8172</code></pre>
+## [15] 375.4616 375.3801</code></pre>
 <pre class="r"><code># which model has smallest error
 min.val.errors &lt;- which.min(val.errors)
 # coefficients of that model
@@ -875,29 +849,88 @@ coef( regfit.best, min.val.errors )</code></pre>
 <p>We can combine these steps into a function that can be called repeatedly when running k-fold cross-validation.</p>
 <pre class="r"><code># precict function for repeatedly choosing model with lowest test error
 predict.regsubsets &lt;- function( object, newdata, id, ... ){
+  # get the formula from the model
   m.formula &lt;- as.formula( object$call[[2]] )
+  # use that formula to create the model matrix for some new data
   mat &lt;- model.matrix( m.formula, newdata )
+  # get coeffiecients where id is the number of variables
   coefi &lt;- coef( object, id = id )
+  # get the variable names of current model
   xvars &lt;- names( coefi )
+  # multiply data with coefficients
   mat[ , xvars ] %*% coefi
 }</code></pre>
-<p>As a final step, we run <code>regsubsets()</code> on the full dataset and examine the coefficients associated with the model that has the lower validation error.</p>
+<p>We run <code>regsubsets()</code> on the full dataset and examine the coefficients associated with the model that has the lower validation error.</p>
 <pre class="r"><code># best subset on full data set
-regfit.best &lt;- regsubsets( IMMBRIT ~ ., data = df, nvmax = 20 )
+regfit.best &lt;- regsubsets( IMMBRIT ~ ., data = df, nvmax = 16 )
 
 # examine coefficients of the model that had the lowest validation error
 coef( regfit.best, min.val.errors )</code></pre>
 <pre><code>## (Intercept)  RSexFemale    Househld         Lab         BNP       HHInc 
 ##   35.920518    6.886259    2.062351   -3.394188    9.708402   -1.563859</code></pre>
+</div>
+<div id="k-fold-cross-validation" class="section level4">
+<h4>k-fold cross-validation</h4>
 <p>For cross-validation, we create the number of folds needed (10, in this case) and allocate a matrix for storing the results.</p>
 <pre class="r"><code># number of folds
 k &lt;- 10
 set.seed(1)
 # fold assignment for each observation
 folds &lt;- sample(1:k, nrow(df), replace = TRUE)
-# container for cross-validation errors
-cv.errors &lt;- matrix(NA, nrow = k, ncol = 20, dimnames = list(NULL, paste(1:20)))</code></pre>
+# frequency table of fold assignment (should be relatively balanced)
+table(folds)</code></pre>
+<pre><code>## folds
+##   1   2   3   4   5   6   7   8   9  10 
+##  99 110  97 116 117  93  93 108  94 114</code></pre>
+<pre class="r"><code># container for cross-validation errors
+cv.errors &lt;- matrix(NA, nrow = k, ncol = 16, dimnames = list(NULL, paste(1:16)))
+# have a look at the matrix
+cv.errors</code></pre>
+<pre><code>##        1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16
+##  [1,] NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA
+##  [2,] NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA
+##  [3,] NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA
+##  [4,] NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA
+##  [5,] NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA
+##  [6,] NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA
+##  [7,] NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA
+##  [8,] NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA
+##  [9,] NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA
+## [10,] NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA</code></pre>
 <p>We then run through each fold in a <code>for()</code> loop and predict the salary using our predict function. We then calculate the validation error for each fold and save them in the matrix created above.</p>
+<pre><code>##              1        2        3        4        5        6        7
+##  [1,] 358.7386 334.5939 323.8124 317.4231 311.8484 316.8302 315.0793
+##  [2,] 379.2802 376.4512 389.1254 374.1665 383.3341 380.6665 380.3079
+##  [3,] 442.9207 426.1023 412.6952 421.7677 418.0278 423.1556 425.7611
+##  [4,] 439.7298 437.2049 416.2253 423.5752 421.0708 424.7605 428.6010
+##  [5,] 459.3967 456.7258 446.3888 447.3912 443.2314 453.3881 459.1921
+##  [6,] 383.8459 366.5701 365.7940 377.7461 372.7480 372.1247 366.5200
+##  [7,] 361.8168 345.1388 352.6694 351.2537 339.6718 337.8319 335.8549
+##  [8,] 411.4885 400.3470 395.9349 383.9394 395.3248 386.5663 386.2542
+##  [9,] 424.7996 398.0276 380.7486 379.0400 377.4007 366.7923 362.5681
+## [10,] 321.5108 317.1196 337.1115 347.0513 341.4610 341.8680 344.7225
+##              8        9       10       11       12       13       14
+##  [1,] 315.1698 315.7354 316.5184 316.1405 318.2277 317.6919 317.6408
+##  [2,] 385.5818 386.1221 387.0886 387.2579 390.6045 391.3079 391.6435
+##  [3,] 429.8113 429.5870 427.2789 427.0476 421.5395 420.3084 421.8910
+##  [4,] 429.9591 436.7310 438.4459 432.5970 436.2287 434.4739 434.3651
+##  [5,] 458.8809 461.2268 451.4365 453.6881 458.8213 457.3609 459.5737
+##  [6,] 365.4540 367.0784 363.6070 362.8737 363.1972 361.1425 364.8936
+##  [7,] 333.5200 333.5632 334.1020 330.4406 329.3324 329.9864 331.1112
+##  [8,] 379.9411 379.1488 379.5117 379.5639 376.7432 376.7048 374.5593
+##  [9,] 363.4348 369.9028 366.8833 367.5859 375.8546 380.4760 380.8302
+## [10,] 342.6951 341.4322 338.6518 337.1286 335.1587 335.8101 336.3503
+##             15       16
+##  [1,] 317.6161 317.8835
+##  [2,] 390.7027 391.5483
+##  [3,] 420.6856 421.4002
+##  [4,] 436.6631 436.7150
+##  [5,] 458.9685 460.2302
+##  [6,] 367.5902 367.0877
+##  [7,] 331.0008 330.4741
+##  [8,] 374.7864 376.7694
+##  [9,] 382.5580 385.0165
+## [10,] 337.3890 336.5040</code></pre>
 <p>We calculate the mean error for all subsets by applying mean to each column using the <code>apply()</code> function.</p>
 <pre class="r"><code># average cross-validation errors over the folds
 mean.cv.errors &lt;- apply(cv.errors, 2, mean)
@@ -905,16 +938,14 @@ mean.cv.errors</code></pre>
 <pre><code>##        1        2        3        4        5        6        7        8 
 ## 398.3527 385.8281 382.0506 382.3354 380.4119 380.3984 380.4861 380.4448 
 ##        9       10       11       12       13       14       15       16 
-## 382.0528 380.3524 379.4324 380.5708 380.5263 381.2859 381.7960 382.3629 
-##       17       18       19       20 
-## 382.2162 382.5028 382.5268 382.5601</code></pre>
+## 382.0528 380.3524 379.4324 380.5708 380.5263 381.2859 381.7960 382.3629</code></pre>
 <pre class="r"><code># visualize
 par( mfrow = c(1,1) , oma = c(0,0,0,0))
 plot( mean.cv.errors, type = &quot;b&quot; )</code></pre>
 <p><img src="day5_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
-<p>Finally, we run <code>regsubsets()</code> on the full dataset and show the coefficients for the best performing model.</p>
+<p>Finally, we run <code>regsubsets()</code> on the full dataset and show the coefficients for the best performing model which we picked using 10-fold cross-validation.</p>
 <pre class="r"><code># run regsubsets on full data set
-reg.best &lt;- regsubsets(IMMBRIT ~ ., data = df, nvmax = 20)
+reg.best &lt;- regsubsets(IMMBRIT ~ ., data = df, nvmax = 16)
 # coefficients of subset which minimized test error
 coef(reg.best, which.min(mean.cv.errors))</code></pre>
 <pre><code>##     (Intercept)      RSexFemale            RAge        Househld 

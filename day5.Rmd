@@ -57,8 +57,11 @@ We check our data set for missing values variable by variable using `apply()`, `
 # check for missing values
 apply(df, 2, function(x) table(is.na(x))["TRUE"] )
 
-#  immbrit has missings which we drop
+# we drop missings in IMMBRIT
 df <- df[ !is.na(df$IMMBRIT), ]
+
+# to drop variables on the entire dataset (uncomment next line)
+#df <- na.omit(df)
 ```
 
 We now declare the categorical variables to be factors and create a copy of the main data set that excludes `over.estimate`.
@@ -91,7 +94,7 @@ With the `nvmax` parameter we control the number of variables in the model. The 
 
 ```{r}
 # increase the max number of variables
-regfit.full <- regsubsets(IMMBRIT ~ ., data = df, nvmax = 20)
+regfit.full <- regsubsets(IMMBRIT ~ ., data = df, nvmax = 16)
 reg.summary <- summary(regfit.full)
 ```
 
@@ -192,11 +195,11 @@ The default method used by `regsubsets()` is exhaustive but we can change it to 
 
 ```{r}
 # run forward selection
-regfit.fwd <- regsubsets(IMMBRIT ~ ., data = df, nvmax = 20, method = "forward")
+regfit.fwd <- regsubsets(IMMBRIT ~ ., data = df, nvmax = 16, method = "forward")
 summary(regfit.fwd)
 
 # run backward selection
-regfit.bwd <- regsubsets(IMMBRIT ~ ., data = df, nvmax = 20, method = "backward")
+regfit.bwd <- regsubsets(IMMBRIT ~ ., data = df, nvmax = 16, method = "backward")
 summary(regfit.bwd)
 
 # mdoel coefficients of best 7-variable models
@@ -223,10 +226,10 @@ test <- (!train)
 We use `regsubsets()` as we did in the last section, but limit the estimation to the training subset.
 
 ```{r}
-regfit.best <- regsubsets(IMMBRIT ~ ., data = df[train, ], nvmax = 20)
+regfit.best <- regsubsets(IMMBRIT ~ ., data = df[train, ], nvmax = 16)
 ```
 
-We create a matrix from the test subset using `model.matrix()`.
+We create a matrix from the test subset using `model.matrix()`. Model matrix takes the dependent variable out of the data and adds an intercept to it.
 
 ```{r}
 # test data
@@ -238,7 +241,7 @@ Next, we compute the validation error for each model.
 ```{r}
 # validation error for each model
 val.errors <- NA
-for (i in 1:20 ){
+for (i in 1:16 ){
   coefi <- coef(regfit.best, id = i)
   y_hat <- test.mat[, names(coefi)] %*% coefi
   val.errors[i] <- mean(  (df$IMMBRIT[test] - y_hat)^2   )
@@ -261,23 +264,30 @@ We can combine these steps into a function that can be called repeatedly when ru
 ```{r}
 # precict function for repeatedly choosing model with lowest test error
 predict.regsubsets <- function( object, newdata, id, ... ){
+  # get the formula from the model
   m.formula <- as.formula( object$call[[2]] )
+  # use that formula to create the model matrix for some new data
   mat <- model.matrix( m.formula, newdata )
+  # get coeffiecients where id is the number of variables
   coefi <- coef( object, id = id )
+  # get the variable names of current model
   xvars <- names( coefi )
+  # multiply data with coefficients
   mat[ , xvars ] %*% coefi
 }
 ```
 
-As a final step, we run `regsubsets()` on the full dataset and examine the coefficients associated with the model that has the lower validation error.
+We run `regsubsets()` on the full dataset and examine the coefficients associated with the model that has the lower validation error.
 
 ```{r}
 # best subset on full data set
-regfit.best <- regsubsets( IMMBRIT ~ ., data = df, nvmax = 20 )
+regfit.best <- regsubsets( IMMBRIT ~ ., data = df, nvmax = 16 )
 
 # examine coefficients of the model that had the lowest validation error
 coef( regfit.best, min.val.errors )
 ```
+
+#### k-fold cross-validation
 
 For cross-validation, we create the number of folds needed (10, in this case) and allocate a matrix for storing the results.
 
@@ -287,8 +297,12 @@ k <- 10
 set.seed(1)
 # fold assignment for each observation
 folds <- sample(1:k, nrow(df), replace = TRUE)
+# frequency table of fold assignment (should be relatively balanced)
+table(folds)
 # container for cross-validation errors
-cv.errors <- matrix(NA, nrow = k, ncol = 20, dimnames = list(NULL, paste(1:20)))
+cv.errors <- matrix(NA, nrow = k, ncol = 16, dimnames = list(NULL, paste(1:16)))
+# have a look at the matrix
+cv.errors
 ```
 
 We then run through each fold in a `for()` loop and predict the salary using our predict function. We then calculate the validation error for each fold and save them in the matrix created above.
@@ -298,10 +312,10 @@ We then run through each fold in a `for()` loop and predict the salary using our
 for (a in 1:k){
   
   # best subset selection on training data
-  best.fit <- regsubsets(IMMBRIT ~ ., data = df[ folds != a, ], nvmax = 20)
+  best.fit <- regsubsets(IMMBRIT ~ ., data = df[ folds != a, ], nvmax = 16)
   
-  # loop over the 20 subsets
-  for (b in 1:20){
+  # loop over the 16 subsets
+  for (b in 1:16){
     
     # predict response for test set for current subset
     pred <- predict(best.fit, df[ folds == a ,], id = b )
@@ -309,8 +323,10 @@ for (a in 1:k){
     # MSE into container; rows are folds; columns are subsets
     cv.errors[a, b] <- mean( (df$IMMBRIT[folds==a] - pred)^2 )
     
-  } # end of loop over the 20 subsets
+  } # end of loop over the 16 subsets
 } # end of loop over folds
+# the cross-validation error matrix
+cv.errors
 ```
 
 We calculate the mean error for all subsets by applying mean to each column using the `apply()` function.
@@ -325,11 +341,11 @@ par( mfrow = c(1,1) , oma = c(0,0,0,0))
 plot( mean.cv.errors, type = "b" )
 ```
 
-Finally, we run `regsubsets()` on the full dataset and show the coefficients for the best performing model.
+Finally, we run `regsubsets()` on the full dataset and show the coefficients for the best performing model which we picked using 10-fold cross-validation.
 
 ```{r}
 # run regsubsets on full data set
-reg.best <- regsubsets(IMMBRIT ~ ., data = df, nvmax = 20)
+reg.best <- regsubsets(IMMBRIT ~ ., data = df, nvmax = 16)
 # coefficients of subset which minimized test error
 coef(reg.best, which.min(mean.cv.errors))
 ```

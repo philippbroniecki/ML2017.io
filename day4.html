@@ -263,6 +263,9 @@ $(document).ready(function () {
       <a href="day5.html">Lab</a>
     </li>
     <li>
+      <a href="labs/Lab%Code%5.R">plain R-Code</a>
+    </li>
+    <li>
       <a href="./slides/D5%20-%20Model%20Selection%20I.pdf">Slides</a>
     </li>
     <li>
@@ -504,13 +507,8 @@ glm.fit &lt;- glm( IMMBRIT ~ RAge, data = data2)
 lm.fit &lt;- lm( IMMBRIT ~ RAge, data = data2)</code></pre>
 <p>The <code>glm()</code> function can be used with <code>cv.glm()</code> to estimate k-fold cross-validation prediction error.</p>
 <pre class="r"><code># use cv.glm() for k-fold corss-validation on glm
-library(boot)</code></pre>
-<pre><code>## 
-## Attaching package: &#39;boot&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:survival&#39;:
-## 
-##     aml</code></pre>
-<pre class="r"><code>cv.err &lt;- cv.glm(data2, glm.fit)
+library(boot)
+cv.err &lt;- cv.glm(data2, glm.fit)
 # cross-validation error
 cv.err$delta</code></pre>
 <pre><code>## [1] 380.2451 380.2415</code></pre>
@@ -569,9 +567,9 @@ lines( x = seq(1,7), y = cv.error.10, col = &quot;red&quot;, lty = &quot;dashed&
 <div id="the-bootstrap" class="section level3">
 <h3>The Bootstrap</h3>
 <p>In order to perform bootstrap analysis, we first create an <code>alpha.fn()</code> for estimating <span class="math inline">\(\alpha\)</span> You can think of <span class="math inline">\(\alpha\)</span> as a proxy for investment risk (see p. 187 for more details).</p>
-<pre class="r"><code>library(ISLR)</code></pre>
-<pre><code>## Warning: package &#39;ISLR&#39; was built under R version 3.4.1</code></pre>
-<pre class="r"><code># function on investment risk
+<pre class="r"><code>library(ISLR)
+
+# function on investment risk
 alpha.fn &lt;- function(data, index){
   X &lt;- data$X[index]
   Y &lt;- data$Y[index]
