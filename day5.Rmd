@@ -307,7 +307,7 @@ cv.errors
 
 We then run through each fold in a `for()` loop and predict the salary using our predict function. We then calculate the validation error for each fold and save them in the matrix created above.
 
-```{r, echo=FALSE}
+```{r}
 # loop over folds
 for (a in 1:k){
   

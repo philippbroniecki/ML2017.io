@@ -898,6 +898,25 @@ cv.errors</code></pre>
 ##  [9,] NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA
 ## [10,] NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA</code></pre>
 <p>We then run through each fold in a <code>for()</code> loop and predict the salary using our predict function. We then calculate the validation error for each fold and save them in the matrix created above.</p>
+<pre class="r"><code># loop over folds
+for (a in 1:k){
+  
+  # best subset selection on training data
+  best.fit &lt;- regsubsets(IMMBRIT ~ ., data = df[ folds != a, ], nvmax = 16)
+  
+  # loop over the 16 subsets
+  for (b in 1:16){
+    
+    # predict response for test set for current subset
+    pred &lt;- predict(best.fit, df[ folds == a ,], id = b )
+    
+    # MSE into container; rows are folds; columns are subsets
+    cv.errors[a, b] &lt;- mean( (df$IMMBRIT[folds==a] - pred)^2 )
+    
+  } # end of loop over the 16 subsets
+} # end of loop over folds
+# the cross-validation error matrix
+cv.errors</code></pre>
 <pre><code>##              1        2        3        4        5        6        7
 ##  [1,] 358.7386 334.5939 323.8124 317.4231 311.8484 316.8302 315.0793
 ##  [2,] 379.2802 376.4512 389.1254 374.1665 383.3341 380.6665 380.3079
