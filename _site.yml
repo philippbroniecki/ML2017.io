@@ -83,6 +83,8 @@ navbar:
       menu:
         - text: "Simulation"
           href: simulation.html
+        - text: "Monte Carlos"
+          href: montecarlo.html
 output:
   html_document:
     theme: sandstone

@@ -1,0 +1,187 @@
+---
+title: "Solution Day 5 - Subset Selection"
+author: "Philipp Broniecki and Lucas Leemann -- Machine Learning 1K"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Q1 
+
+1. Use the `rnorm()` function to generate a predictor $X$ of length $n=100$, as well as a noise vector $\epsilon$ of length $n=100$.
+
+```{r}
+set.seed(1)
+X <-  rnorm(100)
+eps <-  rnorm(100)
+```
+
+2. Generate a response vector $Y$ of length $n=100$ according to the model $$ Y = \beta_{0} + \beta_{1} X + \beta_{2} X^{2} + \beta_{3} X^{3} + \epsilon,$$
+
+We are selecting $\beta_{0}=3$, $\beta_{1}=2$, $\beta_{2}=-3$, and $\beta_{3}=0.3$.
+
+```{r}
+y_hat <- 3 + 2 * X + -3 * X^2 + .3 * X^3 + eps
+```
+
+3. Use the `regsubsets()` function to perform best subset selection in order to choose the best model containing the predictors $X,X^2,\ldots,X^{10}$. What is the best model obtained according to $C_{p}$, $BIC$, and adjusted $R^2$ Show some plots to provide evidence for your answer, and report the coefficients of the best model obtained. Note you will need to use the `data.frame()` function to create a single data set containing both $X$ and $Y$.
+
+In the $poly()$ function we set the argument $raw=TRUE$. This uses the raw polynomials. Otherwise orthogonal polynomials are used. Orthogonal polynomials are usually preferrable because they solve the problem that higher orders of $X$ are highly correlated. In addition, they keep the numbers from growing astronomically. One downside is that they are somewhat abstract. We know the true data generating process and thus the true coefficients. We want to compare the our estimates to those values. Thus, we do not want to use orthogonal polynomials.
+
+```{r}
+library(leaps)
+data.full <-  data.frame("y" = y_hat, "x" = X)
+mod.full <-  regsubsets(y ~ poly(x, 10, raw=TRUE), data = data.full, nvmax = 10)
+mod.summary <-  summary(mod.full)
+
+# Find the model size for best Cp, BIC and adjR2
+which.min(mod.summary$cp)
+which.min(mod.summary$bic)
+which.max(mod.summary$adjr2)
+
+# Plot Cp, BIC and adjr2
+plot(mod.summary$cp, xlab="Subset Size", ylab="Cp", pch=20, type="l")
+points(3, mod.summary$cp[3], pch=4, col="red", lwd=7)
+
+plot(mod.summary$bic, xlab="Subset Size", ylab="BIC", pch=20, type="l")
+points(3, mod.summary$bic[3], pch=4, col="red", lwd=7)
+
+plot(mod.summary$adjr2, xlab="Subset Size", ylab="Adjusted R2", pch=20, type="l")
+points(3, mod.summary$adjr2[3], pch=4, col="red", lwd=7)
+```
+
+**We find that with Cp, BIC and Adjusted R2 criteria, 3, 3, and 3 variable models are picked respectively.**
+
+```{r}
+coefficients(mod.full, id=3)
+```
+
+**All statistics pick $X^7$ over $X^3$. The remaining coefficients are quite close to the true $\beta$s.**
+
+4. Repeat (3), using forward stepwise selection and also using backwards stepwise selection. How does your answer compare to the results in (3)?
+
+**We fit forward and backward stepwise models to the data.**
+
+```{r, fig.height=9, fig.align="center"}
+# forward
+mod.fwd <-  regsubsets(y ~ poly(x, 10, raw=TRUE), 
+                       data = data.full, nvmax = 10, 
+                       method="forward")
+
+# backward
+mod.bwd <-  regsubsets(y ~ poly(x, 10, raw=TRUE), 
+                       data = data.full, nvmax=10, 
+                       method="backward")
+
+fwd.summary <-  summary(mod.fwd)
+bwd.summary <-  summary(mod.bwd)
+
+which.min(fwd.summary$cp)
+which.min(bwd.summary$cp)
+
+which.min(fwd.summary$bic)
+which.min(bwd.summary$bic)
+
+which.max(fwd.summary$adjr2)
+which.max(bwd.summary$adjr2)
+
+# Plot the statistics
+par(mfrow=c(3, 2))
+
+plot(fwd.summary$cp, xlab="Subset Size", ylab="Forward Cp", pch=20, type="l")
+points(3, fwd.summary$cp[3], pch=4, col="red", lwd=7)
+plot(bwd.summary$cp, xlab="Subset Size", ylab="Backward Cp", pch=20, type="l")
+points(3, bwd.summary$cp[3], pch=4, col="red", lwd=7)
+plot(fwd.summary$bic, xlab="Subset Size", ylab="Forward BIC", pch=20, type="l")
+points(3, fwd.summary$bic[3], pch=4, col="red", lwd=7)
+plot(bwd.summary$bic, xlab="Subset Size", ylab="Backward BIC", pch=20, type="l")
+points(3, bwd.summary$bic[3], pch=4, col="red", lwd=7)
+plot(fwd.summary$adjr2, xlab="Subset Size", ylab="Forward Adjusted R2", pch=20, type="l")
+points(3, fwd.summary$adjr2[3], pch=4, col="red", lwd=7)
+plot(bwd.summary$adjr2, xlab="Subset Size", ylab="Backward Adjusted R2", pch=20, type="l")
+points(4, bwd.summary$adjr2[4], pch=4, col="red", lwd=7)
+```
+
+**We see that all statistics pick 3 variable models except backward stepwise with adjusted R2R2. Here are the coefficients**
+
+```{r}
+coefficients(mod.fwd, id=3)
+coefficients(mod.bwd, id=3)
+coefficients(mod.fwd, id=4)
+```
+
+**Here forward stepwise picks $X^7$ over $X^3$. Backward stepwise with 3 variables picks $X^9$ while backward stepwise with 4 variables picks $X^4$ and $X^7$. All other coefficients are close to $\beta$s.**
+
+#### Q2
+
+We have seen that as the number of features used in a model increases, the training error will necessarily decrease, but the test error may not. We will now explore this in a simulated data set.
+
+1. Generate a data set with $p=20$ features, $n=1,000$ observations, and an associated quantitative response vector generated according to the model $$Y = X\beta+\epsilon,$$ where $\beta$ has some elements that are exactly equal to $0$.
+
+```{r}
+set.seed(1)
+p <-  20
+n <-  1000
+x <-  matrix(rnorm(n*p), n, p)
+B <-  rnorm(p)
+B[3] <-  0
+B[4] <-  0
+B[9] <-  0
+B[19] <-  0
+B[10] <-  0
+eps <-  rnorm(p)
+y <-  x %*% B + eps
+```
+
+2. Split your dataset into a training set containing $100$ observations and a test set containing $900$ observations.
+
+```{r}
+train <-  sample(seq(1000), 100, replace = FALSE)
+y.train <-  y[train,]
+y.test <-  y[-train,]
+x.train <-  x[train,]
+x.test <-  x[-train,]
+```
+
+3. Perform best subset selection on the training set, and plot the training set MSE associated with the best model of each size.
+
+```{r}
+library(leaps)
+regfit.full <-  regsubsets(y ~ . , 
+                           data = data.frame(x = x.train, y = y.train), 
+                           nvmax = p)
+val.errors <-  rep(NA, p)
+x_cols <-  colnames(x, do.NULL=FALSE, prefix="x.")
+
+for (i in 1:p) {
+  coefi <-  coef(regfit.full, id = i)
+  pred <-  as.matrix(x.train[, x_cols %in% names(coefi)]) %*% 
+    coefi[names(coefi) %in% x_cols]
+  val.errors[i] <-  mean((y.train - pred)^2)
+}
+
+plot(val.errors, ylab = "Training MSE", pch = 19, type = "b")
+```
+
+4. Plot the test set MSE associated with the best model of each size.
+
+```{r}
+val.errors <-  rep(NA, p)
+for (i in 1:p) {
+  coefi <-  coef(regfit.full, id = i)
+  pred <-  as.matrix(x.test[, x_cols %in% names(coefi)]) %*% 
+    coefi[names(coefi) %in% x_cols]
+  val.errors[i] <-  mean((y.test - pred)^2)
+}
+plot(val.errors, ylab = "Test MSE", pch = 19, type = "b")
+```
+
+5. For which model size does the test set MSE take on its minimum value? Comment on your results. If it takes on its minimum value for a model containing only an intercept or a model containing all of the features, then play around with the way that you are generating the data in 1. until you come up with a scenario in which the test set MSE is minimized for an intermediate model size.
+
+```{r}
+which.min(val.errors)
+```
+
+**16 parameter model has the smallest test MSE.**

@@ -9,9 +9,10 @@
 <meta name="generator" content="pandoc" />
 
 
+<meta name="author" content="Philipp Broniecki and Lucas Leemann – Machine Learning 1K" />
 
 
-<title>page_A</title>
+<title>Monte Carlo Simulation</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -354,6 +355,9 @@ $(document).ready(function () {
     <li>
       <a href="simulation.html">Simulation</a>
     </li>
+    <li>
+      <a href="montecarlo.html">Monte Carlos</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -368,30 +372,75 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">page_A</h1>
+<h1 class="title toc-ignore">Monte Carlo Simulation</h1>
+<h4 class="author"><em>Philipp Broniecki and Lucas Leemann – Machine Learning 1K</em></h4>
 
 </div>
 
 
-<div id="r-markdown" class="section level2">
-<h2>R Markdown</h2>
-<p>This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <a href="http://rmarkdown.rstudio.com" class="uri">http://rmarkdown.rstudio.com</a>.</p>
-<p>When you click the <strong>Knit</strong> button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:</p>
-<pre class="r"><code>summary(cars)</code></pre>
-<pre><code>##      speed           dist       
-##  Min.   : 4.0   Min.   :  2.00  
-##  1st Qu.:12.0   1st Qu.: 26.00  
-##  Median :15.0   Median : 36.00  
-##  Mean   :15.4   Mean   : 42.98  
-##  3rd Qu.:19.0   3rd Qu.: 56.00  
-##  Max.   :25.0   Max.   :120.00</code></pre>
-</div>
-<div id="including-plots" class="section level2">
-<h2>Including Plots</h2>
-<p>You can also embed plots, for example:</p>
-<p><img src="page_A_files/figure-html/pressure-1.png" width="672" /></p>
-<p>Note that the <code>echo = FALSE</code> parameter was added to the code chunk to prevent printing of the R code that generated the plot.</p>
-</div>
+<p>We set up an MC analysis to see whether problems of multicollinearity (high correlation between explanatory variables) go away as the sample size increases. The goal is see how well we are able to retrieve the true value of <span class="math inline">\(\beta_{1}\)</span> for varying strengths of correlation and sample sizes.</p>
+<p>The basic setup of the simulation is as follows:</p>
+<pre class="r"><code># the number of runs (simulations)
+sim.n &lt;- 1000
+# sequence of low to high correlation
+Rho &lt;- seq(from = 0, to = .9,length.out=10)
+# vector of sample sizes
+sample.N &lt;- c(100, 500, 1000, 2000)</code></pre>
+<p>We create a container <code>beta.catcher</code> that stores coefficient values for different simulations. The container is a 3-dimensional array where the first dimension is the number of simulations, the second is the sample size, the third is correlation.</p>
+<pre class="r"><code># rows = simulations, columns = sample size, layers = correlation
+beta.catcher &lt;- array(NA, c(sim.n, 4, 10))</code></pre>
+<p>We start simulating. This will take a while because we are iterating through <span class="math inline">\(sim.n * Rho * sample.N\)</span> iterations, i.e. <span class="math inline">\(40,000\)</span> iterations. Each time we regress <span class="math inline">\(y\)</span> on our covariates.</p>
+<pre class="r"><code># loop over the correlations
+for (i in 1:length(Rho)){
+  
+  # loop over sample sizes
+  for (j in 1:4){
+    
+    # loop over the random draws (number of simulations)
+    for (k in 1:sim.n){
+      
+      # current correlation
+      rho &lt;- Rho[i]
+      # current sample size
+      sample.n &lt;- sample.N[j] 
+      # variance covariance matrix current corr on off-diagonal
+      varL &lt;- matrix(c (1,rho,rho,1) , nrow = 2, ncol = 2)
+      # random draw of covariates as many as sample size
+      XX &lt;- MASS::mvrnorm(sample.n, rep(0,2), varL) 
+      # random noise
+      e &lt;- rnorm(sample.n)
+      # the true data generation process b1 = 1; b2 = 1
+      y &lt;- XX  %*% c(1,1) + e
+      # we regress the true y on the covariates and extract beta 1
+      beta.catcher[k,j,i] &lt;- coef(lm(y~XX))[2]  
+      
+      } # end of loop over number of sims
+    } # end of loop over sample sizes
+  } # end of loop over correlations</code></pre>
+<p>You can have a look at the container by calling it with <code>beta.catcher</code>. We remind ourselves of the dimensions with:</p>
+<pre class="r"><code>dim(beta.catcher)</code></pre>
+<pre><code>## [1] 1000    4   10</code></pre>
+<p>We take the MSE of each coefficient estimate in the container. This is an element-wise operation so the resulting object <code>error.sq</code> has the same dimensions as the container.</p>
+<pre class="r"><code>error.sq &lt;- (beta.catcher-1)^2 </code></pre>
+<p>We average over the simulations by taking the column means. This returns a matrix where the rows are now the different sample sizes (previously in the columns) and the columns are the correlations (previously in the layers). The <code>matrix mse.beta</code>, thus, has 4 rows and 10 columns.</p>
+<pre class="r"><code>mse.beta1 &lt;- colMeans(error.sq) </code></pre>
+<p>To show the effect of multicollinearity for increasing levels of correlation and for increasing sample sizes, we plot correlation on the x-axis and the MSE on the y-axis in four plots where sample size increases by plot.</p>
+<pre class="r"><code>par(mfrow=c(1,4))
+plot(c(0:9)/10,mse.beta1[1,], xlab=&quot;correlation&quot;, ylab=&quot;Mean Squared Error&quot;, type=&quot;o&quot;, pch=19, bty=&quot;n&quot;, main=&quot;N=100&quot;, ylim=c(0,.2))
+plot(c(0:9)/10,mse.beta1[2,], xlab=&quot;correlation&quot;, ylab=&quot;Mean Squared Error&quot;, type=&quot;o&quot;, pch=19, bty=&quot;n&quot;, main=&quot;N=500&quot;, ylim=c(0,.2))
+plot(c(0:9)/10,mse.beta1[3,], xlab=&quot;correlation&quot;, ylab=&quot;Mean Squared Error&quot;, type=&quot;o&quot;, pch=19, bty=&quot;n&quot;, main=&quot;N=1000&quot;, ylim=c(0,.2))
+plot(c(0:9)/10,mse.beta1[4,], xlab=&quot;correlation&quot;, ylab=&quot;Mean Squared Error&quot;, type=&quot;o&quot;, pch=19, bty=&quot;n&quot;, main=&quot;N=2000&quot;, ylim=c(0,.2))</code></pre>
+<p><img src="montecarlo_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>error.abs &lt;- abs(beta.catcher-1)
+mae.beta1 &lt;- colMeans(error.abs)
+
+par(mfrow=c(1,4))
+plot(c(0:9)/10,mae.beta1[1,], xlab=&quot;correlation&quot;, ylab=&quot;Means Absolute Error&quot;, type=&quot;o&quot;, pch=19, bty=&quot;n&quot;, main=&quot;N=100&quot;, ylim=c(0,.2))
+plot(c(0:9)/10,mae.beta1[2,], xlab=&quot;correlation&quot;, ylab=&quot;Means Absolute Error&quot;, type=&quot;o&quot;, pch=19, bty=&quot;n&quot;, main=&quot;N=500&quot;, ylim=c(0,.2))
+plot(c(0:9)/10,mae.beta1[3,], xlab=&quot;correlation&quot;, ylab=&quot;Means Absolute Error&quot;, type=&quot;o&quot;, pch=19, bty=&quot;n&quot;, main=&quot;N=1000&quot;, ylim=c(0,.2))
+plot(c(0:9)/10,mae.beta1[4,], xlab=&quot;correlation&quot;, ylab=&quot;Means Absolute Error&quot;, type=&quot;o&quot;, pch=19, bty=&quot;n&quot;, main=&quot;N=2000&quot;, ylim=c(0,.2))</code></pre>
+<p><img src="montecarlo_files/figure-html/unnamed-chunk-7-2.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The two take-aways are that (1) with increasing sample size the problem of multicollinearity decreases substantially and (2) bias increases exponentially with increasing levels of correlation.</p>
 
 
 

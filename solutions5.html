@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Philipp Broniecki and Lucas Leemann – Machine Learning 1K" />
+
+
+<title>Solution Day 5 - Subset Selection</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Essex 2017 Machine Learning</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 1
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day1.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D1%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions1.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 2
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day2.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D2%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions2.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 3
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day3.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D3%20-%20Classification.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions3.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 4
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day4.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D4%20-%20Resampling.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions4.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 5
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day5.html">Lab</a>
+    </li>
+    <li>
+      <a href="labs/Lab%20Code%205.R">plain R-Code</a>
+    </li>
+    <li>
+      <a href="./slides/D5%20-%20Model%20Selection%20I.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions5.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 6
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day6.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D6%20-%20Model%20Selection%20II.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions6.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 7
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day7.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D7%20-%20Polynomial%20Models.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions7.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 8
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day8.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D8%20-%20Tree-Based%20Methods.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions8.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 9
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day9.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D9%20-%20Unsupervised%20Learning.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions9.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    More
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="simulation.html">Simulation</a>
+    </li>
+    <li>
+      <a href="montecarlo.html">Monte Carlos</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Solution Day 5 - Subset Selection</h1>
+<h4 class="author"><em>Philipp Broniecki and Lucas Leemann – Machine Learning 1K</em></h4>
+
+</div>
+
+
+<div id="q1" class="section level4">
+<h4>Q1</h4>
+<ol style="list-style-type: decimal">
+<li>Use the <code>rnorm()</code> function to generate a predictor <span class="math inline">\(X\)</span> of length <span class="math inline">\(n=100\)</span>, as well as a noise vector <span class="math inline">\(\epsilon\)</span> of length <span class="math inline">\(n=100\)</span>.</li>
+</ol>
+<pre class="r"><code>set.seed(1)
+X &lt;-  rnorm(100)
+eps &lt;-  rnorm(100)</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Generate a response vector <span class="math inline">\(Y\)</span> of length <span class="math inline">\(n=100\)</span> according to the model <span class="math display">\[ Y = \beta_{0} + \beta_{1} X + \beta_{2} X^{2} + \beta_{3} X^{3} + \epsilon,\]</span></li>
+</ol>
+<p>We are selecting <span class="math inline">\(\beta_{0}=3\)</span>, <span class="math inline">\(\beta_{1}=2\)</span>, <span class="math inline">\(\beta_{2}=-3\)</span>, and <span class="math inline">\(\beta_{3}=0.3\)</span>.</p>
+<pre class="r"><code>y_hat &lt;- 3 + 2 * X + -3 * X^2 + .3 * X^3 + eps</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Use the <code>regsubsets()</code> function to perform best subset selection in order to choose the best model containing the predictors <span class="math inline">\(X,X^2,\ldots,X^{10}\)</span>. What is the best model obtained according to <span class="math inline">\(C_{p}\)</span>, <span class="math inline">\(BIC\)</span>, and adjusted <span class="math inline">\(R^2\)</span> Show some plots to provide evidence for your answer, and report the coefficients of the best model obtained. Note you will need to use the <code>data.frame()</code> function to create a single data set containing both <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>.</li>
+</ol>
+<p>In the <span class="math inline">\(poly()\)</span> function we set the argument <span class="math inline">\(raw=TRUE\)</span>. This uses the raw polynomials. Otherwise orthogonal polynomials are used. Orthogonal polynomials are usually preferrable because they solve the problem that higher orders of <span class="math inline">\(X\)</span> are highly correlated. In addition, they keep the numbers from growing astronomically. One downside is that they are somewhat abstract. We know the true data generating process and thus the true coefficients. We want to compare the our estimates to those values. Thus, we do not want to use orthogonal polynomials.</p>
+<pre class="r"><code>library(leaps)
+data.full &lt;-  data.frame(&quot;y&quot; = y_hat, &quot;x&quot; = X)
+mod.full &lt;-  regsubsets(y ~ poly(x, 10, raw=TRUE), data = data.full, nvmax = 10)
+mod.summary &lt;-  summary(mod.full)
+
+# Find the model size for best Cp, BIC and adjR2
+which.min(mod.summary$cp)</code></pre>
+<pre><code>## [1] 3</code></pre>
+<pre class="r"><code>which.min(mod.summary$bic)</code></pre>
+<pre><code>## [1] 3</code></pre>
+<pre class="r"><code>which.max(mod.summary$adjr2)</code></pre>
+<pre><code>## [1] 3</code></pre>
+<pre class="r"><code># Plot Cp, BIC and adjr2
+plot(mod.summary$cp, xlab=&quot;Subset Size&quot;, ylab=&quot;Cp&quot;, pch=20, type=&quot;l&quot;)
+points(3, mod.summary$cp[3], pch=4, col=&quot;red&quot;, lwd=7)</code></pre>
+<p><img src="solutions5_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code>plot(mod.summary$bic, xlab=&quot;Subset Size&quot;, ylab=&quot;BIC&quot;, pch=20, type=&quot;l&quot;)
+points(3, mod.summary$bic[3], pch=4, col=&quot;red&quot;, lwd=7)</code></pre>
+<p><img src="solutions5_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
+<pre class="r"><code>plot(mod.summary$adjr2, xlab=&quot;Subset Size&quot;, ylab=&quot;Adjusted R2&quot;, pch=20, type=&quot;l&quot;)
+points(3, mod.summary$adjr2[3], pch=4, col=&quot;red&quot;, lwd=7)</code></pre>
+<p><img src="solutions5_files/figure-html/unnamed-chunk-3-3.png" width="672" /></p>
+<p><strong>We find that with Cp, BIC and Adjusted R2 criteria, 3, 3, and 3 variable models are picked respectively.</strong></p>
+<pre class="r"><code>coefficients(mod.full, id=3)</code></pre>
+<pre><code>##              (Intercept) poly(x, 10, raw = TRUE)1 poly(x, 10, raw = TRUE)2 
+##               3.07627412               2.35623596              -3.16514887 
+## poly(x, 10, raw = TRUE)7 
+##               0.01046843</code></pre>
+<p><strong>All statistics pick <span class="math inline">\(X^7\)</span> over <span class="math inline">\(X^3\)</span>. The remaining coefficients are quite close to the true <span class="math inline">\(\beta\)</span>s.</strong></p>
+<ol start="4" style="list-style-type: decimal">
+<li>Repeat (3), using forward stepwise selection and also using backwards stepwise selection. How does your answer compare to the results in (3)?</li>
+</ol>
+<p><strong>We fit forward and backward stepwise models to the data.</strong></p>
+<pre class="r"><code># forward
+mod.fwd &lt;-  regsubsets(y ~ poly(x, 10, raw=TRUE), 
+                       data = data.full, nvmax = 10, 
+                       method=&quot;forward&quot;)
+
+# backward
+mod.bwd &lt;-  regsubsets(y ~ poly(x, 10, raw=TRUE), 
+                       data = data.full, nvmax=10, 
+                       method=&quot;backward&quot;)
+
+fwd.summary &lt;-  summary(mod.fwd)
+bwd.summary &lt;-  summary(mod.bwd)
+
+which.min(fwd.summary$cp)</code></pre>
+<pre><code>## [1] 3</code></pre>
+<pre class="r"><code>which.min(bwd.summary$cp)</code></pre>
+<pre><code>## [1] 3</code></pre>
+<pre class="r"><code>which.min(fwd.summary$bic)</code></pre>
+<pre><code>## [1] 3</code></pre>
+<pre class="r"><code>which.min(bwd.summary$bic)</code></pre>
+<pre><code>## [1] 3</code></pre>
+<pre class="r"><code>which.max(fwd.summary$adjr2)</code></pre>
+<pre><code>## [1] 3</code></pre>
+<pre class="r"><code>which.max(bwd.summary$adjr2)</code></pre>
+<pre><code>## [1] 3</code></pre>
+<pre class="r"><code># Plot the statistics
+par(mfrow=c(3, 2))
+
+plot(fwd.summary$cp, xlab=&quot;Subset Size&quot;, ylab=&quot;Forward Cp&quot;, pch=20, type=&quot;l&quot;)
+points(3, fwd.summary$cp[3], pch=4, col=&quot;red&quot;, lwd=7)
+plot(bwd.summary$cp, xlab=&quot;Subset Size&quot;, ylab=&quot;Backward Cp&quot;, pch=20, type=&quot;l&quot;)
+points(3, bwd.summary$cp[3], pch=4, col=&quot;red&quot;, lwd=7)
+plot(fwd.summary$bic, xlab=&quot;Subset Size&quot;, ylab=&quot;Forward BIC&quot;, pch=20, type=&quot;l&quot;)
+points(3, fwd.summary$bic[3], pch=4, col=&quot;red&quot;, lwd=7)
+plot(bwd.summary$bic, xlab=&quot;Subset Size&quot;, ylab=&quot;Backward BIC&quot;, pch=20, type=&quot;l&quot;)
+points(3, bwd.summary$bic[3], pch=4, col=&quot;red&quot;, lwd=7)
+plot(fwd.summary$adjr2, xlab=&quot;Subset Size&quot;, ylab=&quot;Forward Adjusted R2&quot;, pch=20, type=&quot;l&quot;)
+points(3, fwd.summary$adjr2[3], pch=4, col=&quot;red&quot;, lwd=7)
+plot(bwd.summary$adjr2, xlab=&quot;Subset Size&quot;, ylab=&quot;Backward Adjusted R2&quot;, pch=20, type=&quot;l&quot;)
+points(4, bwd.summary$adjr2[4], pch=4, col=&quot;red&quot;, lwd=7)</code></pre>
+<p><img src="solutions5_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><strong>We see that all statistics pick 3 variable models except backward stepwise with adjusted R2R2. Here are the coefficients</strong></p>
+<pre class="r"><code>coefficients(mod.fwd, id=3)</code></pre>
+<pre><code>##              (Intercept) poly(x, 10, raw = TRUE)1 poly(x, 10, raw = TRUE)2 
+##               3.07627412               2.35623596              -3.16514887 
+## poly(x, 10, raw = TRUE)7 
+##               0.01046843</code></pre>
+<pre class="r"><code>coefficients(mod.bwd, id=3)</code></pre>
+<pre><code>##              (Intercept) poly(x, 10, raw = TRUE)1 poly(x, 10, raw = TRUE)2 
+##              3.078881355              2.419817953             -3.177235617 
+## poly(x, 10, raw = TRUE)9 
+##              0.001870457</code></pre>
+<pre class="r"><code>coefficients(mod.fwd, id=4)</code></pre>
+<pre><code>##              (Intercept) poly(x, 10, raw = TRUE)1 poly(x, 10, raw = TRUE)2 
+##              3.112358625              2.369858879             -3.275726574 
+## poly(x, 10, raw = TRUE)4 poly(x, 10, raw = TRUE)7 
+##              0.027673638              0.009997134</code></pre>
+<p><strong>Here forward stepwise picks <span class="math inline">\(X^7\)</span> over <span class="math inline">\(X^3\)</span>. Backward stepwise with 3 variables picks <span class="math inline">\(X^9\)</span> while backward stepwise with 4 variables picks <span class="math inline">\(X^4\)</span> and <span class="math inline">\(X^7\)</span>. All other coefficients are close to <span class="math inline">\(\beta\)</span>s.</strong></p>
+</div>
+<div id="q2" class="section level4">
+<h4>Q2</h4>
+<p>We have seen that as the number of features used in a model increases, the training error will necessarily decrease, but the test error may not. We will now explore this in a simulated data set.</p>
+<ol style="list-style-type: decimal">
+<li>Generate a data set with <span class="math inline">\(p=20\)</span> features, <span class="math inline">\(n=1,000\)</span> observations, and an associated quantitative response vector generated according to the model <span class="math display">\[Y = X\beta+\epsilon,\]</span> where <span class="math inline">\(\beta\)</span> has some elements that are exactly equal to <span class="math inline">\(0\)</span>.</li>
+</ol>
+<pre class="r"><code>set.seed(1)
+p &lt;-  20
+n &lt;-  1000
+x &lt;-  matrix(rnorm(n*p), n, p)
+B &lt;-  rnorm(p)
+B[3] &lt;-  0
+B[4] &lt;-  0
+B[9] &lt;-  0
+B[19] &lt;-  0
+B[10] &lt;-  0
+eps &lt;-  rnorm(p)
+y &lt;-  x %*% B + eps</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Split your dataset into a training set containing <span class="math inline">\(100\)</span> observations and a test set containing <span class="math inline">\(900\)</span> observations.</li>
+</ol>
+<pre class="r"><code>train &lt;-  sample(seq(1000), 100, replace = FALSE)
+y.train &lt;-  y[train,]
+y.test &lt;-  y[-train,]
+x.train &lt;-  x[train,]
+x.test &lt;-  x[-train,]</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Perform best subset selection on the training set, and plot the training set MSE associated with the best model of each size.</li>
+</ol>
+<pre class="r"><code>library(leaps)
+regfit.full &lt;-  regsubsets(y ~ . , 
+                           data = data.frame(x = x.train, y = y.train), 
+                           nvmax = p)
+val.errors &lt;-  rep(NA, p)
+x_cols &lt;-  colnames(x, do.NULL=FALSE, prefix=&quot;x.&quot;)
+
+for (i in 1:p) {
+  coefi &lt;-  coef(regfit.full, id = i)
+  pred &lt;-  as.matrix(x.train[, x_cols %in% names(coefi)]) %*% 
+    coefi[names(coefi) %in% x_cols]
+  val.errors[i] &lt;-  mean((y.train - pred)^2)
+}
+
+plot(val.errors, ylab = &quot;Training MSE&quot;, pch = 19, type = &quot;b&quot;)</code></pre>
+<p><img src="solutions5_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<ol start="4" style="list-style-type: decimal">
+<li>Plot the test set MSE associated with the best model of each size.</li>
+</ol>
+<pre class="r"><code>val.errors &lt;-  rep(NA, p)
+for (i in 1:p) {
+  coefi &lt;-  coef(regfit.full, id = i)
+  pred &lt;-  as.matrix(x.test[, x_cols %in% names(coefi)]) %*% 
+    coefi[names(coefi) %in% x_cols]
+  val.errors[i] &lt;-  mean((y.test - pred)^2)
+}
+plot(val.errors, ylab = &quot;Test MSE&quot;, pch = 19, type = &quot;b&quot;)</code></pre>
+<p><img src="solutions5_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<ol start="5" style="list-style-type: decimal">
+<li>For which model size does the test set MSE take on its minimum value? Comment on your results. If it takes on its minimum value for a model containing only an intercept or a model containing all of the features, then play around with the way that you are generating the data in 1. until you come up with a scenario in which the test set MSE is minimized for an intermediate model size.</li>
+</ol>
+<pre class="r"><code>which.min(val.errors)</code></pre>
+<pre><code>## [1] 16</code></pre>
+<p><strong>16 parameter model has the smallest test MSE.</strong></p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
