@@ -42,7 +42,7 @@ navbar:
         - text: "Lab"
           href: day5.html
         - text: "plain R-Code"
-          href: "labs/Lab%Code%5.R" 
+          href: "labs/Lab%20Code%205.R" 
         - text: "Slides"
           href: "./slides/D5%20-%20Model%20Selection%20I.pdf"
         - text: "Solutions"
