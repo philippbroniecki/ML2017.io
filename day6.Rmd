@@ -234,26 +234,3 @@ We will now try to predict the per capita crime rate in the `Boston` data set. T
 1. Try out some of the regression methods explored in this chapter, such as best subset selection, the lasso, and ridge regression. Present and discuss results for the approaches that you consider.
 2. Propose a model (or set of models) that seem to perform well on this data set, and justify your answer. Make sure that you are evaluating model performance using validation set error, cross-validation, or some other reasonable alternative, as opposed to using training error.
 3. Does your chosen model involve all of the features in the data set? Why or why not?
-
-```{r, inlcude=FALSE}
-detachAllPackages <- function() {
-  
-  basic.packages <- c("package:stats","package:graphics","package:grDevices","package:utils","package:datasets","package:methods","package:base")
-  
-  package.list <- search()[ifelse(unlist(gregexpr("package:",search()))==1,TRUE,FALSE)]
-  
-  package.list <- setdiff(package.list,basic.packages)
-  
-  if (length(package.list)>0)  for (package in package.list) detach(package, character.only=TRUE)
-  
-}
-detachAllPackages()
-
-# keep on detaching namespaces
-unloadNamespace("AER")
-unloadNamespace("car")
-unloadNamespace("mgcv")
-unloadNamespace("Amelia")
-#unloadNamespace("pbkrtest")
-#unloadNamespace("lme4")
-```

@@ -656,26 +656,6 @@ lasso.coef</code></pre>
 <li>Propose a model (or set of models) that seem to perform well on this data set, and justify your answer. Make sure that you are evaluating model performance using validation set error, cross-validation, or some other reasonable alternative, as opposed to using training error.</li>
 <li>Does your chosen model involve all of the features in the data set? Why or why not?</li>
 </ol>
-<pre class="r"><code>detachAllPackages &lt;- function() {
-  
-  basic.packages &lt;- c(&quot;package:stats&quot;,&quot;package:graphics&quot;,&quot;package:grDevices&quot;,&quot;package:utils&quot;,&quot;package:datasets&quot;,&quot;package:methods&quot;,&quot;package:base&quot;)
-  
-  package.list &lt;- search()[ifelse(unlist(gregexpr(&quot;package:&quot;,search()))==1,TRUE,FALSE)]
-  
-  package.list &lt;- setdiff(package.list,basic.packages)
-  
-  if (length(package.list)&gt;0)  for (package in package.list) detach(package, character.only=TRUE)
-  
-}
-detachAllPackages()
-
-# keep on detaching namespaces
-unloadNamespace(&quot;AER&quot;)
-unloadNamespace(&quot;car&quot;)
-unloadNamespace(&quot;mgcv&quot;)
-unloadNamespace(&quot;Amelia&quot;)
-#unloadNamespace(&quot;pbkrtest&quot;)
-#unloadNamespace(&quot;lme4&quot;)</code></pre>
 </div>
 </div>
 </div>
