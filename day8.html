@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Philipp Broniecki and Lucas Leemann – Machine Learning 1K" />
+
+
+<title>Lab 8 – Tree-based Methods</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Essex 2017 Machine Learning</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 1
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day1.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D1%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions1.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 2
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day2.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D2%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions2.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 3
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day3.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D3%20-%20Classification.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions3.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 4
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day4.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D4%20-%20Resampling.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions4.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 5
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day5.html">Lab</a>
+    </li>
+    <li>
+      <a href="labs/Lab%20Code%205.R">plain R-Code</a>
+    </li>
+    <li>
+      <a href="./slides/D5%20-%20Model%20Selection%20I.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions5.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 6
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day6.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D6%20-%20Model%20Selection%20II.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions6.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 7
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day7.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D7%20-%20Polynomial%20Models.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions7.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 8
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day8.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D8%20-%20Tree-Based%20Methods.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions8.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 9
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day9.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D9%20-%20Unsupervised%20Learning.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions9.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    More
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="simulation.html">Simulation</a>
+    </li>
+    <li>
+      <a href="montecarlo.html">Monte Carlos</a>
+    </li>
+    <li>
+      <a href="./data/titanic.dta">Titanic Data</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Lab 8 – Tree-based Methods</h1>
+<h4 class="author"><em>Philipp Broniecki and Lucas Leemann – Machine Learning 1K</em></h4>
+
+</div>
+
+
+<div id="based-on-james-et-al.-2013" class="section level5">
+<h5>(based on James et al. 2013)</h5>
+<p>We load post-election survey data from the 2004 British Election Survey.</p>
+<pre class="r"><code># clear workspace
+rm(list=ls())
+library(foreign)
+bes &lt;- read.dta(&quot;./data/bes.dta&quot;)
+bes &lt;- na.omit(bes)
+
+# clean in_school
+table(bes$in_school)</code></pre>
+<pre><code>## 
+##  -0.405100243979883  -0.286622836951644 -0.0932005119161492 
+##                   1                   1                   1 
+##   -0.08278915151733                   0  0.0403350016659423 
+##                   1                4120                   1 
+##   0.123419680101826   0.247478125358543                   1 
+##                   1                   1                  34</code></pre>
+<pre class="r"><code>bes$in_school &lt;- ifelse (bes$in_school != 1, 0, bes$in_school)
+table(bes$in_school)</code></pre>
+<pre><code>## 
+##    0    1 
+## 4127   34</code></pre>
+<pre class="r"><code># data manipulation
+categcorical &lt;- c(&quot;Turnout&quot;, &quot;Vote2001&quot;, &quot;Gender&quot;, &quot;PartyID&quot;, &quot;Telephone&quot;, &quot;edu15&quot;,
+                  &quot;edu16&quot;, &quot;edu17&quot;, &quot;edu18&quot;, &quot;edu19plus&quot;, &quot;in_school&quot;, &quot;in_uni&quot;)
+# declare factor variables
+bes[, categcorical] &lt;- lapply(bes[, categcorical], factor)</code></pre>
+</div>
+<div id="classification-trees" class="section level3">
+<h3>Classification Trees</h3>
+<p>We use trees to classifyrespondents into voters and non-voters.</p>
+<pre class="r"><code>library(tree)</code></pre>
+<pre><code>## Warning: package &#39;tree&#39; was built under R version 3.4.1</code></pre>
+<pre class="r"><code># build classification tree (- in formula language means except)
+t1 &lt;- tree( Turnout ~ . -CivicDutyScores, data = bes)
+summary(t1)</code></pre>
+<pre><code>## 
+## Classification tree:
+## tree(formula = Turnout ~ . - CivicDutyScores, data = bes)
+## Variables actually used in tree construction:
+## [1] &quot;CivicDutyIndex&quot; &quot;Vote2001&quot;       &quot;polinfoindex&quot;  
+## Number of terminal nodes:  6 
+## Residual mean deviance:  0.8434 = 3504 / 4155 
+## Misclassification error rate: 0.1769 = 736 / 4161</code></pre>
+<p>We can plot the tree using the standard plot function. On every split a condition is printed. The observations in the left branch are those for which the condition is true and the ones on the right are those for which the condition is false.</p>
+<pre class="r"><code># plot tree object
+plot(t1)
+text(t1, pretty = 0)</code></pre>
+<p><img src="day8_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code># examin the tree object
+t1</code></pre>
+<pre><code>## node), split, n, deviance, yval, (yprob)
+##       * denotes terminal node
+## 
+##  1) root 4161 4763.0 1 ( 0.25931 0.74069 )  
+##    2) CivicDutyIndex &lt; 19.5 3066 2446.0 1 ( 0.13666 0.86334 )  
+##      4) Vote2001: 0 243  333.4 1 ( 0.44033 0.55967 ) *
+##      5) Vote2001: 1 2823 1963.0 1 ( 0.11052 0.88948 )  
+##       10) CivicDutyIndex &lt; 16.5 1748  950.8 1 ( 0.07723 0.92277 ) *
+##       11) CivicDutyIndex &gt; 16.5 1075  961.7 1 ( 0.16465 0.83535 ) *
+##    3) CivicDutyIndex &gt; 19.5 1095 1471.0 0 ( 0.60274 0.39726 )  
+##      6) Vote2001: 0 429  391.4 0 ( 0.82984 0.17016 ) *
+##      7) Vote2001: 1 666  918.2 1 ( 0.45646 0.54354 )  
+##       14) polinfoindex &lt; 5.5 356  483.4 0 ( 0.58427 0.41573 ) *
+##       15) polinfoindex &gt; 5.5 310  383.7 1 ( 0.30968 0.69032 ) *</code></pre>
+<p>Now we use the validation set approach for classification. We split our data and re-grow the tree on the training data.</p>
+<pre class="r"><code># initialize random number generator
+set.seed(2)
+
+# training/test split
+train &lt;- sample(nrow(bes), size = as.integer(nrow(bes)*.66))
+bes.test &lt;- bes[ -train, ]
+turnout.test &lt;- ifelse( bes$Turnout[-train] == &quot;1&quot;, yes = 1, no = 0)
+
+# grow tree on training data
+t2 &lt;- tree( Turnout ~ . , data = bes, subset = train)</code></pre>
+<p>We predict outcomes using the <code>predict()</code> function.</p>
+<pre class="r"><code># predict outcomes
+t2.pred &lt;- predict(t2, newdata = bes.test, type = &quot;class&quot;)
+
+# confusion matrix
+table(prediction = t2.pred, truth = turnout.test)</code></pre>
+<pre><code>##           truth
+## prediction   0   1
+##          0 193  73
+##          1 168 981</code></pre>
+<pre class="r"><code># percent correctly classified
+mean( t2.pred == turnout.test )</code></pre>
+<pre><code>## [1] 0.829682</code></pre>
+<p>We correctly classify <span class="math inline">\(83\%\)</span> of the observations. In classification models the Brier Score is often used as as measure of model quality. We estimate it as the average of the squared differences between predicted probabilities and true outcomes. It is, thus, similar to the MSE.</p>
+<pre class="r"><code># Brier score
+t2.pred &lt;- predict(t2, newdata = bes.test, type = &quot;vector&quot;)
+head(t2.pred)</code></pre>
+<pre><code>##            0         1
+## 9  0.0403071 0.9596929
+## 11 0.1722365 0.8277635
+## 16 0.1722365 0.8277635
+## 18 0.1722365 0.8277635
+## 21 0.0403071 0.9596929
+## 25 0.0403071 0.9596929</code></pre>
+<pre class="r"><code>t2.pred &lt;- t2.pred[,2]
+# brier score
+mean( (t2.pred - turnout.test)^2 )</code></pre>
+<pre><code>## [1] 0.1292594</code></pre>
+<p>We turn to cost-complexity pruning to see if we can simplify the tree and thus decrease variance without increasing bias. We use k-fold cross-validation to determine the best size of the tree.</p>
+<pre class="r"><code>set.seed(3)
+cv.t2 &lt;- cv.tree(t2, FUN = prune.misclass)
+
+# illustrate
+par(mfrow = c(1, 2))
+plot(cv.t2$size, cv.t2$dev, type = &quot;b&quot;)
+plot(cv.t2$k, cv.t2$dev, type = &quot;b&quot;)</code></pre>
+<p><img src="day8_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>We can prune the tree to four terminal nodes.</p>
+<pre class="r"><code># prune the tree (pick the smallest tree that does not substiantially increase error)
+prune.t2 &lt;- prune.misclass(t2, best = 4)
+par(mfrow = c(1,1))
+plot(prune.t2)
+text(prune.t2, pretty = 0)</code></pre>
+<p><img src="day8_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<pre class="r"><code># predict outcomes
+t2.pred &lt;- predict(prune.t2, newdata = bes.test, type = &quot;class&quot;)
+
+# did we loose predictive power?
+table(prediction = t2.pred, truth = turnout.test)</code></pre>
+<pre><code>##           truth
+## prediction   0   1
+##          0 193  73
+##          1 168 981</code></pre>
+<pre class="r"><code>mean( t2.pred == turnout.test )</code></pre>
+<pre><code>## [1] 0.829682</code></pre>
+<pre class="r"><code># Brier score
+t2.pred &lt;- predict(t2, newdata = bes.test, type = &quot;vector&quot;)[,2]
+mean( (t2.pred - turnout.test)^2 ) </code></pre>
+<pre><code>## [1] 0.1292594</code></pre>
+<p>We still correctly classify <span class="math inline">\(83\%\)</span> of the observations and the brier score remained the same.</p>
+<p>In the previous plots, we saw that we should do worse if we prune back the tree to have less than 4 terminal nodes. We examine what happens if we overdo it.</p>
+<pre class="r"><code># using &quot;wrong&quot; value for pruning (where the error rate does increase)
+prune.t2 &lt;- prune.misclass(t2, best = 2)
+plot(prune.t2)
+text(prune.t2, pretty = 0)</code></pre>
+<p><img src="day8_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<pre class="r"><code># predict outcomes based on a tree that is too small
+t2.pred &lt;- predict(prune.t2, newdata = bes.test, type = &quot;class&quot;)
+table(prediction = t2.pred, truth = turnout.test)</code></pre>
+<pre><code>##           truth
+## prediction   0   1
+##          0 252 185
+##          1 109 869</code></pre>
+<pre class="r"><code># our predictive power decreased
+mean( t2.pred == turnout.test )</code></pre>
+<pre><code>## [1] 0.7922261</code></pre>
+<pre class="r"><code># brier score
+t2.pred &lt;- predict(prune.t2, newdata = bes.test, type = &quot;vector&quot;)[,2]
+mean( (t2.pred - turnout.test)^2 ) </code></pre>
+<pre><code>## [1] 0.1439949</code></pre>
+<p>We see that our test error increases.</p>
+</div>
+<div id="regression-trees" class="section level3">
+<h3>Regression Trees</h3>
+<p>We predict the continuous variable <code>Income</code>. The plot of the regression tree is similar. However, in the terminal nodes the mean values of the dependent variable for that group are displayed rather than the class labels.</p>
+<pre class="r"><code># grow a regression tree
+set.seed(123)
+reg.t1 &lt;- tree(Income ~ ., data = bes, subset = train)
+summary(reg.t1)</code></pre>
+<pre><code>## 
+## Regression tree:
+## tree(formula = Income ~ ., data = bes, subset = train)
+## Variables actually used in tree construction:
+## [1] &quot;edu19plus&quot; &quot;Age&quot;       &quot;Telephone&quot;
+## Number of terminal nodes:  6 
+## Residual mean deviance:  3.659 = 10030 / 2740 
+## Distribution of residuals:
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+## -6.8830 -1.1430  0.1174  0.0000  1.2990  9.3210</code></pre>
+<pre class="r"><code># plot regression tree
+plot(reg.t1)
+text(reg.t1, pretty = 0)</code></pre>
+<p><img src="day8_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code># examin the tree objext
+t1</code></pre>
+<pre><code>## node), split, n, deviance, yval, (yprob)
+##       * denotes terminal node
+## 
+##  1) root 4161 4763.0 1 ( 0.25931 0.74069 )  
+##    2) CivicDutyIndex &lt; 19.5 3066 2446.0 1 ( 0.13666 0.86334 )  
+##      4) Vote2001: 0 243  333.4 1 ( 0.44033 0.55967 ) *
+##      5) Vote2001: 1 2823 1963.0 1 ( 0.11052 0.88948 )  
+##       10) CivicDutyIndex &lt; 16.5 1748  950.8 1 ( 0.07723 0.92277 ) *
+##       11) CivicDutyIndex &gt; 16.5 1075  961.7 1 ( 0.16465 0.83535 ) *
+##    3) CivicDutyIndex &gt; 19.5 1095 1471.0 0 ( 0.60274 0.39726 )  
+##      6) Vote2001: 0 429  391.4 0 ( 0.82984 0.17016 ) *
+##      7) Vote2001: 1 666  918.2 1 ( 0.45646 0.54354 )  
+##       14) polinfoindex &lt; 5.5 356  483.4 0 ( 0.58427 0.41573 ) *
+##       15) polinfoindex &gt; 5.5 310  383.7 1 ( 0.30968 0.69032 ) *</code></pre>
+<p>We estimate test error of our tree.</p>
+<pre class="r"><code># MSE
+mean( (bes.test$Income - predict(reg.t1, newdata = bes.test))^2)</code></pre>
+<pre><code>## [1] 4.083786</code></pre>
+<p>We apply pruning again to get a smaller more interpretable tree.</p>
+<pre class="r"><code># cross-validation (to determine cutback size for pruning)
+cv.reg.t1 &lt;- cv.tree(reg.t1)
+plot(cv.reg.t1)</code></pre>
+<p><img src="day8_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<pre class="r"><code>plot(cv.reg.t1$size, cv.reg.t1$dev, type = &quot;b&quot;)</code></pre>
+<p><img src="day8_files/figure-html/unnamed-chunk-12-2.png" width="672" /></p>
+<p>This is time we will increase error by pruning the tree. We choose four as a smaller tree size that does not increase RSS by much.</p>
+<pre class="r"><code># pruning
+prune.reg.t1 &lt;- prune.tree(reg.t1, best = 4)
+plot(prune.reg.t1)
+text(prune.reg.t1, pretty = 0)</code></pre>
+<p><img src="day8_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p>We can predict the outcome based on our pruned back tree. We will predict four values because we have four terminal nodes. We can illustrate the groups and their variance and estimate the MSE of our prediction.</p>
+<pre class="r"><code># predict outcomes
+yhat &lt;- predict(prune.reg.t1, newdata = bes.test)
+plot(yhat, bes.test$Income)
+abline(0, 1)</code></pre>
+<p><img src="day8_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<pre class="r"><code># MSE
+mean((yhat - bes.test$Income)^2)</code></pre>
+<pre><code>## [1] 4.200642</code></pre>
+<p>We increased our MSE by:</p>
+<pre class="r"><code>(4.200642 - 4.083786) / 4.083786</code></pre>
+<pre><code>## [1] 0.02861462</code></pre>
+<p><span class="math inline">\(3\%\)</span>.</p>
+<div id="bagging-and-random-forests" class="section level4">
+<h4>Bagging and Random Forests</h4>
+<p>We now apply bagging and random forests to improve our prediction. Bagging is the idea that the high variance of a single bushy tree can be reduced by bootstapping samples and averaging over trees that were grown on the samples.</p>
+<p>Note: Bagging gets an estimate of the test error for free as it always leaves out some observations when a tree is fit. The reported out-of-bag MSE is thus an estimate of test error. We also estimate test error separately on a test set. This is one particular test set, so the test error may vary.</p>
+<p>In our run below the OOB MSE may be a better estimate of test error. It is reported to be lower than our test error estimate.</p>
+<pre class="r"><code>library(randomForest)</code></pre>
+<pre><code>## randomForest 4.6-12</code></pre>
+<pre><code>## Type rfNews() to see new features/changes/bug fixes.</code></pre>
+<pre class="r"><code>bag1 &lt;- randomForest(Income ~ . , mtry = 19, data = bes, subset = train, importance = TRUE)
+bag1</code></pre>
+<pre><code>## 
+## Call:
+##  randomForest(formula = Income ~ ., data = bes, mtry = 19, importance = TRUE,      subset = train) 
+##                Type of random forest: regression
+##                      Number of trees: 500
+## No. of variables tried at each split: 19
+## 
+##           Mean of squared residuals: 3.545845
+##                     % Var explained: 38.59</code></pre>
+<pre class="r"><code># predict outcome, illustrate, MSE
+yhat.bag &lt;- predict(bag1, newdata = bes.test)
+plot(yhat.bag, bes.test$Income)
+abline(0, 1) # line of 1:1 perfect prediction</code></pre>
+<p><img src="day8_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<pre class="r"><code>mean( (yhat.bag - bes.test$Income)^2 )</code></pre>
+<pre><code>## [1] 3.836317</code></pre>
+<pre class="r"><code># reduction of error
+(3.836317 - 4.200642) / 3.836317</code></pre>
+<pre><code>## [1] -0.09496739</code></pre>
+<p>We reduce the error rate by <span class="math inline">\(9\%\)</span> by using bagging.</p>
+<p>We examine what happens when we reduce the number of trees we grow. The default is 500.</p>
+<pre class="r"><code># dcrease the number of trees (defaults to 500)
+bag2 &lt;- randomForest(Income ~ ., mtry = 19, data = bes, subset = train, ntree = 25, importance = TRUE)
+
+# predict outcome
+yhat.bag &lt;- predict(bag2, newdata = bes.test)
+mean( (yhat.bag - bes.test$Income)^2 )</code></pre>
+<pre><code>## [1] 4.001648</code></pre>
+<p>The result is that our rate increases substantially again.</p>
+<p>We now apply random forest. The trick is to decorrelate the trees by randomly considering only a subset of variables at every split. We thereby reduce variance further. The number of variables argument <code>mtry</code> is a tuning parameter.</p>
+<pre class="r"><code>## Random Forest: not trying all vars at each split decorrelates the trees
+set.seed(123)
+
+# we try to find the optimal tuning parameter for the number of variables to use at each split
+oob.error &lt;- NA
+val.set.error &lt;- NA
+for ( idx in 1:10){
+  rf1 &lt;- randomForest(Income ~ ., mtry = idx, data = bes, subset = train, importance = TRUE)
+  # record out of bag error
+  oob.error[idx] &lt;- rf1$mse[length(rf1$mse)]
+  cat(paste(&quot;\n&quot;, &quot;Use &quot;, idx, &quot; variables at each split&quot;, sep=&quot;&quot;))
+  # record validation set error
+  val.set.error[idx] &lt;- mean( (predict(rf1, newdata = bes.test) - bes.test$Income)^2 )
+}</code></pre>
+<pre><code>## 
+## Use 1 variables at each split
+## Use 2 variables at each split
+## Use 3 variables at each split
+## Use 4 variables at each split
+## Use 5 variables at each split
+## Use 6 variables at each split
+## Use 7 variables at each split
+## Use 8 variables at each split
+## Use 9 variables at each split
+## Use 10 variables at each split</code></pre>
+<pre class="r"><code># check optimal values for mtry
+matplot( 1:idx, cbind(oob.error, val.set.error), pch = 19, col = c(&quot;red&quot;, &quot;blue&quot;),
+         type = &quot;b&quot;, ylab = &quot;MSE&quot;, frame.plot = FALSE)
+legend(&quot;topright&quot;, legend = c(&quot;OOB&quot;, &quot;Val. Set&quot;), pch = 19, col = c(&quot;red&quot;, &quot;blue&quot;),
+       bty = &quot;n&quot;)</code></pre>
+<p><img src="day8_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p>We use 4 as the optimal value for <code>mtry</code>.</p>
+<pre class="r"><code>rf1 &lt;- randomForest(Income ~ ., mtry = 4, data = bes, subset = train, importance = TRUE)
+
+# predict outcomes
+yhat.rf &lt;- predict(rf1, newdata = bes.test)
+mean( (yhat.rf - bes.test$Income)^2 )</code></pre>
+<pre><code>## [1] 3.738068</code></pre>
+<pre class="r"><code># reduction in error
+(3.738068 - 3.836317) / 3.836317</code></pre>
+<pre><code>## [1] -0.02561024</code></pre>
+<p>We reduced the error rate by another <span class="math inline">\(3\%\)</span> by decorrelating the trees. We can exmine variable importance as well. Variable reduction is obtained by as the average that a predictor reduces error at splits within a tree where it was used and averaged again over all trees. Similarly, node purity is based on the gini index of how heterogenous a group becomes due to a split.</p>
+<pre class="r"><code># which varaibles help explain outcome
+importance(rf1)</code></pre>
+<pre><code>##                     %IncMSE IncNodePurity
+## cs_id            2.06598543    1191.62963
+## Turnout         10.63267089     187.08688
+## Vote2001         4.74392742     134.49639
+## Age             61.67167351    2726.49512
+## Gender           7.75324398     270.15383
+## PartyID         -1.30764676     186.00643
+## Influence        8.25220908     622.72510
+## Attention       13.48430187     734.16131
+## Telephone       41.55335004     420.28959
+## LeftrightSelf    3.84799215     701.93854
+## CivicDutyIndex  19.09482995     765.92377
+## polinfoindex    12.62283324     761.74783
+## edu15           22.02752039     856.04335
+## edu16           11.78494180     286.72268
+## edu17            8.09626481     109.68566
+## edu18            8.90440198     102.36531
+## edu19plus       53.12112919    2236.08056
+## in_school        6.07771141      77.57576
+## in_uni          -0.02058015      51.77373
+## CivicDutyScores 18.09776217    1145.64391</code></pre>
+<pre class="r"><code># importance plot
+varImpPlot(rf1)</code></pre>
+<p><img src="day8_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+</div>
+<div id="boosting" class="section level4">
+<h4>Boosting</h4>
+<pre class="r"><code>library(gbm)</code></pre>
+<pre><code>## Loading required package: survival</code></pre>
+<pre><code>## Loading required package: lattice</code></pre>
+<pre><code>## Loading required package: parallel</code></pre>
+<pre><code>## Loaded gbm 2.1.3</code></pre>
+<pre class="r"><code>set.seed(1234)</code></pre>
+<p>We run gradient boosting. The tuning parameters are the tree size. Tree size is directly related to the second tuning parameter: the learning rate. When the learning rate is smaller, we need more trees. The third tuning parameter interaction.depth determines how bushy the tree is. Common choices are 1, 2, 4, 8. When interaction depth is 1, each tree is a stump. If we increase to two we can get bivariate interactions with 2 splits and so. A final parameter that is related to the complexity of the tree could be minimum number of observations in the terminal node which defaults to 10.</p>
+<pre class="r"><code># gradient boosting
+gb1 &lt;- gbm(Income ~ ., data = bes[train, ], 
+           distribution = &quot;gaussian&quot;, 
+           n.trees = 5000, 
+           interaction.depth = 4,
+           shrinkage = 0.001)
+
+summary(gb1)</code></pre>
+<p><img src="day8_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<pre><code>##                             var    rel.inf
+## edu19plus             edu19plus 41.4726490
+## Age                         Age 28.6747586
+## Telephone             Telephone  7.0882505
+## polinfoindex       polinfoindex  5.3053648
+## Gender                   Gender  2.5211165
+## edu15                     edu15  2.4673348
+## cs_id                     cs_id  2.1982736
+## LeftrightSelf     LeftrightSelf  1.7370627
+## Turnout                 Turnout  1.4784065
+## in_school             in_school  1.2178698
+## CivicDutyScores CivicDutyScores  1.1787687
+## Attention             Attention  1.1600579
+## edu16                     edu16  0.9406745
+## Influence             Influence  0.9211903
+## CivicDutyIndex   CivicDutyIndex  0.6809589
+## Vote2001               Vote2001  0.3880845
+## edu17                     edu17  0.2379545
+## edu18                     edu18  0.1226292
+## PartyID                 PartyID  0.1054473
+## in_uni                   in_uni  0.1031473</code></pre>
+<pre class="r"><code># partial dependence plots
+plot(gb1, i = &quot;edu19plus&quot;)</code></pre>
+<p><img src="day8_files/figure-html/unnamed-chunk-22-2.png" width="672" /></p>
+<pre class="r"><code>plot(gb1, i = &quot;Age&quot;)</code></pre>
+<p><img src="day8_files/figure-html/unnamed-chunk-22-3.png" width="672" /></p>
+<pre class="r"><code># predict outcome
+yhat.gb &lt;- predict(gb1, newdata = bes.test, n.trees = 5000)
+mean( (yhat.gb - bes.test$Income)^2 )</code></pre>
+<pre><code>## [1] 3.720392</code></pre>
+<pre class="r"><code># reduction in error
+(3.716085 - 3.738321) / 3.738321</code></pre>
+<pre><code>## [1] -0.005948125</code></pre>
+<p>We reduce the error rate by roughly another half percent.</p>
+</div>
+</div>
+<div id="exercises" class="section level3">
+<h3>Exercises</h3>
+<div id="q1" class="section level4">
+<h4>Q1</h4>
+<p>We applied random forests for varying <code>mtry</code>. In addition vary the number of trees and create a plot that displays both test error and OOB error.</p>
+</div>
+<div id="q2" class="section level4">
+<h4>Q2</h4>
+<p>Looking at the Carseats data from the ISLR package we will seek to predict <code>Sales</code> using regression trees and related approaches, treating the response as a quantitative variable.</p>
+<ol style="list-style-type: decimal">
+<li>Split the data set into a training set and a test set.</li>
+<li>Fit a regression tree to the training set. Plot the tree, and interpret the results. What test error rate do you obtain?</li>
+<li>Use cross-validation in order to determine the optimal level of tree complexity. Does pruning the tree improve the test error rate?</li>
+<li>Use the bagging approach in order to analyze this data. What test error rate do you obtain? Use the <code>importance()</code> function to determine which variables are most important.</li>
+<li>Use random forests to analyze this data. What test error rate do you obtain? Use the <code>importance()</code> function to determine which variables are most important. Describe the effect of mm, the number of variables considered at each split, on the error rate obtained.</li>
+</ol>
+</div>
+<div id="q3" class="section level4">
+<h4>Q3</h4>
+<p>This problem involves the OJ dataset which is part of the ISLR package.</p>
+<ol style="list-style-type: decimal">
+<li>Create a training set containing a random sample of 800 observations, and a test set containing the remaining observations.</li>
+<li>Fit a tree to the training data, with <code>Purchase</code> as the response and the other variables except for <code>Buy</code> as predictors. Use the <code>summary()</code> function to produce summary statistics about the tree, and describe the results obtained. What is the training error rate? How many terminal nodes does the tree have?</li>
+<li>Type in the name of the tree object in order to get a detailed text output. Pick one of the terminal nodes, and interpret the information displayed.</li>
+<li>Create a plot of the tree, and interpret the results.</li>
+<li>Predict the response on the test data, and produce a confusion matrix comparing the test labels to the predicted test labels. What is the test error rate?</li>
+<li>Produce a plot with tree size on the <span class="math inline">\(x\)</span>-axis and cross-validated classification error rate on the <span class="math inline">\(y\)</span>-axis.</li>
+<li>Which tree size corresponds to the lowest cross-validated classification error rate?</li>
+<li>Produce a pruned tree corresponding to the optimal tree size obtained using cross-validation. If cross-validation does not lead to selection of a pruned tree, then create a pruned tree with five terminal nodes.</li>
+<li>Compare the training error rates between the pruned and unpruned trees. Which is higher?</li>
+<li>Compare the test error rates between the pruned and unpruned trees. Which is higher?</li>
+</ol>
+</div>
+<div id="q4" class="section level4">
+<h4>Q4</h4>
+<p>We now use boosting to predict <code>Salary</code> in the Hitters dataset, which is part of the ISLR package.</p>
+<ol style="list-style-type: decimal">
+<li>Remove the observations for whom the salary information is unknown, and then log-transform the salaries.</li>
+<li>Create a training set consisting of the first 200 observations, and a test set consisting of the remaining observations.</li>
+<li>Perform boosting on the training set with <span class="math inline">\(1,000\)</span> trees for a range of values of the shrinkage parameter <span class="math inline">\(\lambda\)</span>. Produce a plot with different shrinkage values on the <span class="math inline">\(x\)</span>-axis and the corresponding training set MSE on the <span class="math inline">\(y\)</span>-axis.</li>
+<li>Produce a plot with different shrinkage values on the <span class="math inline">\(x\)</span>-axis and the corresponding test set MSE on the <span class="math inline">\(y\)</span>-axis.</li>
+<li>Compare the test MSE of boosting to the test MSE that results from applying two of the regression approaches seen in our discussions of regression models.</li>
+<li>Which variables appear to be the most important predictors in the boosted model?</li>
+<li>Now apply bagging to the training set. What is the test set MSE for this approach?</li>
+</ol>
+</div>
+<div id="q5" class="section level4">
+<h4>Q5</h4>
+<ol style="list-style-type: decimal">
+<li>Create a training set consisting of the first 1,000 observations, and a test set consisting of the remaining observations.</li>
+<li>Fit a boosting model to the training set with <code>Purchase</code> as the response and the other variables as predictors. Use 1,000 trees, and a shrinkage value of 0.01. Which predictors appear to be the most important?</li>
+<li>Use the boosting model to predict the response on the test data. Predict that a person will make a purchase if the estimated probability of purchase is greater than 20%. Form a confusion matrix. What fraction of the people predicted to make a purchase do in fact make one? How does this compare with the results obtained from applying KNN or logistic regression to this data set?</li>
+</ol>
+</div>
+</div>
+<div id="optional-exercise" class="section level3">
+<h3>Optional Exercise</h3>
+<p>Apply boosting, bagging, and random forests to a data set of your choice. Be sure to fit the models on a training set and to evaluate their performance on a test set. How accurate are the results compared to simple methods like linear or logistic regression? Which of these approaches yields the best performance?</p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
