@@ -26,6 +26,11 @@ head(data2)
 data2$urban <- factor(data2$urban, labels = c("rural", "more rural", "more urban", "urban"))
 data2$RSex <- factor(data2$RSex, labels = c("Male", "Female"))
 data2$health.good <- factor(data2$health.good, labels = c("bad", "fair", "fairly good", "good") )
+
+# categorical variables
+cat.vars <- unlist(lapply(data2, function(x) is.factor(x) | all(x == 0 | x==1) | all( x==1 | x==2) ))
+# normalize numeric variables
+data2[, !cat.vars] <- apply(data2[, !cat.vars], 2, scale)
 ```
 
 ```{r, include=FALSE}
@@ -40,17 +45,18 @@ head(data2)
 data2$urban <- factor(data2$urban, labels = c("rural", "more rural", "more urban", "urban"))
 data2$RSex <- factor(data2$RSex, labels = c("Male", "Female"))
 data2$health.good <- factor(data2$health.good, labels = c("bad", "fair", "fairly good", "good") )
+
+# categorical variables
+cat.vars <- unlist(lapply(data2, function(x) is.factor(x) | all(x == 0 | x==1) | all( x==1 | x==2) ))
+# normalize numeric variables
+data2[, !cat.vars] <- apply(data2[, !cat.vars], 2, scale)
 ```
 
 In order to run ridge regression, we create a matrix from our dataset using the `model.matrix()` function. We also need to remove the intercept from the resulting matrix because the function to run ridge regression automatically includes one. Furthermore, we will use the subjective rate of immigrants as response. Consequently, we have to remove `over.estimate` as it measures the same thing. Otherwise, it would be somewhat similar to predicting height measured in inches using as a predictor whether the person is taller than 70 inches. Lastly, the party affiliation dummies are mutually exclusive, se we have to exclude the model category `Cons`.
 
 ```{r}
-# covariates in matrix form
-x <- model.matrix(IMMBRIT ~ ., data2)
-
-# drop the intercept and over.estimate & Cons
-drop <- which(colnames(x) %in% (c("(Intercept)", "over.estimate", "Cons")))
-x <- x[, -drop]
+# covariates in matrix form but remove the intercept, over.estimate, and Cons
+x <- model.matrix(IMMBRIT ~ . -1 -over.estimate -Cons, data2)
 # check if it looks fine
 head(x)
 
@@ -98,7 +104,7 @@ We can get ridge regression coefficients for any value of $\lambda$ using predic
 
 ```{r}
 # compute coefficients at lambda = s
-predict(ridge.mod, s = 50, type = "coefficients")[1:21, ]
+predict(ridge.mod, s = 50, type = "coefficients")[1:22, ]
 ```
 
 Next, we can use cross-validation on ridge regression by first splitting the dataset into training and test subsets.
@@ -142,9 +148,8 @@ ridge.p <- predict(ridge.m, s = 0, newx = x[-train, ], exact = TRUE)
 mean( (ridge.p - y.test)^2 )
 
 # standard lm
-lm.data <- data.frame(IMMBRIT = y, x)
-lm.m <- lm(IMMBRIT ~ ., data = lm.data, subset = train)
-lm.p <- predict(lm.m, newdata = lm.data[-train,])
+lm.m <- lm(IMMBRIT ~ . -over.estimate -Cons, data = data2, subset = train)
+lm.p <- predict(lm.m, newdata = data2[-train,])
 mean( (lm.p - y.test)^2 )
 ```
 
@@ -173,7 +178,7 @@ Finally, we run ridge regression on the full dataset and examine the coefficient
 ```{r}
 # ridge on full data
 out <- glmnet(x, y, alpha = 0)
-predict(out, type = "coefficients", s = bestlam)[1:21, ]
+predict(out, type = "coefficients", s = bestlam)[1:22, ]
 ```
 
 
