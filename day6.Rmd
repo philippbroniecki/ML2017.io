@@ -12,7 +12,7 @@ knitr::opts_knit$set(global.par = TRUE)
 
 ### Ridge Regression and the Lasso
 
-We start by clearing our workspace, loading the foreigners data, and doing the necessary variable manipulations.
+We start by clearing our workspace, loading the foreigners data, and doing the necessary variable manipulations. The data is available [here](http://philippbroniecki.github.io/ML2017.io/data/BSAS_manip.RData).
 
 ```{r, eval=FALSE}
 # clear workspace
