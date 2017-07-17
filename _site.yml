@@ -85,6 +85,8 @@ navbar:
           href: simulation.html
         - text: "Monte Carlos"
           href: montecarlo.html
+        - text: "MC Lasso v. Ridge"
+          href: MCLassoRidge.html
         - text: "Titanic Data"
           href: "./data/titanic.dta"
 output:

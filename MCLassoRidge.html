@@ -12,7 +12,7 @@
 <meta name="author" content="Philipp Broniecki and Lucas Leemann – Machine Learning 1K" />
 
 
-<title>How to Simulate without Zelig</title>
+<title>Monte Carlo - Lasso v. Ridge</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -378,85 +378,91 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">How to Simulate without Zelig</h1>
+<h1 class="title toc-ignore">Monte Carlo - Lasso v. Ridge</h1>
 <h4 class="author"><em>Philipp Broniecki and Lucas Leemann – Machine Learning 1K</em></h4>
 
 </div>
 
 
-<p>Simulation can be done in a few steps even without the Zelig package. If we make a prediction, we want to be able to quantify our uncertainty of that prediction. This makes it transparent how well we are able to predict.</p>
-<p>Simulation is the Swiss army knife of statistics. Quantifying the uncertainty of an outcome can be tough or even impossible algebraically. Even for the linear model we need to consider the standard errors of all coefficients and their covariance. The formulas can be tedious…</p>
-<p><strong>For simulation, the process is always the same regardless of the model.</strong></p>
-<p>We start by loading data and fitting a linear model on the unemployment rate.</p>
-<pre class="r"><code># clear workspace
-rm(list=ls())
-# load data
-df &lt;- read.csv(&quot;http://philippbroniecki.github.io/ML2017.io/data/communities.csv&quot;)</code></pre>
-<p><strong>Simulation step 1:</strong> Our coefficients each follow a sampling distribution. Jointly, they follow a multivariate distribution which is assumed to be multivariate normal.</p>
-<p>To characterize the shape of the distribution we need to know its mean and its variance. The mean is our vector of coefficient point estimates. We extract it using <code>coef(model_name)</code>. The variance is the model uncertainty which lives in the variance-covariance matrix. We extract it with <code>vcov(model_name)</code>.</p>
-<p>As we draw randomly from a distribution we want to set the random number generator with <code>set.seed()</code> to make our results replicable and we pick the number of coefficients to draw form the distribution (the number of simulations).</p>
-<pre class="r"><code># run a model
-m1 &lt;- lm(PctUnemployed ~ pctUrban + householdsize + racePctWhite, data = df)
+<p>We set up a Monte Carlo simulation to test the performance lasso and ridge.</p>
+<pre class="r"><code>library(glmnet)
 
-# set the random number generator to some value
+# setup
 set.seed(123)
+rho &lt;- c(0.0, 0.5, 0.9) # correlation
+N &lt;- 100 # number of observations
+n.sim &lt;- 100 # number of simulations
+n.x &lt;- 40 # number of covariates
 
-# pick how many coefficients you want to draw from the distribution
-n.sim &lt;- 1000
+# container matrix; rows = simulations; cols = correlations 
+l.mse &lt;- matrix(NA, n.sim, length(rho)) # lasso 
+r.mse &lt;- matrix(NA, n.sim, length(rho)) # ridge
+grid &lt;- 10^seq(4, -2, length = 100) # 100 lambda values</code></pre>
+<p>We loop over correlation, and simulations and record the MSE each time.</p>
+<pre class="r"><code>start.time &lt;- Sys.time()
 
-# draw coefficients from the multivariate normal
-S &lt;- MASS::mvrnorm(n.sim, coef(m1), vcov(m1))</code></pre>
-<p><strong>Simulation step 2:</strong> Choose a scenario for which you want to make a prediction. That means we have to set our covariates to some value. We will vary the percentage of the urban population and keep all other covariates constant. We also check the range of the variable of interest so that we don’t extrapolate to something that is outside of our data range.</p>
-<pre class="r"><code># choose a scenario to predict the outcome for
-summary(df$pctUrban)</code></pre>
-<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##  0.0000  0.0000  1.0000  0.6963  1.0000  1.0000</code></pre>
-<pre class="r"><code># set the covariates (predictions for changes in pctUrban)
-X &lt;- cbind( constant = 1,
-            urban = seq(from = 0, to = 1, by = .1),
-            householdsize = mean(df$householdsize),
-            pctwhite = mean(df$racePctWhite))
+# loop over correlations
+for (j in 1:length(rho)){
+  # loop over number of simulations
+  for (i in 1:n.sim){
+    
+    # current level of correlation 
+    rho.j &lt;- rho[j]
+    # variance covariance matrix filled with current correlation
+    Sigma &lt;- matrix(rho.j, nrow=n.x, ncol=n.x)
+    # set the diagonal to 1
+    diag(Sigma) &lt;- 1
+    # 100 (N) random draws of 40 (n.x) covariates with mean 0 and variance sigma
+    X &lt;- MASS::mvrnorm(N, rep(0,n.x), Sigma)
+    # random noise, draws from standard normal
+    e &lt;- rnorm(N)
+    # true data generation process (all betas are exactly 1)
+    y &lt;- rowSums(X) + e
+    # split into training/ test data
+    train &lt;- sample(x = c(1:N), size = N/2)
+    
+    ## ridge
+    # cross-validation on ridge to find best of 100 lambda values
+    r.mod &lt;- cv.glmnet(X[train,], y[train], alpha = 0, lambda = grid)
+    # predict outcome using the model with the best lambda
+    y.hatr &lt;- predict(r.mod, s = r.mod$lambda.min, newx = X[-train, ])
+    # MSE
+    r.mse[i,j] &lt;- mean((y[-train]-y.hatr)^2)
+    
+    ## lasso
+    # cross-validation on ridge to find best of 100 lambda values
+    l.mod &lt;- cv.glmnet(X[train,], y[train], alpha = 1, lambda = grid)
+    # predict outcome using the model with the best lambda
+    y.hatl &lt;- predict(l.mod, s = l.mod$lambda.min, newx = X[-train, ])
+    # MSE
+    l.mse[i,j] &lt;- mean((y[-train]-y.hatl)^2)
+  } 
+}
 
-# check covariates
-X            </code></pre>
-<pre><code>##       constant urban householdsize  pctwhite
-##  [1,]        1   0.0     0.4633952 0.7537161
-##  [2,]        1   0.1     0.4633952 0.7537161
-##  [3,]        1   0.2     0.4633952 0.7537161
-##  [4,]        1   0.3     0.4633952 0.7537161
-##  [5,]        1   0.4     0.4633952 0.7537161
-##  [6,]        1   0.5     0.4633952 0.7537161
-##  [7,]        1   0.6     0.4633952 0.7537161
-##  [8,]        1   0.7     0.4633952 0.7537161
-##  [9,]        1   0.8     0.4633952 0.7537161
-## [10,]        1   0.9     0.4633952 0.7537161
-## [11,]        1   1.0     0.4633952 0.7537161</code></pre>
-<p><strong>Simulation step 3:</strong> Predict the outcome. We have set our covariates and we have drawn our coefficients. This is all we need to predict <span class="math inline">\(y\)</span>. Depending on the flavour of generalized linear model, <span class="math inline">\(y\)</span> may have to be sent through a link function. In logistic regression we would send latent <span class="math inline">\(y\)</span> trough the logit link function: <span class="math inline">\(\frac{1}{1 + exp^{-y}}\)</span> to get probabilities that <span class="math inline">\(y\)</span> is 1. Here, we ran a simple linear model so in linear algebra notation our prediction is simply <span class="math inline">\(Y=X\beta\)</span>.</p>
-<p>We estimate <code>y_hat</code> as a matrix where its rows are the number of simulations and its columns are the different covariate scenarios.</p>
-<pre class="r"><code># predict outcome, ie betas * X for all scenarios
-y_hat &lt;- S %*% t(as.matrix(X))</code></pre>
-<p>Finally, all that is left is the interpretation of the result. We can simply look at the numerical outcomes similar to using the <code>summary()</code> function on the Zelig simulation object.</p>
-<pre class="r"><code># output like the zelig summary (including estimation uncertainty)
-apply(y_hat, 2, quantile, probs = c(.025, .5, .975))</code></pre>
-<pre><code>##            [,1]      [,2]      [,3]      [,4]      [,5]      [,6]
-## 2.5%  0.4316010 0.4214979 0.4105675 0.4000181 0.3893180 0.3784349
-## 50%   0.4450405 0.4332109 0.4215157 0.4097547 0.3981805 0.3864607
-## 97.5% 0.4584981 0.4454806 0.4327917 0.4198413 0.4070521 0.3945582
-##            [,7]      [,8]      [,9]     [,10]     [,11]
-## 2.5%  0.3672170 0.3557150 0.3439413 0.3318641 0.3196062
-## 50%   0.3747705 0.3630690 0.3512949 0.3396307 0.3279723
-## 97.5% 0.3823658 0.3703668 0.3586515 0.3473086 0.3363178</code></pre>
-<p>We can also draw a plot that shows our mean prediction and the uncertainty around in a few lines.</p>
-<pre class="r"><code># plot like zelig&#39;s ci plot
-par( mfrow = c(1,1))
-plot(0, bty = &quot;n&quot;, xlab = &quot;Pct Urban&quot;, ylab = &quot;Unemployment Rate&quot;, 
-     ylim = c(0.3, 0.5), xlim = c(0,1), pch =&quot;&quot;)
-ci &lt;- apply(y_hat, 2, quantile, probs = c(.025, .975))
-polygon(x =  c(rev(X[,&quot;urban&quot;]), X[,&quot;urban&quot;]), 
-        y = c(rev(t(ci)[,2]), t(ci)[,1]), border = NA,
-        col = &quot;lightblue&quot;)
-lines(x = X[,&quot;urban&quot;], y = apply(y_hat, 2, quantile, probs = .5), lwd = 1)</code></pre>
-<p><img src="simulation_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+# how long did the MC take?
+end.time &lt;- Sys.time()
+end.time-start.time</code></pre>
+<pre><code>## Time difference of 56.09904 secs</code></pre>
+<p>We now take column means to get the average MSE over the <code>n.sim</code> simulations.</p>
+<pre class="r"><code>apply(l.mse,2,mean)</code></pre>
+<pre><code>## [1] 7.364181 5.687029 3.720381</code></pre>
+<pre class="r"><code>apply(r.mse,2,mean)</code></pre>
+<pre><code>## [1] 4.478394 1.541326 1.112696</code></pre>
+<p>To illustrate the results we create an outcome object where the first row contains the ridge results and the second the lasso results.</p>
+<pre class="r"><code># rbind means row-wise bind together vectors
+outcome &lt;- rbind( apply(r.mse, 2, mean), apply(l.mse, 2, mean))
+# rownames of the outcome matrix
+rownames(outcome) &lt;- c(&quot;Ridgre Regression&quot;, &quot;Lasso&quot;)
+# column names of outcomes matrix where we paste together the word &quot;Cor=&quot; and the vector (rho)
+# because the string &quot;Cor=&quot; is of lenght 1 and the vector rho of length 3, &quot;Cor&quot; gets recycled
+colnames(outcome) &lt;- paste(&quot;Cor=&quot;, rho)
+outcome</code></pre>
+<pre><code>##                     Cor= 0 Cor= 0.5 Cor= 0.9
+## Ridgre Regression 4.478394 1.541326 1.112696
+## Lasso             7.364181 5.687029 3.720381</code></pre>
+<pre class="r"><code>outcome[2,]/outcome[1,]</code></pre>
+<pre><code>##   Cor= 0 Cor= 0.5 Cor= 0.9 
+## 1.644380 3.689698 3.343574</code></pre>
 
 
 

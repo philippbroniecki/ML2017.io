@@ -1,0 +1,97 @@
+---
+title: "Monte Carlo - Lasso v. Ridge"
+author: "Philipp Broniecki and Lucas Leemann -- Machine Learning 1K"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(global.par = TRUE)
+```
+
+We set up a Monte Carlo simulation to test the performance lasso and ridge.
+
+```{r}
+library(glmnet)
+
+# setup
+set.seed(123)
+rho <- c(0.0, 0.5, 0.9) # correlation
+N <- 100 # number of observations
+n.sim <- 100 # number of simulations
+n.x <- 40 # number of covariates
+
+# container matrix; rows = simulations; cols = correlations 
+l.mse <- matrix(NA, n.sim, length(rho)) # lasso 
+r.mse <- matrix(NA, n.sim, length(rho)) # ridge
+grid <- 10^seq(4, -2, length = 100) # 100 lambda values
+```
+
+We loop over correlation, and simulations and record the MSE each time.
+
+```{r}
+start.time <- Sys.time()
+
+# loop over correlations
+for (j in 1:length(rho)){
+  # loop over number of simulations
+  for (i in 1:n.sim){
+    
+    # current level of correlation 
+    rho.j <- rho[j]
+    # variance covariance matrix filled with current correlation
+    Sigma <- matrix(rho.j, nrow=n.x, ncol=n.x)
+    # set the diagonal to 1
+    diag(Sigma) <- 1
+    # 100 (N) random draws of 40 (n.x) covariates with mean 0 and variance sigma
+    X <- MASS::mvrnorm(N, rep(0,n.x), Sigma)
+    # random noise, draws from standard normal
+    e <- rnorm(N)
+    # true data generation process (all betas are exactly 1)
+    y <- rowSums(X) + e
+    # split into training/ test data
+    train <- sample(x = c(1:N), size = N/2)
+    
+    ## ridge
+    # cross-validation on ridge to find best of 100 lambda values
+    r.mod <- cv.glmnet(X[train,], y[train], alpha = 0, lambda = grid)
+    # predict outcome using the model with the best lambda
+    y.hatr <- predict(r.mod, s = r.mod$lambda.min, newx = X[-train, ])
+    # MSE
+    r.mse[i,j] <- mean((y[-train]-y.hatr)^2)
+    
+    ## lasso
+    # cross-validation on ridge to find best of 100 lambda values
+    l.mod <- cv.glmnet(X[train,], y[train], alpha = 1, lambda = grid)
+    # predict outcome using the model with the best lambda
+    y.hatl <- predict(l.mod, s = l.mod$lambda.min, newx = X[-train, ])
+    # MSE
+    l.mse[i,j] <- mean((y[-train]-y.hatl)^2)
+  } 
+}
+
+# how long did the MC take?
+end.time <- Sys.time()
+end.time-start.time
+```
+
+We now take column means to get the average MSE over the `n.sim` simulations.
+
+```{r}
+apply(l.mse,2,mean)
+apply(r.mse,2,mean)
+```
+
+To illustrate the results we create an outcome object where the first row contains the ridge results and the second the lasso results.
+
+```{r}
+# rbind means row-wise bind together vectors
+outcome <- rbind( apply(r.mse, 2, mean), apply(l.mse, 2, mean))
+# rownames of the outcome matrix
+rownames(outcome) <- c("Ridgre Regression", "Lasso")
+# column names of outcomes matrix where we paste together the word "Cor=" and the vector (rho)
+# because the string "Cor=" is of lenght 1 and the vector rho of length 3, "Cor" gets recycled
+colnames(outcome) <- paste("Cor=", rho)
+outcome
+outcome[2,]/outcome[1,]
+```

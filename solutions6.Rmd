@@ -1,0 +1,184 @@
+---
+title: "Solution Day 6  -- Regularization"
+author: "Philipp Broniecki and Lucas Leemann -- Machine Learning 1K"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(global.par = TRUE)
+```
+
+##### Q1
+
+In this exercise, we will predict the number of applications received using the `College` data set. You need to load `libary(ISLR)` and then type `?College` to get the codebook.
+
+1. Split the data set into a training set and a test set.
+
+**Load and split the College data.**
+
+```{r}
+library(ISLR)
+set.seed(11)
+sum(is.na(College))
+
+train.size <-  dim(College)[1] / 2
+train <-  sample(1:dim(College)[1], train.size)
+test <-  -train
+College.train <-  College[train, ]
+College.test <-  College[test, ]
+```
+
+2. Fit a linear model using least squares on the training set, and report the test error obtained.
+
+**Number of applications is the Apps variable.**
+
+```{r}
+lm.fit <-  lm(Apps ~ . , data = College.train)
+lm.pred <-  predict(lm.fit, College.test)
+mean((College.test[, "Apps"] - lm.pred)^2)
+```
+
+**Test RSS is 1538442**
+
+3. Fit a ridge regression model on the training set, with $\lambda$ chosen by cross-validation. Report the test error obtained.
+
+**Pick $\lambda$ using College.train and report error on College.test**
+
+```{r}
+library(glmnet)
+train.mat <-  model.matrix(Apps ~ . , data = College.train)
+test.mat <-  model.matrix(Apps ~ . , data = College.test)
+grid <-  10 ^ seq(4, -2, length = 100)
+mod.ridge <-  cv.glmnet(train.mat, College.train[, "Apps"], 
+                        alpha = 0, lambda = grid, thresh = 1e-12)
+lambda.best <-  mod.ridge$lambda.min
+lambda.best
+
+ridge.pred <-  predict(mod.ridge, newx = test.mat, s = lambda.best)
+mean((College.test[, "Apps"] - ridge.pred)^2)
+```
+
+
+4. Fit a lasso model on the training set, with $\lambda$ chosen by cross-validation. Report the test error obtained, along with the number of non-zero coefficient estimates.
+
+**Pick $\lambda$ using College.train and report error on College.test.**
+
+```{r}
+mod.lasso <-  cv.glmnet(train.mat, College.train[, "Apps"], 
+                        alpha = 1, lambda = grid, thresh = 1e-12)
+lambda.best <-  mod.lasso$lambda.min
+lambda.best
+
+lasso.pred <-  predict(mod.lasso, newx = test.mat, s = lambda.best)
+mean((College.test[, "Apps"] - lasso.pred)^2)
+```
+
+**Again, Test RSS is slightly higher that OLS, 1635280.**
+
+**The coefficients look like**
+
+```{r}
+mod.lasso <-  glmnet(model.matrix(Apps ~ . , data = College), 
+                     College[, "Apps"], alpha = 1)
+predict(mod.lasso, s = lambda.best, type = "coefficients")
+```
+
+5. Comment on the results obtained. How accurately can we predict the number of college applications received? Is there much difference among the test errors resulting from these five approaches?
+
+**Results for OLS, Lasso, Ridge are comparable. Lasso reduces the $F$. `Undergrad` and `Books` variables to zero and shrinks coefficients of other variables. Here are the test $R^2$ for all models.
+
+```{r, fig.align="center"}
+test.avg <-  mean(College.test[, "Apps"])
+
+lm.test.r2 <-  1 - mean((College.test[, "Apps"] - lm.pred)^2) /
+  mean((College.test[, "Apps"] - test.avg)^2)
+
+ridge.test.r2 <-  1 - mean((College.test[, "Apps"] - ridge.pred)^2)/
+  mean((College.test[, "Apps"] - test.avg)^2)
+
+lasso.test.r2 <-  1 - mean((College.test[, "Apps"] - lasso.pred)^2) /
+  mean((College.test[, "Apps"] - test.avg)^2)
+
+barplot(c(lm.test.r2, ridge.test.r2, lasso.test.r2),
+        col = "red", names.arg = c("OLS", "Ridge", "Lasso"),
+        main = "Test R-squared")
+```
+
+The plot shows that test $R^2$ for all models are around $0.9$. All models predict college applications with high accuracy.
+
+##### Q2
+
+We will now try to predict the per capita crime rate in the `Boston` data set. The `Boston` data set is in the `MASS` library.
+
+1. Try out some of the regression methods explored in this chapter, such as best subset selection, the lasso, and ridge regression. Present and discuss results for the approaches that you consider.
+
+```{r}
+set.seed(1)
+library(MASS)
+library(leaps)
+library(glmnet)
+```
+
+**Best subset selection**
+
+```{r}
+predict.regsubsets <-  function(object, newdata, id, ...) {
+    form <-  as.formula(object$call[[2]])
+    mat <-  model.matrix(form, newdata)
+    coefi <-  coef(object, id = id)
+    mat[, names(coefi)] %*% coefi
+}
+
+k <-  10
+p <-  ncol(Boston)-1
+folds <-  sample(rep(1:k, length = nrow(Boston)))
+cv.errors <-  matrix(NA, k, p)
+
+for (i in 1:k) {
+  best.fit <-  regsubsets(crim ~ . , data = Boston[folds!=i,], nvmax = p)
+  for (j in 1:p) {
+    pred <-  predict(best.fit, Boston[folds==i, ], id = j)
+    cv.errors[i,j] <-  mean((Boston$crim[folds==i] - pred)^2)
+  }
+}
+
+rmse.cv <-  sqrt(apply(cv.errors, 2, mean))
+plot(rmse.cv, pch = 19, type = "b")
+
+which.min(rmse.cv)
+rmse.cv[which.min(rmse.cv)]
+```
+
+**Lasso**
+
+```{r}
+x <-  model.matrix(crim ~ . -1, data = Boston)
+y <-  Boston$crim
+cv.lasso <-  cv.glmnet(x, y, type.measure = "mse")
+plot(cv.lasso)
+coef(cv.lasso)
+
+sqrt(cv.lasso$cvm[cv.lasso$lambda == cv.lasso$lambda.1se])
+```
+
+**Ridge regression**
+
+```{r}
+x <-  model.matrix(crim ~ . -1, data = Boston)
+y <-  Boston$crim
+cv.ridge <-  cv.glmnet(x, y, type.measure = "mse", alpha = 0)
+plot(cv.ridge)
+
+coef(cv.ridge)
+
+sqrt(cv.ridge$cvm[cv.ridge$lambda == cv.ridge$lambda.1se])
+```
+
+2. Propose a model (or set of models) that seem to perform well on this data set, and justify your answer. Make sure that you are evaluating model performance using validation set error, cross-validation, or some other reasonable alternative, as opposed to using training error.
+
+**See above answer for cross-validated mean squared errors of selected models.**
+
+3. Does your chosen model involve all of the features in the data set? Why or why not?
+
+**I would choose the 9 parameter best subset model because it had the best cross-validated RMSE.**

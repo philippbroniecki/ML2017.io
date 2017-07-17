@@ -358,6 +358,12 @@ $(document).ready(function () {
     <li>
       <a href="montecarlo.html">Monte Carlos</a>
     </li>
+    <li>
+      <a href="MCLassoRidge.html">MC Lasso v. Ridge</a>
+    </li>
+    <li>
+      <a href="./data/titanic.dta">Titanic Data</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -608,13 +614,8 @@ y &lt;- x -2*x^2 + rnorm(100)</code></pre>
 </ol></li>
 </ol>
 <p>Note, you may find it helpful to use the <code>data.frame()</code> function to create a single data set containing both <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>.</p>
-<pre class="r"><code>library(boot)</code></pre>
-<pre><code>## 
-## Attaching package: &#39;boot&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:survival&#39;:
-## 
-##     aml</code></pre>
-<pre class="r"><code>dat &lt;- data.frame(x,y)
+<pre class="r"><code>library(boot)
+dat &lt;- data.frame(x,y)
 set.seed(1)
 
 # a.
