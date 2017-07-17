@@ -395,7 +395,10 @@ $(document).ready(function () {
 set.seed(11)
 sum(is.na(College))</code></pre>
 <pre><code>## [1] 0</code></pre>
-<pre class="r"><code>train.size &lt;-  dim(College)[1] / 2
+<pre class="r"><code># normalize
+College[, -1] &lt;- apply(College[, -1], 2, scale)
+
+train.size &lt;-  dim(College)[1] / 2
 train &lt;-  sample(1:dim(College)[1], train.size)
 test &lt;-  -train
 College.train &lt;-  College[train, ]
@@ -407,24 +410,24 @@ College.test &lt;-  College[test, ]</code></pre>
 <pre class="r"><code>lm.fit &lt;-  lm(Apps ~ . , data = College.train)
 lm.pred &lt;-  predict(lm.fit, College.test)
 mean((College.test[, &quot;Apps&quot;] - lm.pred)^2)</code></pre>
-<pre><code>## [1] 1538442</code></pre>
-<p><strong>Test RSS is 1538442</strong></p>
+<pre><code>## [1] 0.1027103</code></pre>
+<p><strong>Test RSS is 0.1027103</strong></p>
 <ol start="3" style="list-style-type: decimal">
 <li>Fit a ridge regression model on the training set, with <span class="math inline">\(\lambda\)</span> chosen by cross-validation. Report the test error obtained.</li>
 </ol>
 <p><strong>Pick <span class="math inline">\(\lambda\)</span> using College.train and report error on College.test</strong></p>
 <pre class="r"><code>library(glmnet)
-train.mat &lt;-  model.matrix(Apps ~ . , data = College.train)
-test.mat &lt;-  model.matrix(Apps ~ . , data = College.test)
+train.mat &lt;-  model.matrix(Apps ~ . -1 , data = College.train)
+test.mat &lt;-  model.matrix(Apps ~ . -1, data = College.test)
 grid &lt;-  10 ^ seq(4, -2, length = 100)
 mod.ridge &lt;-  cv.glmnet(train.mat, College.train[, &quot;Apps&quot;], 
                         alpha = 0, lambda = grid, thresh = 1e-12)
 lambda.best &lt;-  mod.ridge$lambda.min
 lambda.best</code></pre>
-<pre><code>## [1] 18.73817</code></pre>
+<pre><code>## [1] 0.01</code></pre>
 <pre class="r"><code>ridge.pred &lt;-  predict(mod.ridge, newx = test.mat, s = lambda.best)
 mean((College.test[, &quot;Apps&quot;] - ridge.pred)^2)</code></pre>
-<pre><code>## [1] 1608859</code></pre>
+<pre><code>## [1] 0.1125371</code></pre>
 <ol start="4" style="list-style-type: decimal">
 <li>Fit a lasso model on the training set, with <span class="math inline">\(\lambda\)</span> chosen by cross-validation. Report the test error obtained, along with the number of non-zero coefficient estimates.</li>
 </ol>
@@ -433,40 +436,40 @@ mean((College.test[, &quot;Apps&quot;] - ridge.pred)^2)</code></pre>
                         alpha = 1, lambda = grid, thresh = 1e-12)
 lambda.best &lt;-  mod.lasso$lambda.min
 lambda.best</code></pre>
-<pre><code>## [1] 21.54435</code></pre>
+<pre><code>## [1] 0.01</code></pre>
 <pre class="r"><code>lasso.pred &lt;-  predict(mod.lasso, newx = test.mat, s = lambda.best)
 mean((College.test[, &quot;Apps&quot;] - lasso.pred)^2)</code></pre>
-<pre><code>## [1] 1635280</code></pre>
-<p><strong>Again, Test RSS is slightly higher that OLS, 1635280.</strong></p>
+<pre><code>## [1] 0.1103055</code></pre>
+<p><strong>Again, Test RSS is slightly higher than OLS, 0.1027103.</strong></p>
 <p><strong>The coefficients look like</strong></p>
-<pre class="r"><code>mod.lasso &lt;-  glmnet(model.matrix(Apps ~ . , data = College), 
+<pre class="r"><code>mod.lasso &lt;-  glmnet(model.matrix(Apps ~ . -1, data = College), 
                      College[, &quot;Apps&quot;], alpha = 1)
 predict(mod.lasso, s = lambda.best, type = &quot;coefficients&quot;)</code></pre>
 <pre><code>## 19 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
 ##                         1
-## (Intercept) -6.038452e+02
-## (Intercept)  .           
-## PrivateYes  -4.235413e+02
-## Accept       1.455236e+00
-## Enroll      -2.003696e-01
-## Top10perc    3.367640e+01
-## Top25perc   -2.403036e+00
+## (Intercept) -2.483323e-02
+## PrivateNo    9.101612e-02
+## PrivateYes  -9.758968e-14
+## Accept       8.827830e-01
+## Enroll       .           
+## Top10perc    1.285778e-01
+## Top25perc    .           
 ## F.Undergrad  .           
-## P.Undergrad  2.086035e-02
-## Outstate    -5.781855e-02
-## Room.Board   1.246462e-01
+## P.Undergrad  .           
+## Outstate    -3.693941e-02
+## Room.Board   2.682937e-02
 ## Books        .           
-## Personal     1.832912e-05
-## PhD         -5.601313e+00
-## Terminal    -3.313824e+00
-## S.F.Ratio    4.478684e+00
-## perc.alumni -9.796600e-01
-## Expend       6.967693e-02
-## Grad.Rate    5.159652e+00</code></pre>
+## Personal     .           
+## PhD         -1.307949e-02
+## Terminal    -1.016626e-02
+## S.F.Ratio    .           
+## perc.alumni -1.794075e-03
+## Expend       8.228831e-02
+## Grad.Rate    1.271356e-02</code></pre>
 <ol start="5" style="list-style-type: decimal">
 <li>Comment on the results obtained. How accurately can we predict the number of college applications received? Is there much difference among the test errors resulting from these five approaches?</li>
 </ol>
-<p>**Results for OLS, Lasso, Ridge are comparable. Lasso reduces the <span class="math inline">\(F\)</span>. <code>Undergrad</code> and <code>Books</code> variables to zero and shrinks coefficients of other variables. Here are the test <span class="math inline">\(R^2\)</span> for all models.</p>
+<p>**Results for OLS, Lasso, Ridge are comparable. Furthermore, it shrinks the <code>Enroll</code>, <code>Top25perc</code>, <code>P.Undergrad</code>, <code>Room.Board</code>, <code>Books</code>, <code>Personal</code>, <code>PhD</code>, and <code>S.F.Ratio</code> variables to exactly zero and shrinks coefficients of other variables. Here are the test <span class="math inline">\(R^2\)</span> for all models.</p>
 <pre class="r"><code>test.avg &lt;-  mean(College.test[, &quot;Apps&quot;])
 
 lm.test.r2 &lt;-  1 - mean((College.test[, &quot;Apps&quot;] - lm.pred)^2) /
@@ -493,7 +496,10 @@ barplot(c(lm.test.r2, ridge.test.r2, lasso.test.r2),
 <pre class="r"><code>set.seed(1)
 library(MASS)
 library(leaps)
-library(glmnet)</code></pre>
+library(glmnet)
+
+# normalize
+Boston[, -4] &lt;- apply(Boston[, -4], 2, scale)</code></pre>
 <p><strong>Best subset selection</strong></p>
 <pre class="r"><code>predict.regsubsets &lt;-  function(object, newdata, id, ...) {
     form &lt;-  as.formula(object$call[[2]])
@@ -521,7 +527,7 @@ plot(rmse.cv, pch = 19, type = &quot;b&quot;)</code></pre>
 <pre class="r"><code>which.min(rmse.cv)</code></pre>
 <pre><code>## [1] 9</code></pre>
 <pre class="r"><code>rmse.cv[which.min(rmse.cv)]</code></pre>
-<pre><code>## [1] 6.593396</code></pre>
+<pre><code>## [1] 0.7665362</code></pre>
 <p><strong>Lasso</strong></p>
 <pre class="r"><code>x &lt;-  model.matrix(crim ~ . -1, data = Boston)
 y &lt;-  Boston$crim
@@ -530,23 +536,23 @@ plot(cv.lasso)</code></pre>
 <p><img src="solutions6_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 <pre class="r"><code>coef(cv.lasso)</code></pre>
 <pre><code>## 14 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
-##                     1
-## (Intercept) 1.0894283
-## zn          .        
-## indus       .        
-## chas        .        
-## nox         .        
-## rm          .        
-## age         .        
-## dis         .        
-## rad         0.2643196
-## tax         .        
-## ptratio     .        
-## black       .        
-## lstat       .        
-## medv        .</code></pre>
+##                         1
+## (Intercept) -3.296655e-16
+## zn           .           
+## indus        .           
+## chas         .           
+## nox          .           
+## rm           .           
+## age          .           
+## dis          .           
+## rad          2.675681e-01
+## tax          .           
+## ptratio      .           
+## black        .           
+## lstat        .           
+## medv         .</code></pre>
 <pre class="r"><code>sqrt(cv.lasso$cvm[cv.lasso$lambda == cv.lasso$lambda.1se])</code></pre>
-<pre><code>## [1] 7.405176</code></pre>
+<pre><code>## [1] 0.8609123</code></pre>
 <p><strong>Ridge regression</strong></p>
 <pre class="r"><code>x &lt;-  model.matrix(crim ~ . -1, data = Boston)
 y &lt;-  Boston$crim
@@ -556,22 +562,22 @@ plot(cv.ridge)</code></pre>
 <pre class="r"><code>coef(cv.ridge)</code></pre>
 <pre><code>## 14 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
 ##                        1
-## (Intercept)  1.017516864
-## zn          -0.002805664
-## indus        0.034405928
-## chas        -0.225250602
-## nox          2.249887499
-## rm          -0.162546004
-## age          0.007343331
-## dis         -0.114928730
-## rad          0.059813844
-## tax          0.002659110
-## ptratio      0.086423005
-## black       -0.003342067
-## lstat        0.044495213
-## medv        -0.029124577</code></pre>
+## (Intercept)  0.001811369
+## zn          -0.007607351
+## indus        0.027441211
+## chas        -0.026187226
+## nox          0.030309872
+## rm          -0.013277569
+## age          0.024031311
+## dis         -0.028135246
+## rad          0.060548965
+## tax          0.052102117
+## ptratio      0.021752033
+## black       -0.035471949
+## lstat        0.036940229
+## medv        -0.031141122</code></pre>
 <pre class="r"><code>sqrt(cv.ridge$cvm[cv.ridge$lambda == cv.ridge$lambda.1se])</code></pre>
-<pre><code>## [1] 7.456946</code></pre>
+<pre><code>## [1] 0.866931</code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>Propose a model (or set of models) that seem to perform well on this data set, and justify your answer. Make sure that you are evaluating model performance using validation set error, cross-validation, or some other reasonable alternative, as opposed to using training error.</li>
 </ol>
