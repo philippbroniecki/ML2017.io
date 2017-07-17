@@ -393,8 +393,8 @@ library(ISLR)
 attach(Wage)
 ?Wage # codebook</code></pre>
 </div>
-<div id="polynomial-regression-and-step-functions" class="section level3">
-<h3>Polynomial Regression and Step Functions</h3>
+<div id="polynomial-regression" class="section level3">
+<h3>Polynomial Regression</h3>
 <p>Let’s fit a linear model to predict <code>wage</code> with a forth-degree polynomial using the <code>poly()</code> function.</p>
 <pre class="r"><code># linear regression on wage, with age up to a 4th degree polynomial
 fit &lt;- lm(wage ~ poly(age, 4), data = Wage)
@@ -405,7 +405,7 @@ coef(summary(fit))</code></pre>
 ## poly(age, 4)2 -478.31581 39.9147851 -11.983424 2.355831e-32
 ## poly(age, 4)3  125.52169 39.9147851   3.144742 1.678622e-03
 ## poly(age, 4)4  -77.91118 39.9147851  -1.951938 5.103865e-02</code></pre>
-<p>We can also obtain raw instead of orthogonal polynomials by passing the <code>raw = TRUE</code> argument to <code>poly()</code>.</p>
+<p>We can also obtain raw instead of orthogonal polynomials by passing the <code>raw = TRUE</code> argument to <code>poly()</code>. The coefficients will change the fit should be largely unaffected.</p>
 <pre class="r"><code>fit2 &lt;- lm(wage ~ poly(age, 4, raw = TRUE), data = Wage)
 coef(summary(fit2))</code></pre>
 <pre><code>##                                Estimate   Std. Error   t value
@@ -420,12 +420,12 @@ coef(summary(fit2))</code></pre>
 ## poly(age, 4, raw = TRUE)2 0.0062606446
 ## poly(age, 4, raw = TRUE)3 0.0263977518
 ## poly(age, 4, raw = TRUE)4 0.0510386498</code></pre>
-<p>Finally, instead of using <code>poly()</code>, we can specify the polynomials directly in the formula as shown below.</p>
+<p>There are several ways to specify polynomials. These are, however a little less convenient.</p>
 <pre class="r"><code>fit2a &lt;- lm(wage ~ age + I(age^2) + I(age^3) + I(age^4), data = Wage)
 coef(fit2a)</code></pre>
 <pre><code>##   (Intercept)           age      I(age^2)      I(age^3)      I(age^4) 
 ## -1.841542e+02  2.124552e+01 -5.638593e-01  6.810688e-03 -3.203830e-05</code></pre>
-<p>A more compact version of the same example uses <code>cbind()</code> and eliminates the need to wrap each term in <code>I()</code>.</p>
+<p>A more compact version of the same example uses <code>cbind()</code> and eliminates the need to wrap each term in <code>I()</code>. The output is less readable though.</p>
 <pre class="r"><code>fit2b &lt;- lm(wage ~ cbind(age, age^2, age^3, age^4), data = Wage)
 coef(fit2b)</code></pre>
 <pre><code>##                        (Intercept) cbind(age, age^2, age^3, age^4)age 
@@ -434,29 +434,49 @@ coef(fit2b)</code></pre>
 ##                      -5.638593e-01                       6.810688e-03 
 ##    cbind(age, age^2, age^3, age^4) 
 ##                      -3.203830e-05</code></pre>
-<p>We can create an age grid for the targeted values of the prediction and pass the grid to <code>predict()</code>.</p>
-<pre class="r"><code>agelims &lt;- range(age)
+<p>We can create an age grid for the targeted values of the prediction and pass the grid to <code>predict()</code>. We can set the argument <code>se=TRUE</code> in the <code>predict()</code> function which will return a list that includes standard errors of the outcome. We can use these to an upper and lower bound of our estimate of <span class="math inline">\(y\)</span>.</p>
+<pre class="r"><code># minimum and maximum values of age variable
+agelims &lt;- range(age) 
 age.grid &lt;- seq(from = agelims[1], to = agelims[2])
+# se=TRUE returns standard errors
 preds &lt;- predict(fit, newdata = list(age = age.grid), se = TRUE)
+# confidence intervals as estimate + and - 2 standard deviations
 se.bands &lt;- cbind(preds$fit + 2 * preds$se.fit, preds$fit - 2 * preds$se.fit)</code></pre>
-<p>We can plot the data and add the fit from the degree-4 polynomial.</p>
-<pre class="r"><code>par(mfrow = c(1, 2), mar = c(4.5, 4.5, 1, 1), oma = c(0, 0, 4, 0))
-plot(jitter(age,2), wage, xlim = agelims, cex = 0.5, col = &quot;darkgrey&quot;, bty = &quot;n&quot;,
+<p>We can plot the data and add the fit from the degree-4 polynomial. We set the margins and outer margins in our plot the later plot a title that will be the overall title for two plots that we plot next to each other. The function <code>matlines()</code> lets us draw the lines fo the uncertainty bounds in one go.</p>
+<pre class="r"><code># set margins to plot title in margins
+par(mfrow = c(1, 2), mar = c(4.5, 4.5, 1, 1), oma = c(0, 0, 4, 0))
+plot(wage ~ jitter(age,2), xlim = agelims, cex = 0.5, col = &quot;darkgrey&quot;, bty = &quot;n&quot;,
      xlab = &quot;age&quot;)
+# overall plot window title
 title(&quot;Degree -4 Polynomial &quot;, outer = TRUE)
+# line for mean estimate
 lines(age.grid, preds$fit, lwd = 2, col = &quot;blue&quot;)
+# ~95% ci&#39;s
 matlines(age.grid, se.bands, lwd = 2, col = &quot;blue&quot;, lty = 3)</code></pre>
 <p><img src="day7_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
-<p>Comparing orthogonolized fit with regular fit.</p>
+<p>We can compare the orthogonolized polynomials that we saved in the object called <code>fit</code> with the polynomials that plain polynomials sved in <code>fit2</code>. The difference will substantially <span class="math inline">\(0\)</span>. We predict the outcome from the fit with the raw polynomials and take the diffence to the fit with the independent linear combinations of the powers of age.</p>
 <pre class="r"><code>preds2 &lt;- predict(fit2, newdata = list(age = age.grid), se = TRUE)
+# average difference
+mean(preds$fit - preds2$fit)</code></pre>
+<pre><code>## [1] -1.752311e-11</code></pre>
+<pre class="r"><code># maximum difference
 max(abs(preds$fit - preds2$fit))</code></pre>
 <pre><code>## [1] 7.81597e-11</code></pre>
-<p>We can use <code>anova()</code> to compare five different models of linear fit.</p>
+<p>When we have only predictor variable and and its powers we use the <code>coef()</code> function to see whether the powers of the variable improve in-sample model fit.</p>
+<pre class="r"><code>fit.5 &lt;- lm(wage ~ poly(age, 5), data = Wage)
+coef(summary(fit.5))</code></pre>
+<pre><code>##                 Estimate Std. Error     t value     Pr(&gt;|t|)
+## (Intercept)    111.70361  0.7287647 153.2780243 0.000000e+00
+## poly(age, 5)1  447.06785 39.9160847  11.2001930 1.491111e-28
+## poly(age, 5)2 -478.31581 39.9160847 -11.9830341 2.367734e-32
+## poly(age, 5)3  125.52169 39.9160847   3.1446392 1.679213e-03
+## poly(age, 5)4  -77.91118 39.9160847  -1.9518743 5.104623e-02
+## poly(age, 5)5  -35.81289 39.9160847  -0.8972045 3.696820e-01</code></pre>
+<p>Preferably, we use the <code>anova()</code> and look at the F-test to decide whether in-sample fit improves by including powers of a variable.</p>
 <pre class="r"><code>fit.1 &lt;- lm(wage ~ age, data = Wage)
 fit.2 &lt;- lm(wage ~ poly(age, 2), data = Wage)
 fit.3 &lt;- lm(wage ~ poly(age, 3), data = Wage)
 fit.4 &lt;- lm(wage ~ poly(age, 4), data = Wage)
-fit.5 &lt;- lm(wage ~ poly(age, 5), data = Wage)
 anova(fit.1, fit.2, fit.3, fit.4, fit.5)</code></pre>
 <pre><code>## Analysis of Variance Table
 ## 
@@ -473,16 +493,7 @@ anova(fit.1, fit.2, fit.3, fit.4, fit.5)</code></pre>
 ## 5   2994 4770322  1      1283   0.8050  0.369682    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>The same p-values can also be obtained from the <code>coef()</code> function.</p>
-<pre class="r"><code>coef(summary(fit.5))</code></pre>
-<pre><code>##                 Estimate Std. Error     t value     Pr(&gt;|t|)
-## (Intercept)    111.70361  0.7287647 153.2780243 0.000000e+00
-## poly(age, 5)1  447.06785 39.9160847  11.2001930 1.491111e-28
-## poly(age, 5)2 -478.31581 39.9160847 -11.9830341 2.367734e-32
-## poly(age, 5)3  125.52169 39.9160847   3.1446392 1.679213e-03
-## poly(age, 5)4  -77.91118 39.9160847  -1.9518743 5.104623e-02
-## poly(age, 5)5  -35.81289 39.9160847  -0.8972045 3.696820e-01</code></pre>
-<p>The <code>anova()</code> function can also compare the variances when other terms are included as predictors.</p>
+<p>We prefer the F-test beacuse it works when we include additional predictors into our model.</p>
 <pre class="r"><code># comparing models when other predictors are added
 fit.1 &lt;- lm(wage ~ education + age, data = Wage)
 fit.2 &lt;- lm(wage ~ education + poly(age, 2), data = Wage)
@@ -499,28 +510,42 @@ anova(fit.1, fit.2, fit.3)</code></pre>
 ## 3   2992 3719809  1      5587   4.4936 0.0341 *  
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>With <code>glm()</code> we can also fit a polynomial logistic regression.</p>
+<p>With <code>glm()</code> we can also fit a polynomial logistic regression. Here, we create a binary variable that is 1 if wage &gt; 250 and 0 otherwise.</p>
 <pre class="r"><code>fit &lt;- glm(I(wage &gt; 250) ~ poly(age, 4), data = Wage, family = binomial)</code></pre>
-<p>And use the same method for making predictions using <code>predict()</code> as seen above.</p>
-<pre class="r"><code>preds &lt;- predict(fit, newdata = list(age = age.grid), se = TRUE)
-pfit &lt;- exp(preds$fit) / (1 + exp(preds$fit))
+<p>Similar to <code>lm()</code> we use the <code>predict()</code> function again and also obtain standard errors by setting <code>se=TRUE</code>.</p>
+<p>Note: If we do <strong>not</strong> set <code>type=&quot;response&quot;</code> in the <code>predict()</code> function, we get the latent <span class="math inline">\(y\)</span> as <span class="math inline">\(X\beta\)</span>. We have to send those values through the link function to get predicted probabilities. We do this, so that we can estimate the standard errors on the latent <span class="math inline">\(y\)</span>. We then send these through the link function as well. This ensures that our confidence intervals will never be outside the logical <span class="math inline">\([0, 1]\)</span> interval for probabilities.</p>
+<pre class="r"><code># predict latent y
+preds &lt;- predict(fit, newdata = list(age = age.grid), se = TRUE)
+
+# send latent y through the link function
+pfit &lt;- 1 / (1 + exp(-preds$fit))
+
+# error bands calculate on the latent y
 se.bands.logit &lt;- cbind(preds$fit + 2 * preds$se.fit, preds$fit - 2 * preds$se.fit)
-se.bands &lt;- exp(se.bands.logit)/(1 + exp(se.bands.logit))
-preds &lt;- predict(fit, newdata = list(age = age.grid), type = &quot;response&quot;, se = TRUE)</code></pre>
-<p>We can plot these results with the <code>plot()</code> function as usual.</p>
-<pre class="r"><code>plot(age, I(wage &gt; 250), xlim = agelims, type = &quot;n&quot;, ylim = c(0, 0.2))
-points(jitter(age), I((wage &gt; 250)/5), cex = 1, pch = &quot;|&quot;, col = &quot; darkgrey &quot;)
+se.bands &lt;- 1 / (1 + exp(-se.bands.logit))</code></pre>
+<p>We the <code>plot()</code> function, we put the result next to the plot where wage is continuous. With the <code>points()</code> function we add the actual data to the plot. The argument <code>pch=&quot;|&quot;</code> draws a bar as the symbol for each point. Also notice the y-coordinate of each point. In the <code>plot()</code> function we set the range of the y-axis with <code>ylim = c(0, 0.2)</code> to range from <span class="math inline">\(0\)</span> to <span class="math inline">\(1\)</span>. If the true outcome is <span class="math inline">\(1\)</span> we want to draw the | at <span class="math inline">\(y=0.2\)</span> and otherwhise at <span class="math inline">\(y=0\)</span>. We achieve this with <code>I((wage &gt; 250)/5)</code>. Play around to see why.</p>
+<pre class="r"><code>plot(I(wage &gt; 250) ~ age, xlim = agelims, type = &quot;n&quot;, ylim = c(0, 0.2))
+# add data to the plot
+points(jitter(age), I((wage &gt; 250)/5) , cex = 1, pch = &quot;|&quot;, col = &quot; darkgrey &quot;)
+# mean estimate
 lines(age.grid, pfit, lwd = 2, col = &quot;blue&quot;)
+# 95 ci
 matlines(age.grid, se.bands, lwd = 2, col = &quot;blue&quot;, lty = 3)</code></pre>
 <p><img src="day7_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
-<p>In the above plot, the <code>jitter()</code> function is used to prevent the same age observations from overlapping each other.</p>
-<p>The <code>cut()</code> functions creates cutpoints in the observations, which are then used as predictors for the linear model to fit a step function.</p>
-<pre class="r"><code># linear step function
+<p>Notice, that the confidence interval becomes very large in the range of the data where we have few data and no <span class="math inline">\(1\)</span>’s.</p>
+</div>
+<div id="step-functions" class="section level3">
+<h3>Step Functions</h3>
+<p>Instead of using polynomials to create a non-linear prediction, we could also use step functions. With step functions we fit different lines for different data ranges.</p>
+<p>We use the <code>cut()</code> function to create equally spaced cutpoints in our data. We use the now categorical variable age as predictor in our linear model.</p>
+<pre class="r"><code># four equally spaced intervals of age
 table(cut(age, 4))</code></pre>
 <pre><code>## 
 ## (17.9,33.5]   (33.5,49]   (49,64.5] (64.5,80.1] 
 ##         750        1399         779          72</code></pre>
-<pre class="r"><code>fit &lt;- lm(wage ~ cut(age, 4), data = Wage)
+<pre class="r"><code># fit the linear regression with the factor variable age that has four categories
+fit &lt;- lm(wage ~ cut(age, 4), data = Wage)
+# the first category is the baseline.
 coef(summary(fit))</code></pre>
 <pre><code>##                         Estimate Std. Error   t value     Pr(&gt;|t|)
 ## (Intercept)            94.158392   1.476069 63.789970 0.000000e+00
@@ -530,9 +555,9 @@ coef(summary(fit))</code></pre>
 </div>
 <div id="splines" class="section level3">
 <h3>Splines</h3>
-<p>We use the <code>splines</code> package to run regression splines.</p>
+<p>We use the <code>splines</code> package to fit splines.</p>
 <pre class="r"><code>library(splines)</code></pre>
-<p>We first use <code>bs()</code> to generate a basis matrix for a polynomial spline and fit a model with knots at age 25, 40 and 60.</p>
+<p>We first use <code>bs()</code> to generate a basis matrix for a polynomial spline and fit a model with knots at age 25, 40 and 60. <code>bs</code> will by default fit a cubic spline with the specified number of knots. To deviate from a cubic spline, chanbe the argument <code>degree</code> to some other value.</p>
 <pre class="r"><code>fit &lt;- lm(wage ~ bs(age, knots = c(25, 40, 60)), data = Wage)
 pred &lt;- predict(fit, newdata = list(age = age.grid), se = TRUE)
 par( mfrow = c(1,1))
@@ -541,7 +566,8 @@ lines(age.grid, pred$fit, lwd = 2)
 lines(age.grid, pred$fit + 2 * pred$se, lty = &quot;dashed&quot;, lwd = 2)
 lines(age.grid, pred$fit - 2 * pred$se, lty = &quot;dashed&quot;, lwd = 2)</code></pre>
 <p><img src="day7_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
-<p>Alternatively, the <code>df()</code> function can be used to produce a spline fit with knots at uniform intervals.</p>
+<p>The confidence intervals are wide at the end of data range whree the curve is forced off into some direction by only a few observations.</p>
+<p>Instead of specifying knots ourselves we can set the argument <code>df</code> (degrees of freedom) to some value to set knots at uniform intervals. A polynomial of the power of three uses up four degrees of freedom. One for each power. Where we to fit polynomials in regions of the data we woud use 4 degrees of freedom in each region. Fitting a cubic spline involves three predictors and an intercept = 4. In addition we use a degree of freedom at each knot.</p>
 <pre class="r"><code>dim( bs(age, knots = c(25, 40, 60)) )</code></pre>
 <pre><code>## [1] 3000    6</code></pre>
 <pre class="r"><code>dim(bs(age, df = 6))</code></pre>
@@ -549,12 +575,19 @@ lines(age.grid, pred$fit - 2 * pred$se, lty = &quot;dashed&quot;, lwd = 2)</code
 <pre class="r"><code>attr(bs(age, df = 6), &quot;knots&quot;)</code></pre>
 <pre><code>##   25%   50%   75% 
 ## 33.75 42.00 51.00</code></pre>
+<p>To address the problem of the wide error bands at the ends of the data range, we can fit natural splines. They impose linearity at the end of the range, are better behaved (produce narror error bands) and free up two degrees of freedom. One at each end. We <code>ns()</code> for natural splines.</p>
 <pre class="r"><code>plot(jitter(age,2), wage, col = &quot;gray&quot;, bty = &quot;n&quot;, xlab = &quot;age&quot;)
 fit2 &lt;- lm(wage ~ ns(age, df = 4), data = Wage)
 pred2 &lt;- predict(fit2, newdata = list(age = age.grid), se = TRUE)
-lines(age.grid, pred2$fit, col = &quot;red&quot;, lwd = 2)</code></pre>
-<p><img src="day7_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
-<p>Using the <code>loess()</code> smoother.</p>
+lines(age.grid, pred2$fit, col = &quot;red&quot;, lwd = 2)
+lines(age.grid, pred2$fit + 2 * pred$se, lty = &quot;dashed&quot;, lwd = 2, col = &quot;red&quot;)
+lines(age.grid, pred2$fit - 2 * pred$se, lty = &quot;dashed&quot;, lwd = 2, col = &quot;red&quot;)</code></pre>
+<p><img src="day7_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+</div>
+<div id="local-regression" class="section level3">
+<h3>Local Regression</h3>
+<p>One can also account for non-linearity by using local regression. We estimate the regression curve only in the near neighborhood of the the current point. Smoothness is achieved by moving along the data range gradually whereby the intervals overlap. Like k-nearest neighbors local regression can does not work well in high dimensions (many predictors) because the distances between points become very large.</p>
+<p>Here, wer use the <code>loess()</code> smoother for local regression. The argument <code>span</code> specifies the range of the data that is being used. The narrower the span the more flexible and wiggly the line will become.</p>
 <pre class="r"><code>plot(jitter(age,2), wage, xlim = agelims, cex = 0.5, col = &quot;darkgrey&quot;, bty = &quot;n&quot;, xlab = &quot;age&quot;)
 title(&quot; Local Regression &quot;)
 fit &lt;- loess(wage ~ age, span = 0.2, data = Wage)
@@ -563,20 +596,28 @@ lines(age.grid, predict(fit, data.frame(age = age.grid)), col = &quot;red&quot;,
 lines(age.grid, predict(fit2, data.frame(age = age.grid)), col = &quot;blue&quot;, lwd = 2)
 legend(&quot;topright&quot;, legend = c(&quot;Span=0.2&quot;, &quot;Span=0.5&quot;), col = c(&quot;red&quot;, &quot;blue&quot;), 
        lty = 1, lwd = 2, cex = 0.8, bty = &quot;n&quot;)</code></pre>
-<p><img src="day7_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p><img src="day7_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
 </div>
-<div id="gams" class="section level3">
-<h3>GAMs</h3>
-<p>We can fit a GAM with <code>lm()</code> when an appropriate basis function can used.</p>
+<div id="genearlized-additive-models-gams" class="section level3">
+<h3>Genearlized Additive Models (GAMs)</h3>
+<p>With GAMs we can flexibly combine the mehtods we introduced above for multible predictors.</p>
+<p>For splines, we can fit a GAM with <code>lm()</code> when an appropriate basis functions can be used.</p>
 <pre class="r"><code>gam1 &lt;- lm(wage ~ bs(year, 4) + bs(age, 5) + education, data = Wage)</code></pre>
-<p>However, the <code>gam</code> package offers a general solution to fitting GAMs and is especially useful when splines cannot be easily expressed in terms of basis functions.</p>
-<pre class="r"><code>library(gam)
+<p>However, the <code>gam</code> package offers a general solution to fitting GAMs and is especially useful when splines cannot be easily expressed in terms of basis functions. Here, we fit natural splines on age and year. Something that could not easily be expressed as a basis function.</p>
+<pre class="r"><code>library(gam)</code></pre>
+<pre><code>## Warning: package &#39;gam&#39; was built under R version 3.4.1</code></pre>
+<pre><code>## Loaded gam 1.14-4</code></pre>
+<pre class="r"><code># gam with natural splines for year and age
 gam.m3 &lt;- gam(wage ~ ns(year, 4) + ns(age, 5) + education, data = Wage)</code></pre>
-<p>The <code>plot()</code> function behaves the same way as it does with <code>lm()</code> and <code>glm()</code>.</p>
-<pre class="r"><code>par(mfrow = c(1, 3))
-plot(gam.m3, se = TRUE, col = &quot;blue&quot;)</code></pre>
+<p>We can use the <code>plot()</code> function as well as <code>plot.gam()</code> to plot our results. The difference between cubic splines and natural splines fit to age and education is very small.</p>
+<pre class="r"><code>par(mfrow = c(1, 3), mar = c(4.5, 4.5, 1, 1), oma = c(0, 0, 4, 0))
+# plot function behaves similar to plot.gam
+plot(gam.m3, se = TRUE, col = &quot;blue&quot;)
+title(&quot;Natural splines for age and education&quot;, outer = TRUE)</code></pre>
 <p><img src="day7_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
-<pre class="r"><code>plot.gam(gam1, se = TRUE, col = &quot;red&quot;)</code></pre>
+<pre class="r"><code>par(mfrow = c(1, 3), mar = c(4.5, 4.5, 1, 1), oma = c(0, 0, 4, 0))
+plot.gam(gam1, se = TRUE, col = &quot;red&quot;)
+title(&quot;Cubic splines for age and education&quot;, outer = TRUE)</code></pre>
 <p><img src="day7_files/figure-html/unnamed-chunk-26-2.png" width="672" /></p>
 <p>We can use <code>anova()</code> to find the best performing model.</p>
 <pre class="r"><code>gam.m1 &lt;- gam(wage ~ ns(age, 5) + education, data = Wage)
@@ -593,7 +634,7 @@ anova(gam.m1, gam.m2, gam.m3, test = &quot;F&quot;)</code></pre>
 ## 3      2986    3691919  3   2966.4  0.7997 0.4938916    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>And use <code>summary()</code> to generate a summary of the fitted model.</p>
+<p>We can see that looking at the <code>summary()</code> function would not have been enough to determine whether a natural spline on year is appropriate. The coeffiecient is highly significant. However, the F-test reveals that the model is not significantly better than the model without a natural spline for year.</p>
 <pre class="r"><code>summary(gam.m3)</code></pre>
 <pre><code>## 
 ## Call: gam(formula = wage ~ ns(year, 4) + ns(age, 5) + education, data = Wage)
@@ -617,13 +658,14 @@ anova(gam.m1, gam.m2, gam.m3, test = &quot;F&quot;)</code></pre>
 ## Residuals   2986 3691919    1236                       
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>We can make predictions using <code>predict()</code> just as we did with linear and logistic regressions.</p>
+<p>We can make predictions using <code>predict()</code> just as we did before.</p>
 <pre class="r"><code>preds &lt;- predict(gam.m2, newdata = Wage)</code></pre>
 <p>The <code>gam()</code> function also allows fitting logistic regression GAM with the <code>family = binomial</code> argument.</p>
 <pre class="r"><code>gam.lr &lt;- gam(I(wage &gt; 250) ~ year + ns(age, df = 5) + education, family = binomial, data = Wage)
 par(mfrow = c(1, 3))
 plot(gam.lr, se = TRUE, col = &quot;green&quot;)</code></pre>
 <p><img src="day7_files/figure-html/unnamed-chunk-30-1.png" width="672" /></p>
+<p>Looking at the education variable, we see that the first category has extremely wide error bands. We check a cross-table of education against the indicator of whether age &gt; 250. We see that age &gt; 250 is never true for lowest category.</p>
 <pre class="r"><code>table(education, I(wage &gt; 250))</code></pre>
 <pre><code>##                     
 ## education            FALSE TRUE
@@ -632,9 +674,10 @@ plot(gam.lr, se = TRUE, col = &quot;green&quot;)</code></pre>
 ##   3. Some College      643    7
 ##   4. College Grad      663   22
 ##   5. Advanced Degree   381   45</code></pre>
+<p>Based on this we exclude the lowest education category from our model.</p>
 <pre class="r"><code>gam.lr.s &lt;- gam(I(wage &gt; 250) ~ year + ns(age, df = 5) + education, family = binomial, data = Wage, subset = (education != &quot;1. &lt; HS Grad&quot;))
 plot(gam.lr.s, se = TRUE, col = &quot;green&quot;)</code></pre>
-<p><img src="day7_files/figure-html/unnamed-chunk-30-2.png" width="672" /></p>
+<p><img src="day7_files/figure-html/unnamed-chunk-32-1.png" width="672" /></p>
 </div>
 <div id="exercises" class="section level3">
 <h3>Exercises</h3>
