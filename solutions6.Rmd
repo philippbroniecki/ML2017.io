@@ -89,7 +89,7 @@ predict(mod.lasso, s = lambda.best, type = "coefficients")
 
 5. Comment on the results obtained. How accurately can we predict the number of college applications received? Is there much difference among the test errors resulting from these five approaches?
 
-**Results for OLS, Lasso, Ridge are comparable. Furthermore, it shrinks the `Enroll`, `Top25perc`, `P.Undergrad`, `Room.Board`, `Books`, `Personal`, `PhD`, and `S.F.Ratio` variables to exactly zero and shrinks coefficients of other variables. Here are the test $R^2$ for all models.
+**Results for OLS, Lasso, Ridge are comparable. Furthermore, it shrinks the `Enroll`, `Top25perc`, `F.Undergrad`, `P.Undergrad`, `Books`, `Personal`, and `S.F.Ratio` variables to exactly zero and shrinks coefficients of other variables. Here are the test $R^2$ for all models.
 
 ```{r, fig.align="center"}
 test.avg <-  mean(College.test[, "Apps"])

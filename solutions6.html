@@ -469,7 +469,7 @@ predict(mod.lasso, s = lambda.best, type = &quot;coefficients&quot;)</code></pre
 <ol start="5" style="list-style-type: decimal">
 <li>Comment on the results obtained. How accurately can we predict the number of college applications received? Is there much difference among the test errors resulting from these five approaches?</li>
 </ol>
-<p>**Results for OLS, Lasso, Ridge are comparable. Furthermore, it shrinks the <code>Enroll</code>, <code>Top25perc</code>, <code>P.Undergrad</code>, <code>Room.Board</code>, <code>Books</code>, <code>Personal</code>, <code>PhD</code>, and <code>S.F.Ratio</code> variables to exactly zero and shrinks coefficients of other variables. Here are the test <span class="math inline">\(R^2\)</span> for all models.</p>
+<p>**Results for OLS, Lasso, Ridge are comparable. Furthermore, it shrinks the <code>Enroll</code>, <code>Top25perc</code>, <code>F.Undergrad</code>, <code>P.Undergrad</code>, <code>Books</code>, <code>Personal</code>, and <code>S.F.Ratio</code> variables to exactly zero and shrinks coefficients of other variables. Here are the test <span class="math inline">\(R^2\)</span> for all models.</p>
 <pre class="r"><code>test.avg &lt;-  mean(College.test[, &quot;Apps&quot;])
 
 lm.test.r2 &lt;-  1 - mean((College.test[, &quot;Apps&quot;] - lm.pred)^2) /
