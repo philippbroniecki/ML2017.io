@@ -158,7 +158,7 @@ se.bands <- 1 / (1 + exp(-se.bands.logit))
 
 ```
 
-We the `plot()` function, we put the result next to the plot where wage is continuous. With the `points()` function we add the actual data to the plot. The argument `pch="|"` draws a bar as the symbol for each point. Also notice the y-coordinate of each point. In the `plot()` function we set the range of the y-axis with `ylim = c(0, 0.2)` to range from $0$ to $1$. If the true outcome is $1$ we want to draw the | at $y=0.2$ and otherwhise at $y=0$. We achieve this with `I((wage > 250)/5)`. Play around to see why.
+We add the results next to the plot where wage is continuous. With the `points()` function we add the actual data to the plot. The argument `pch="|"` draws a bar as the symbol for each point. Also notice the y-coordinate of each point. In the `plot()` function we set the range of the y-axis with `ylim = c(0, 0.2)` to range from $0$ to $0.2$. If the true outcome is $1$ we want to draw the | at $y=0.2$ and otherwhise at $y=0$. We achieve this with `I((wage > 250)/5)`. Play around to see why.
 
 ```{r, eval = FALSE}
 plot(I(wage > 250) ~ age, xlim = agelims, type = "n", ylim = c(0, 0.2))
