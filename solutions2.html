@@ -509,6 +509,12 @@ texreg::screenreg(list(m_edu, m_minority, m_immi))</code></pre>
 </ol>
 <pre class="r"><code>library(Zelig)</code></pre>
 <pre><code>## Warning: package &#39;Zelig&#39; was built under R version 3.4.1</code></pre>
+<pre><code>## Loading required package: survival</code></pre>
+<pre><code>## 
+## Attaching package: &#39;survival&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:boot&#39;:
+## 
+##     aml</code></pre>
 <pre class="r"><code>z.out &lt;- zelig(unemploymentrate ~ recentimmigration5, data = com, model = &quot;ls&quot;)</code></pre>
 <pre><code>## How to cite this model in Zelig:
 ##   R Core Team. 2007.

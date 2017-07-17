@@ -406,7 +406,7 @@ data2$health.good &lt;- factor(data2$health.good, labels = c(&quot;bad&quot;, &q
 cat.vars &lt;- unlist(lapply(data2, function(x) is.factor(x) | all(x == 0 | x==1) | all( x==1 | x==2) ))
 # normalize numeric variables
 data2[, !cat.vars] &lt;- apply(data2[, !cat.vars], 2, scale)</code></pre>
-<p>In order to run ridge regression, we create a matrix from our dataset using the <code>model.matrix()</code> function. We also need to remove the intercept from the resulting matrix because the function to run ridge regression automatically includes one. Furthermore, we will use the subjective rate of immigrants as response. Consequently, we have to remove <code>over.estimate</code> as it measures the same thing. Otherwise, it would be somewhat similar to predicting height measured in inches using as a predictor whether the person is taller than 70 inches. Lastly, the party affiliation dummies are mutually exclusive, se we have to exclude the model category <code>Cons</code>.</p>
+<p>In order to run ridge regression, we create a matrix from our dataset using the <code>model.matrix()</code> function. We also need to remove the intercept from the resulting matrix because the function to run ridge regression automatically includes one. Furthermore, we will use the subjective rate of immigrants as response. Consequently, we have to remove <code>over.estimate</code> as it measures the same thing. Lastly, the party affiliation dummies are mutually exclusive, se we have to exclude the model category <code>Cons</code>.</p>
 <pre class="r"><code># covariates in matrix form but remove the intercept, over.estimate, and Cons
 x &lt;- model.matrix(IMMBRIT ~ . -1 -over.estimate -Cons, data2)
 # check if it looks fine
@@ -571,7 +571,7 @@ plot(cv.out)</code></pre>
 bestlam &lt;- cv.out$lambda.min
 bestlam</code></pre>
 <pre><code>## [1] 0.242911</code></pre>
-<p>The best performing model is the one with <span class="math inline">\(\lambda = 4.661975\)</span></p>
+<p>The best performing model is the one with <span class="math inline">\(\lambda = 0.242911\)</span></p>
 <pre class="r"><code># predict outcomes using best cross-validated lambda
 ridge.pred &lt;- predict(ridge.mod, s = bestlam, newx = x[-train, ])
 mean((ridge.pred - y.test)^2)</code></pre>

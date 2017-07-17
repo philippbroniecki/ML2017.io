@@ -52,7 +52,7 @@ cat.vars <- unlist(lapply(data2, function(x) is.factor(x) | all(x == 0 | x==1) |
 data2[, !cat.vars] <- apply(data2[, !cat.vars], 2, scale)
 ```
 
-In order to run ridge regression, we create a matrix from our dataset using the `model.matrix()` function. We also need to remove the intercept from the resulting matrix because the function to run ridge regression automatically includes one. Furthermore, we will use the subjective rate of immigrants as response. Consequently, we have to remove `over.estimate` as it measures the same thing. Otherwise, it would be somewhat similar to predicting height measured in inches using as a predictor whether the person is taller than 70 inches. Lastly, the party affiliation dummies are mutually exclusive, se we have to exclude the model category `Cons`.
+In order to run ridge regression, we create a matrix from our dataset using the `model.matrix()` function. We also need to remove the intercept from the resulting matrix because the function to run ridge regression automatically includes one. Furthermore, we will use the subjective rate of immigrants as response. Consequently, we have to remove `over.estimate` as it measures the same thing. Lastly, the party affiliation dummies are mutually exclusive, se we have to exclude the model category `Cons`.
 
 ```{r}
 # covariates in matrix form but remove the intercept, over.estimate, and Cons
@@ -165,7 +165,7 @@ bestlam <- cv.out$lambda.min
 bestlam
 ```
 
-The best performing model is the one with $\lambda = 4.661975$
+The best performing model is the one with $\lambda = 0.242911$
 
 ```{r}
 # predict outcomes using best cross-validated lambda

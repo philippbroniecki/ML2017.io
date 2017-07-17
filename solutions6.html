@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Philipp Broniecki and Lucas Leemann – Machine Learning 1K" />
+
+
+<title>Solution Day 6 – Regularization</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Essex 2017 Machine Learning</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 1
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day1.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D1%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions1.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 2
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day2.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D2%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions2.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 3
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day3.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D3%20-%20Classification.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions3.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 4
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day4.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D4%20-%20Resampling.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions4.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 5
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day5.html">Lab</a>
+    </li>
+    <li>
+      <a href="labs/Lab%20Code%205.R">plain R-Code</a>
+    </li>
+    <li>
+      <a href="./slides/D5%20-%20Model%20Selection%20I.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions5.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 6
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day6.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D6%20-%20Model%20Selection%20II.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions6.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 7
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day7.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D7%20-%20Polynomial%20Models.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions7.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 8
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day8.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D8%20-%20Tree-Based%20Methods.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions8.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 9
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day9.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D9%20-%20Unsupervised%20Learning.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions9.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    More
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="simulation.html">Simulation</a>
+    </li>
+    <li>
+      <a href="montecarlo.html">Monte Carlos</a>
+    </li>
+    <li>
+      <a href="MCLassoRidge.html">MC Lasso v. Ridge</a>
+    </li>
+    <li>
+      <a href="./data/titanic.dta">Titanic Data</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Solution Day 6 – Regularization</h1>
+<h4 class="author"><em>Philipp Broniecki and Lucas Leemann – Machine Learning 1K</em></h4>
+
+</div>
+
+
+<div id="q1" class="section level5">
+<h5>Q1</h5>
+<p>In this exercise, we will predict the number of applications received using the <code>College</code> data set. You need to load <code>libary(ISLR)</code> and then type <code>?College</code> to get the codebook.</p>
+<ol style="list-style-type: decimal">
+<li>Split the data set into a training set and a test set.</li>
+</ol>
+<p><strong>Load and split the College data.</strong></p>
+<pre class="r"><code>library(ISLR)
+set.seed(11)
+sum(is.na(College))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>train.size &lt;-  dim(College)[1] / 2
+train &lt;-  sample(1:dim(College)[1], train.size)
+test &lt;-  -train
+College.train &lt;-  College[train, ]
+College.test &lt;-  College[test, ]</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Fit a linear model using least squares on the training set, and report the test error obtained.</li>
+</ol>
+<p><strong>Number of applications is the Apps variable.</strong></p>
+<pre class="r"><code>lm.fit &lt;-  lm(Apps ~ . , data = College.train)
+lm.pred &lt;-  predict(lm.fit, College.test)
+mean((College.test[, &quot;Apps&quot;] - lm.pred)^2)</code></pre>
+<pre><code>## [1] 1538442</code></pre>
+<p><strong>Test RSS is 1538442</strong></p>
+<ol start="3" style="list-style-type: decimal">
+<li>Fit a ridge regression model on the training set, with <span class="math inline">\(\lambda\)</span> chosen by cross-validation. Report the test error obtained.</li>
+</ol>
+<p><strong>Pick <span class="math inline">\(\lambda\)</span> using College.train and report error on College.test</strong></p>
+<pre class="r"><code>library(glmnet)
+train.mat &lt;-  model.matrix(Apps ~ . , data = College.train)
+test.mat &lt;-  model.matrix(Apps ~ . , data = College.test)
+grid &lt;-  10 ^ seq(4, -2, length = 100)
+mod.ridge &lt;-  cv.glmnet(train.mat, College.train[, &quot;Apps&quot;], 
+                        alpha = 0, lambda = grid, thresh = 1e-12)
+lambda.best &lt;-  mod.ridge$lambda.min
+lambda.best</code></pre>
+<pre><code>## [1] 18.73817</code></pre>
+<pre class="r"><code>ridge.pred &lt;-  predict(mod.ridge, newx = test.mat, s = lambda.best)
+mean((College.test[, &quot;Apps&quot;] - ridge.pred)^2)</code></pre>
+<pre><code>## [1] 1608859</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li>Fit a lasso model on the training set, with <span class="math inline">\(\lambda\)</span> chosen by cross-validation. Report the test error obtained, along with the number of non-zero coefficient estimates.</li>
+</ol>
+<p><strong>Pick <span class="math inline">\(\lambda\)</span> using College.train and report error on College.test.</strong></p>
+<pre class="r"><code>mod.lasso &lt;-  cv.glmnet(train.mat, College.train[, &quot;Apps&quot;], 
+                        alpha = 1, lambda = grid, thresh = 1e-12)
+lambda.best &lt;-  mod.lasso$lambda.min
+lambda.best</code></pre>
+<pre><code>## [1] 21.54435</code></pre>
+<pre class="r"><code>lasso.pred &lt;-  predict(mod.lasso, newx = test.mat, s = lambda.best)
+mean((College.test[, &quot;Apps&quot;] - lasso.pred)^2)</code></pre>
+<pre><code>## [1] 1635280</code></pre>
+<p><strong>Again, Test RSS is slightly higher that OLS, 1635280.</strong></p>
+<p><strong>The coefficients look like</strong></p>
+<pre class="r"><code>mod.lasso &lt;-  glmnet(model.matrix(Apps ~ . , data = College), 
+                     College[, &quot;Apps&quot;], alpha = 1)
+predict(mod.lasso, s = lambda.best, type = &quot;coefficients&quot;)</code></pre>
+<pre><code>## 19 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                         1
+## (Intercept) -6.038452e+02
+## (Intercept)  .           
+## PrivateYes  -4.235413e+02
+## Accept       1.455236e+00
+## Enroll      -2.003696e-01
+## Top10perc    3.367640e+01
+## Top25perc   -2.403036e+00
+## F.Undergrad  .           
+## P.Undergrad  2.086035e-02
+## Outstate    -5.781855e-02
+## Room.Board   1.246462e-01
+## Books        .           
+## Personal     1.832912e-05
+## PhD         -5.601313e+00
+## Terminal    -3.313824e+00
+## S.F.Ratio    4.478684e+00
+## perc.alumni -9.796600e-01
+## Expend       6.967693e-02
+## Grad.Rate    5.159652e+00</code></pre>
+<ol start="5" style="list-style-type: decimal">
+<li>Comment on the results obtained. How accurately can we predict the number of college applications received? Is there much difference among the test errors resulting from these five approaches?</li>
+</ol>
+<p>**Results for OLS, Lasso, Ridge are comparable. Lasso reduces the <span class="math inline">\(F\)</span>. <code>Undergrad</code> and <code>Books</code> variables to zero and shrinks coefficients of other variables. Here are the test <span class="math inline">\(R^2\)</span> for all models.</p>
+<pre class="r"><code>test.avg &lt;-  mean(College.test[, &quot;Apps&quot;])
+
+lm.test.r2 &lt;-  1 - mean((College.test[, &quot;Apps&quot;] - lm.pred)^2) /
+  mean((College.test[, &quot;Apps&quot;] - test.avg)^2)
+
+ridge.test.r2 &lt;-  1 - mean((College.test[, &quot;Apps&quot;] - ridge.pred)^2)/
+  mean((College.test[, &quot;Apps&quot;] - test.avg)^2)
+
+lasso.test.r2 &lt;-  1 - mean((College.test[, &quot;Apps&quot;] - lasso.pred)^2) /
+  mean((College.test[, &quot;Apps&quot;] - test.avg)^2)
+
+barplot(c(lm.test.r2, ridge.test.r2, lasso.test.r2),
+        col = &quot;red&quot;, names.arg = c(&quot;OLS&quot;, &quot;Ridge&quot;, &quot;Lasso&quot;),
+        main = &quot;Test R-squared&quot;)</code></pre>
+<p><img src="solutions6_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The plot shows that test <span class="math inline">\(R^2\)</span> for all models are around <span class="math inline">\(0.9\)</span>. All models predict college applications with high accuracy.</p>
+</div>
+<div id="q2" class="section level5">
+<h5>Q2</h5>
+<p>We will now try to predict the per capita crime rate in the <code>Boston</code> data set. The <code>Boston</code> data set is in the <code>MASS</code> library.</p>
+<ol style="list-style-type: decimal">
+<li>Try out some of the regression methods explored in this chapter, such as best subset selection, the lasso, and ridge regression. Present and discuss results for the approaches that you consider.</li>
+</ol>
+<pre class="r"><code>set.seed(1)
+library(MASS)
+library(leaps)
+library(glmnet)</code></pre>
+<p><strong>Best subset selection</strong></p>
+<pre class="r"><code>predict.regsubsets &lt;-  function(object, newdata, id, ...) {
+    form &lt;-  as.formula(object$call[[2]])
+    mat &lt;-  model.matrix(form, newdata)
+    coefi &lt;-  coef(object, id = id)
+    mat[, names(coefi)] %*% coefi
+}
+
+k &lt;-  10
+p &lt;-  ncol(Boston)-1
+folds &lt;-  sample(rep(1:k, length = nrow(Boston)))
+cv.errors &lt;-  matrix(NA, k, p)
+
+for (i in 1:k) {
+  best.fit &lt;-  regsubsets(crim ~ . , data = Boston[folds!=i,], nvmax = p)
+  for (j in 1:p) {
+    pred &lt;-  predict(best.fit, Boston[folds==i, ], id = j)
+    cv.errors[i,j] &lt;-  mean((Boston$crim[folds==i] - pred)^2)
+  }
+}
+
+rmse.cv &lt;-  sqrt(apply(cv.errors, 2, mean))
+plot(rmse.cv, pch = 19, type = &quot;b&quot;)</code></pre>
+<p><img src="solutions6_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<pre class="r"><code>which.min(rmse.cv)</code></pre>
+<pre><code>## [1] 9</code></pre>
+<pre class="r"><code>rmse.cv[which.min(rmse.cv)]</code></pre>
+<pre><code>## [1] 6.593396</code></pre>
+<p><strong>Lasso</strong></p>
+<pre class="r"><code>x &lt;-  model.matrix(crim ~ . -1, data = Boston)
+y &lt;-  Boston$crim
+cv.lasso &lt;-  cv.glmnet(x, y, type.measure = &quot;mse&quot;)
+plot(cv.lasso)</code></pre>
+<p><img src="solutions6_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<pre class="r"><code>coef(cv.lasso)</code></pre>
+<pre><code>## 14 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                     1
+## (Intercept) 1.0894283
+## zn          .        
+## indus       .        
+## chas        .        
+## nox         .        
+## rm          .        
+## age         .        
+## dis         .        
+## rad         0.2643196
+## tax         .        
+## ptratio     .        
+## black       .        
+## lstat       .        
+## medv        .</code></pre>
+<pre class="r"><code>sqrt(cv.lasso$cvm[cv.lasso$lambda == cv.lasso$lambda.1se])</code></pre>
+<pre><code>## [1] 7.405176</code></pre>
+<p><strong>Ridge regression</strong></p>
+<pre class="r"><code>x &lt;-  model.matrix(crim ~ . -1, data = Boston)
+y &lt;-  Boston$crim
+cv.ridge &lt;-  cv.glmnet(x, y, type.measure = &quot;mse&quot;, alpha = 0)
+plot(cv.ridge)</code></pre>
+<p><img src="solutions6_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code>coef(cv.ridge)</code></pre>
+<pre><code>## 14 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                        1
+## (Intercept)  1.017516864
+## zn          -0.002805664
+## indus        0.034405928
+## chas        -0.225250602
+## nox          2.249887499
+## rm          -0.162546004
+## age          0.007343331
+## dis         -0.114928730
+## rad          0.059813844
+## tax          0.002659110
+## ptratio      0.086423005
+## black       -0.003342067
+## lstat        0.044495213
+## medv        -0.029124577</code></pre>
+<pre class="r"><code>sqrt(cv.ridge$cvm[cv.ridge$lambda == cv.ridge$lambda.1se])</code></pre>
+<pre><code>## [1] 7.456946</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Propose a model (or set of models) that seem to perform well on this data set, and justify your answer. Make sure that you are evaluating model performance using validation set error, cross-validation, or some other reasonable alternative, as opposed to using training error.</li>
+</ol>
+<p><strong>See above answer for cross-validated mean squared errors of selected models.</strong></p>
+<ol start="3" style="list-style-type: decimal">
+<li>Does your chosen model involve all of the features in the data set? Why or why not?</li>
+</ol>
+<p><strong>I would choose the 9 parameter best subset model because it had the best cross-validated RMSE.</strong></p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
