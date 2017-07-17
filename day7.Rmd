@@ -131,7 +131,7 @@ And use the same method for making predictions using `predict()` as seen above.
 
 ```{r}
 preds <- predict(fit, newdata = list(age = age.grid), se = TRUE)
-pfit <- exp(preds$fit) / (1 + exp(preds$fit))
+pfit <- 1 / (1 + exp(-preds$fit))
 se.bands.logit <- cbind(preds$fit + 2 * preds$se.fit, preds$fit - 2 * preds$se.fit)
 se.bands <- exp(se.bands.logit)/(1 + exp(se.bands.logit))
 preds <- predict(fit, newdata = list(age = age.grid), type = "response", se = TRUE)

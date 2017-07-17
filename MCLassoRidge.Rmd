@@ -1,5 +1,5 @@
 ---
-title: "Monte Carlo - Lasso v. Ridge"
+title: "Monte Carlo Simulation - Lasso v. Ridge"
 author: "Philipp Broniecki and Lucas Leemann -- Machine Learning 1K"
 output: html_document
 ---
@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(global.par = TRUE)
 ```
 
-We set up a Monte Carlo simulation to test the performance lasso and ridge.
+We set up a Monte Carlo simulation to test the performance of lasso and ridge under circumstances that we set in the setup and the data generation process.
 
 ```{r}
 library(glmnet)
@@ -27,7 +27,7 @@ r.mse <- matrix(NA, n.sim, length(rho)) # ridge
 grid <- 10^seq(4, -2, length = 100) # 100 lambda values
 ```
 
-We loop over correlation, and simulations and record the MSE each time.
+We loop over correlations, and simulations and record the MSE each time.
 
 ```{r}
 start.time <- Sys.time()

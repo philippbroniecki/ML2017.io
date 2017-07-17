@@ -12,7 +12,7 @@
 <meta name="author" content="Philipp Broniecki and Lucas Leemann – Machine Learning 1K" />
 
 
-<title>Monte Carlo - Lasso v. Ridge</title>
+<title>Monte Carlo Simulation - Lasso v. Ridge</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -378,13 +378,13 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Monte Carlo - Lasso v. Ridge</h1>
+<h1 class="title toc-ignore">Monte Carlo Simulation - Lasso v. Ridge</h1>
 <h4 class="author"><em>Philipp Broniecki and Lucas Leemann – Machine Learning 1K</em></h4>
 
 </div>
 
 
-<p>We set up a Monte Carlo simulation to test the performance lasso and ridge.</p>
+<p>We set up a Monte Carlo simulation to test the performance of lasso and ridge under circumstances that we set in the setup and the data generation process.</p>
 <pre class="r"><code>library(glmnet)
 
 # setup
@@ -398,7 +398,7 @@ n.x &lt;- 40 # number of covariates
 l.mse &lt;- matrix(NA, n.sim, length(rho)) # lasso 
 r.mse &lt;- matrix(NA, n.sim, length(rho)) # ridge
 grid &lt;- 10^seq(4, -2, length = 100) # 100 lambda values</code></pre>
-<p>We loop over correlation, and simulations and record the MSE each time.</p>
+<p>We loop over correlations, and simulations and record the MSE each time.</p>
 <pre class="r"><code>start.time &lt;- Sys.time()
 
 # loop over correlations
@@ -442,7 +442,7 @@ for (j in 1:length(rho)){
 # how long did the MC take?
 end.time &lt;- Sys.time()
 end.time-start.time</code></pre>
-<pre><code>## Time difference of 1.215405 mins</code></pre>
+<pre><code>## Time difference of 1.010497 mins</code></pre>
 <p>We now take column means to get the average MSE over the <code>n.sim</code> simulations.</p>
 <pre class="r"><code>apply(l.mse,2,mean)</code></pre>
 <pre><code>## [1] 7.364181 5.687029 3.720381</code></pre>
