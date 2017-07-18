@@ -396,9 +396,8 @@ $(document).ready(function () {
 <p>Load Wage dataset. Keep an array of all cross-validation errors. We are performing K-fold cross validation with <span class="math inline">\(K=10\)</span>.</p>
 <pre class="r"><code>rm(list = ls())
 set.seed(1)
-library(ISLR)</code></pre>
-<pre><code>## Warning: package &#39;ISLR&#39; was built under R version 3.4.1</code></pre>
-<pre class="r"><code>library(boot)
+library(ISLR)
+library(boot)
 
 # container of test errors
 cv.MSE &lt;- NA
@@ -425,7 +424,7 @@ abline(h = min(cv.MSE) + sd(cv.MSE) , lty = &quot;dotted&quot;)
 
 # where is the minimum
 points( x = which.min(cv.MSE), y = min(cv.MSE), col = &quot;red&quot;, pch = &quot;X&quot;, cex = 1.5 )</code></pre>
-<p><img src="solutions7_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><img src="solutions7_files/figure-html/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>We fit the models again successively with higher powers of age to perfom anova.</p>
 <pre class="r"><code># container for the models we will fit
 models &lt;- vector(&quot;list&quot;, length(cv.MSE))
@@ -506,7 +505,7 @@ abline(h = min(cv.error, na.rm = TRUE) + sd(cv.error, na.rm = TRUE) , lty = &quo
 
 # highlight minimum
 points( x = which.min(cv.error), y = min(cv.error, na.rm = TRUE), col = &quot;red&quot;, pch = &quot;X&quot;, cex = 1.5 )</code></pre>
-<p><img src="solutions7_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><img src="solutions7_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>Cross validation approximates that the test error is minimized at <span class="math inline">\(k=8\)</span> knots. The most parsimonious model within <span class="math inline">\(1sd\)</span> of the minimum has <span class="math inline">\(k=4\)</span> knots and, thus, splits the data into 5 distinct regions.</p>
 <p>We now train the entire data with step function using <span class="math inline">\(4\)</span> cuts and plot it.</p>
 <pre class="r"><code>lm.fit &lt;-  glm(wage ~ cut(age, 4), data = Wage)
@@ -518,7 +517,7 @@ lines(age.grid, lm.pred$fit, col = &quot;red&quot;, lwd = 2)
 matlines(age.grid, cbind( lm.pred$fit + 2* lm.pred$se.fit,
                           lm.pred$fit - 2* lm.pred$se.fit),
          col = &quot;red&quot;, lty =&quot;dashed&quot;)</code></pre>
-<p><img src="solutions7_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><img src="solutions7_files/figure-html/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="q2" class="section level4">
 <h4>Q2</h4>
@@ -560,12 +559,8 @@ deviance(m3)</code></pre>
 <div id="gams" class="section level4">
 <h4>GAMs</h4>
 <p>We can’t fit splines to factors but we can fit a model with a spline one the continuous variable and add the other predictors.</p>
-<pre class="r"><code>library(gam)</code></pre>
-<pre><code>## Warning: package &#39;gam&#39; was built under R version 3.4.1</code></pre>
-<pre><code>## Loading required package: splines</code></pre>
-<pre><code>## Loading required package: foreach</code></pre>
-<pre><code>## Loaded gam 1.14-4</code></pre>
-<pre class="r"><code>m4 &lt;-  gam(wage ~ maritl + jobclass + s(age,4), data = Wage)
+<pre class="r"><code>library(gam)
+m4 &lt;-  gam(wage ~ maritl + jobclass + s(age,4), data = Wage)
 deviance(m4)</code></pre>
 <pre><code>## [1] 4476501</code></pre>
 <pre class="r"><code>anova(m1, m2, m3, m4)</code></pre>
@@ -591,6 +586,16 @@ deviance(m4)</code></pre>
 set.seed(1)
 library(MASS)
 attach(Boston)</code></pre>
+<pre><code>## The following object is masked from Wage (pos = 4):
+## 
+##     age</code></pre>
+<pre><code>## The following objects are masked from Boston (pos = 7):
+## 
+##     age, black, chas, crim, dis, indus, lstat, medv, nox, ptratio,
+##     rad, rm, tax, zn</code></pre>
+<pre><code>## The following object is masked from Wage (pos = 11):
+## 
+##     age</code></pre>
 <ol style="list-style-type: decimal">
 <li>Use the <code>poly()</code> function to fit a cubic polynomial regression to predict <code>nox</code> using <code>dis</code>. Report the regression output, and plot the resulting data and polynomial fits.</li>
 </ol>
@@ -620,6 +625,7 @@ summary(m1)</code></pre>
 dis.grid &lt;-  seq(from = dislim[1], to = dislim[2], length.out = 100)
 lm.pred &lt;-  predict(m1, list(dis = dis.grid), se = TRUE)
 
+par(mfrow = c(1,1))
 plot(nox ~ dis, col = &quot;darkgrey&quot;, bty =&quot;n&quot;, 
      ylim = c( min(lm.pred$fit) - 2.5* min(lm.pred$se.fit), 
                max(lm.pred$fit) + 2.5* max(lm.pred$se.fit) ))
@@ -627,7 +633,7 @@ lines(x = dis.grid, y = lm.pred$fit, col = &quot;red&quot;, lwd = 2)
 matlines(x = dis.grid, y = cbind(lm.pred$fit + 2* lm.pred$se.fit,
                                  lm.pred$fit - 2* lm.pred$se.fit) 
          , col = &quot;red&quot;, lwd = 1.5, lty = &quot;dashed&quot;)</code></pre>
-<p><img src="solutions7_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p><img src="solutions7_files/figure-html/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>Summary shows that all polynomial terms are significant while predicting <code>nox</code> using <code>dis</code>. Plot shows a smooth curve fitting the data fairly well.</p>
 <ol start="2" style="list-style-type: decimal">
 <li>Plot the polynomial fits for a range of different polynomial degrees (say, from 1 to 10), and report the associated residual sum of squares.</li>
@@ -673,8 +679,8 @@ result</code></pre>
 <pre class="r"><code>plot(result ~ seq(1,10), type = &quot;b&quot;, pch = 19, bty = &quot;n&quot;, xlab = &quot;powers of dist to empl. center&quot;,
      ylab = &quot;cv error&quot;)
 abline(h = min(cv.error) + sd(cv.error), col = &quot;red&quot;, lty = &quot;dashed&quot;)</code></pre>
-<p><img src="solutions7_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
-<p>Depending on how disciplined an approach we take, we would pick either no polynomial or <code>dis</code> squared.</p>
+<p><img src="solutions7_files/figure-html/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Based on cross-validation we would pick <code>dis</code> squared.</p>
 <ol start="4" style="list-style-type: decimal">
 <li>Use the <code>bs()</code> function to fit a regression spline to predict <code>nox</code> using <code>dis</code>. Report the output for the fit using four degrees of freedom. How did you choose the knots? Plot the resulting fit.</li>
 </ol>
@@ -707,6 +713,7 @@ summary(m4)</code></pre>
 ## F-statistic: 218.6 on 6 and 499 DF,  p-value: &lt; 2.2e-16</code></pre>
 <pre class="r"><code># plot results
 preds &lt;-  predict(m4, list(dis = dis.grid), se = TRUE)
+par(mfrow=c(1, 1))
 plot(nox ~ dis, col = &quot;darkgrey&quot;, bty = &quot;n&quot;, ylim = c(0.3, .8))
 # all lines at once
 matlines( dis.grid,
@@ -714,7 +721,7 @@ matlines( dis.grid,
                  preds$fit + 2* preds$se.fit,
                  preds$fit - 2* preds$se.fit),
           col = &quot;black&quot;, lwd = 2, lty = c(&quot;solid&quot;, &quot;dashed&quot;, &quot;dashed&quot;))</code></pre>
-<p><img src="solutions7_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p><img src="solutions7_files/figure-html/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>The summary shows that all terms in spline fit are significant except the first. The plot shows that the spline fits data well. The data fit at the extremes, when <span class="math inline">\(dis&gt;9\)</span> is driven by very very few observations.</p>
 <ol start="5" style="list-style-type: decimal">
 <li>Now fit a regression spline for a range of degrees of freedom, and plot the resulting fits and report the resulting RSS. Describe the results obtained.</li>
@@ -740,11 +747,14 @@ box[-c(1, 2)]</code></pre>
 </ol>
 <pre class="r"><code>rm(list = ls())
 set.seed(1)
-library(leaps)</code></pre>
-<pre><code>## Warning: package &#39;leaps&#39; was built under R version 3.4.1</code></pre>
-<pre class="r"><code>attach(College)
-
-# train/test split row index numbers
+library(leaps)
+attach(College)</code></pre>
+<pre><code>## The following objects are masked from College (pos = 7):
+## 
+##     Accept, Apps, Books, Enroll, Expend, F.Undergrad, Grad.Rate,
+##     Outstate, P.Undergrad, perc.alumni, Personal, PhD, Private,
+##     Room.Board, S.F.Ratio, Terminal, Top10perc, Top25perc</code></pre>
+<pre class="r"><code># train/test split row index numbers
 train &lt;-  sample( length(Outstate), length(Outstate)/2)
 test &lt;-  -train
 
@@ -794,7 +804,7 @@ gam.fit &lt;-  gam(Outstate ~ Private + s(Room.Board, df=2) +
                 data=College.train)
 par(mfrow=c(2, 3))
 plot(gam.fit, se=TRUE, col=&quot;blue&quot;)</code></pre>
-<p><img src="solutions7_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p><img src="solutions7_files/figure-html/unnamed-chunk-19-1.png" width="672" style="display: block; margin: auto;" /></p>
 <ol start="3" style="list-style-type: decimal">
 <li>Evaluate the model obtained on the test set, and explain the results obtained.</li>
 </ol>

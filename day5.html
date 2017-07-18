@@ -494,9 +494,9 @@ df$Cons &lt;- NULL</code></pre>
 <div id="best-subset-selection" class="section level3">
 <h3>Best Subset Selection</h3>
 <p>We use the <code>regsubsets()</code> function to identify the best model based on subset selection quantified by the residual sum of squares (RSS) for each model.</p>
-<pre class="r"><code>library(leaps)</code></pre>
-<pre><code>## Warning: package &#39;leaps&#39; was built under R version 3.4.1</code></pre>
-<pre class="r"><code># run best subset selection
+<pre class="r"><code>library(leaps)
+
+# run best subset selection
 regfit.full &lt;- regsubsets(IMMBRIT ~ ., data = df)
 summary(regfit.full)</code></pre>
 <pre><code>## Subset selection object

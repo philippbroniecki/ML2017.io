@@ -38,7 +38,7 @@ cv.MSE
 
 We illustrate the results with a plot of `type = "b"` where dots are drawn connected by lines. We set the limits of the y-axis automatically as the maximum/minimum cross-validation errors $\pm 1sd$.
 
-```{r}
+```{r, fig.align="center"}
 # illustrate results with a line plot connecting the cv.error dots
 plot( x = 1:15, y = cv.MSE, xlab = "power of age", ylab = "CV error", 
       type = "b", pch = 19, lwd = 2, bty = "n", 
@@ -87,7 +87,7 @@ matlines( x = age.grid, y = cbind( lm.pred$fit + 2*lm.pred$se.fit, lm.pred$fit -
 
 2. Fit a step function to predict `wage` using `age`, and perform cross-validation to choose the optimal number of cuts. Make a plot of the fit obtained.
 
-```{r}
+```{r, fig.align="center"}
 cv.error <-  NA
 # for each cut perform 10-fold cross-validation
 for (i in 2:15) {
@@ -112,7 +112,7 @@ Cross validation approximates that the test error is minimized at $k=8$ knots. T
 
 We now train the entire data with step function using $4$ cuts and plot it.
 
-```{r}
+```{r, fig.align="center"}
 lm.fit <-  glm(wage ~ cut(age, 4), data = Wage)
 agelims <-  range(Wage$age)
 age.grid <-  seq(from = agelims[1], to = agelims[2])
@@ -193,7 +193,7 @@ attach(Boston)
 
 1. Use the `poly()` function to fit a cubic polynomial regression to predict `nox` using `dis`. Report the regression output, and plot the resulting data and polynomial fits.
 
-```{r}
+```{r, fig.align="center"}
 m1 <-  lm(nox ~ poly(dis, 3))
 summary(m1)
 
@@ -201,6 +201,7 @@ dislim <-  range(dis)
 dis.grid <-  seq(from = dislim[1], to = dislim[2], length.out = 100)
 lm.pred <-  predict(m1, list(dis = dis.grid), se = TRUE)
 
+par(mfrow = c(1,1))
 plot(nox ~ dis, col = "darkgrey", bty ="n", 
      ylim = c( min(lm.pred$fit) - 2.5* min(lm.pred$se.fit), 
                max(lm.pred$fit) + 2.5* max(lm.pred$se.fit) ))
@@ -235,7 +236,7 @@ As expected, train RSS monotonically decreases with degree of polynomial.
 
 We perform LLOCV and code it up by hand (slower than the implemented version):
 
-```{r}
+```{r, fig.align="center"}
 # container
 cv.error <- matrix(NA, nrow = nrow(Boston), ncol = 10)
 
@@ -259,20 +260,21 @@ abline(h = min(cv.error) + sd(cv.error), col = "red", lty = "dashed")
 
 ```
 
-Depending on how disciplined an approach we take, we would pick either no polynomial or `dis` squared.
+Based on cross-validation we would pick `dis` squared.
 
 4. Use the `bs()` function to fit a regression spline to predict `nox` using `dis`. Report the output for the fit using four degrees of freedom. How did you choose the knots? Plot the resulting fit.
 
 We see that dis has limits of about 1 and 12 respectively. We split this range in roughly equal 4 intervals and
 at $[3, 6, 9]$. Note: `bs()` function in R expects either the  `df` or the `knots` argument. If both are specified, knots are ignored.
 
-```{r}
+```{r, fig.align="center"}
 library(splines)
 m4 <-  lm(nox ~ bs(dis, knots = c(3, 6, 9)))
 summary(m4)
 
 # plot results
 preds <-  predict(m4, list(dis = dis.grid), se = TRUE)
+par(mfrow=c(1, 1))
 plot(nox ~ dis, col = "darkgrey", bty = "n", ylim = c(0.3, .8))
 # all lines at once
 matlines( dis.grid,
@@ -359,7 +361,7 @@ names(coefi)
 
 2. Fit a GAM on the training data, using out-of-state tuition as the response and the features selected in the previous step as the predictors. Plot the results, and explain your findings.
 
-```{r}
+```{r, fig.align="center"}
 library(gam)
 gam.fit <-  gam(Outstate ~ Private + s(Room.Board, df=2) + 
                   s(PhD, df=2) + s(perc.alumni, df=2) + 
