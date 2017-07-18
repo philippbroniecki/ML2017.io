@@ -1,0 +1,392 @@
+---
+title: "Solution Day 7  -- Polynomial Regression"
+author: "Philipp Broniecki and Lucas Leemann -- Machine Learning 1K"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(global.par = TRUE)
+```
+
+#### Q1
+
+In this exercise, you will further analyze the `Wage` dataset coming with the `ISLR` package.
+
+1. Perform polynomial regression to predict `wage` using `age`. Use cross-validation to select the optimal degree for the polynomial. What degree was chosen, and how does this compare to the results of hypothesis testing using `ANOVA`? Make a plot of the resulting polynomial fit to the data.
+
+Load Wage dataset. Keep an array of all cross-validation errors. We are performing K-fold cross validation with $K=10$.
+
+```{r}
+rm(list = ls())
+set.seed(1)
+library(ISLR)
+library(boot)
+
+# container of test errors
+cv.MSE <- NA
+
+# loop over powers of age
+for (i in 1:15) {
+  glm.fit <-  glm(wage ~ poly(age, i), data = Wage)
+  # we use cv.glm's cross-validation and keep the vanilla cv test error
+  cv.MSE[i] <-  cv.glm(Wage, glm.fit, K = 10)$delta[1]
+}
+# inspect results object
+cv.MSE
+```
+
+We illustrate the results with a plot of `type = "b"` where dots are drawn connected by lines. We set the limits of the y-axis automatically as the maximum/minimum cross-validation errors $\pm 1sd$.
+
+```{r}
+# illustrate results with a line plot connecting the cv.error dots
+plot( x = 1:15, y = cv.MSE, xlab = "power of age", ylab = "CV error", 
+      type = "b", pch = 19, lwd = 2, bty = "n", 
+      ylim = c( min(cv.MSE) - sd(cv.MSE), max(cv.MSE) + sd(cv.MSE) ) )
+
+# horizontal line for 1se to less complexity
+abline(h = min(cv.MSE) + sd(cv.MSE) , lty = "dotted")
+
+# where is the minimum
+points( x = which.min(cv.MSE), y = min(cv.MSE), col = "red", pch = "X", cex = 1.5 )
+```
+
+We fit the models again successively with higher powers of age to perfom anova.
+
+
+```{r}
+# container for the models we will fit
+models <- vector("list", length(cv.MSE))
+# fit all 15 models
+for( a in 1:length(cv.MSE)){
+  models[[a]] <- glm(wage ~ poly(age, a), data = Wage)
+}
+# f-test
+anova(models[[1]], models[[2]], models[[3]], models[[4]], models[[5]], models[[6]],
+      models[[7]], models[[8]], models[[9]], models[[10]], models[[11]], models[[12]],
+      models[[13]], models[[14]], models[[15]], test = "F")
+```
+
+According to the F-Test we should have chosen the model with age raised to the power of three whereas with cross-validation the most parsimonious model within $1sd$ of the minimum was the model that includes age squared.
+
+We now plot the results of the polynomial fit.
+
+```{r, fig.align="center"}
+plot(wage ~ age, data = Wage, col = "darkgrey",  bty = "n")
+agelims <-  range(Wage$age)
+age.grid <-  seq(from = agelims[1], to = agelims[2])
+lm.fit <-  lm(wage ~ poly(age, 2), data = Wage)
+lm.pred <-  predict(lm.fit, data.frame(age = age.grid), se = TRUE)
+# mean prediction
+lines(x = age.grid , y = lm.pred$fit, col = "blue", lwd = 2)
+# uncertainty bands
+matlines( x = age.grid, y = cbind( lm.pred$fit + 2*lm.pred$se.fit, lm.pred$fit - 2*lm.pred$se.fit),
+          lty = "dashed", col = "blue")
+```
+
+
+2. Fit a step function to predict `wage` using `age`, and perform cross-validation to choose the optimal number of cuts. Make a plot of the fit obtained.
+
+```{r}
+cv.error <-  NA
+# for each cut perform 10-fold cross-validation
+for (i in 2:15) {
+  Wage$age.cut <-  cut(Wage$age, i)
+  lm.fit <-  glm(wage ~ age.cut, data = Wage)
+  cv.error[i] <-  cv.glm(Wage, lm.fit, K = 10)$delta[1]
+}
+
+
+# the first element of cv.error is NA because we started our loop at 2
+plot(2:15, cv.error[-1], xlab = "Number of cuts", ylab = "CV error", 
+     type = "b", pch = 19, lwd = 2, bty ="n")
+
+# horizontal line for 1se to less complexity
+abline(h = min(cv.error, na.rm = TRUE) + sd(cv.error, na.rm = TRUE) , lty = "dotted")
+
+# highlight minimum
+points( x = which.min(cv.error), y = min(cv.error, na.rm = TRUE), col = "red", pch = "X", cex = 1.5 )
+```
+
+Cross validation approximates that the test error is minimized at $k=8$ knots. The most parsimonious model within $1sd$ of the minimum has $k=4$ knots and, thus, splits the data into 5 distinct regions.
+
+We now train the entire data with step function using $4$ cuts and plot it.
+
+```{r}
+lm.fit <-  glm(wage ~ cut(age, 4), data = Wage)
+agelims <-  range(Wage$age)
+age.grid <-  seq(from = agelims[1], to = agelims[2])
+lm.pred <-  predict(lm.fit, data.frame(age = age.grid), se = TRUE)
+plot(wage ~ age, data = Wage, col = "darkgrey", bty = "n")
+lines(age.grid, lm.pred$fit, col = "red", lwd = 2)
+matlines(age.grid, cbind( lm.pred$fit + 2* lm.pred$se.fit,
+                          lm.pred$fit - 2* lm.pred$se.fit),
+         col = "red", lty ="dashed")
+```
+
+
+#### Q2
+
+The `Wage` data set contains a number of other features that we haven't yet covered, such as marital status (`maritl`), job class (`jobclass`), and others. Explore the relationships between some of these other predictors and `wage`, and use non-linear fitting techniques in order to fit flexible models to the data. Create plots of the results obtained, and write a summary of your findings.
+
+
+```{r, fig.align="center"}
+set.seed(1)
+
+# summary stats
+summary(Wage[, c("maritl", "jobclass")] )
+
+# boxplots of relationships
+par(mfrow=c(1,2))
+plot(Wage$maritl, Wage$wage, frame.plot = "FALSE")
+plot(Wage$jobclass, Wage$wage, frame.plot = "FALSE")
+
+```
+
+It appears a married couple makes more money on average than other groups. It also appears that Informational jobs are higher-wage than Industrial jobs on average.
+
+#### Polynomial and Step functions
+
+```{r}
+m1 <-  lm(wage ~ maritl, data = Wage)
+deviance(m1) # fit (RSS in linear; -2*logLik)
+
+m2 <-  lm(wage ~ jobclass, data = Wage)
+deviance(m2)
+
+m3 <-  lm(wage ~ maritl + jobclass, data = Wage)
+deviance(m3)
+```
+
+As expected the in-sample data fit is minimized with the most complex model.
+
+#### Splines
+
+We can't fit splines to categorical variables.
+
+#### GAMs
+
+We can't fit splines to factors but we can fit a model with a spline one the continuous variable and add the other predictors.
+
+```{r}
+library(gam)
+m4 <-  gam(wage ~ maritl + jobclass + s(age,4), data = Wage)
+deviance(m4)
+```
+
+```{r}
+anova(m1, m2, m3, m4)
+```
+
+The F-Test suggests we get a statistically significant improvement from model four inlcuding the age spline, `wage`, `maritl`, and `jobclass`.
+
+#### Q3
+
+This question uses the variables `dis` (the weighted mean of distances to five Boston employment centers) and `nox` (nitrogen oxides concentration in parts per 10 million) from the `Boston` data available as part of the `MASS` package. We will treat `dis` as the predictor and `nox` as the response.
+
+```{r}
+rm(list = ls())
+set.seed(1)
+library(MASS)
+attach(Boston)
+```
+
+1. Use the `poly()` function to fit a cubic polynomial regression to predict `nox` using `dis`. Report the regression output, and plot the resulting data and polynomial fits.
+
+```{r}
+m1 <-  lm(nox ~ poly(dis, 3))
+summary(m1)
+
+dislim <-  range(dis)
+dis.grid <-  seq(from = dislim[1], to = dislim[2], length.out = 100)
+lm.pred <-  predict(m1, list(dis = dis.grid), se = TRUE)
+
+plot(nox ~ dis, col = "darkgrey", bty ="n", 
+     ylim = c( min(lm.pred$fit) - 2.5* min(lm.pred$se.fit), 
+               max(lm.pred$fit) + 2.5* max(lm.pred$se.fit) ))
+lines(x = dis.grid, y = lm.pred$fit, col = "red", lwd = 2)
+matlines(x = dis.grid, y = cbind(lm.pred$fit + 2* lm.pred$se.fit,
+                                 lm.pred$fit - 2* lm.pred$se.fit) 
+         , col = "red", lwd = 1.5, lty = "dashed")
+```
+
+Summary shows that all polynomial terms are significant while predicting `nox` using `dis`. Plot shows a smooth curve fitting the data fairly well.
+
+2. Plot the polynomial fits for a range of different polynomial degrees (say, from 1 to 10), and report the associated residual sum of squares.
+
+We plot polynomials of degrees 1 to 10 and save train RSS.
+
+```{r}
+# container
+train.rss <-  NA
+
+for (i in 1:10) {
+  m2 <-  lm(nox ~ poly(dis, i))
+  train.rss[i] <-  sum(m2$residuals^2)
+}
+
+# show model fit in training set
+train.rss
+```
+
+As expected, train RSS monotonically decreases with degree of polynomial.
+
+3. Perform cross-validation or another approach to select the optimal degree for the polynomial, and explain your results.
+
+We perform LLOCV and code it up by hand (slower than the implemented version):
+
+```{r}
+# container
+cv.error <- matrix(NA, nrow = nrow(Boston), ncol = 10)
+
+for (observation in 1: nrow(Boston)){
+  for ( power in 1:10){
+   m3 <- lm(nox ~ poly(dis, power))
+   # test error
+   y.hat <- predict( m3, newdata = Boston[-observation, ])
+   # mse 
+   cv.error[observation, power] <- mean((y.hat - Boston$nox[-observation] )^2)
+  }
+}
+
+result <- apply(cv.error, 2, mean)
+names(result) <- paste( "^", 1:10, sep= "" )
+result
+
+plot(result ~ seq(1,10), type = "b", pch = 19, bty = "n", xlab = "powers of dist to empl. center",
+     ylab = "cv error")
+abline(h = min(cv.error) + sd(cv.error), col = "red", lty = "dashed")
+
+```
+
+Depending on how disciplined an approach we take, we would pick either no polynomial or `dis` squared.
+
+4. Use the `bs()` function to fit a regression spline to predict `nox` using `dis`. Report the output for the fit using four degrees of freedom. How did you choose the knots? Plot the resulting fit.
+
+We see that dis has limits of about 1 and 12 respectively. We split this range in roughly equal 4 intervals and
+at $[3, 6, 9]$. Note: `bs()` function in R expects either the  `df` or the `knots` argument. If both are specified, knots are ignored.
+
+```{r}
+library(splines)
+m4 <-  lm(nox ~ bs(dis, knots = c(3, 6, 9)))
+summary(m4)
+
+# plot results
+preds <-  predict(m4, list(dis = dis.grid), se = TRUE)
+plot(nox ~ dis, col = "darkgrey", bty = "n", ylim = c(0.3, .8))
+# all lines at once
+matlines( dis.grid,
+          cbind( preds$fit,
+                 preds$fit + 2* preds$se.fit,
+                 preds$fit - 2* preds$se.fit),
+          col = "black", lwd = 2, lty = c("solid", "dashed", "dashed"))
+```
+
+
+The summary shows that all terms in spline fit are significant except the first. The plot shows that the spline fits data well. The data fit at the extremes, when $dis>9$ is driven by very very few observations.
+
+5. Now fit a regression spline for a range of degrees of freedom, and plot the resulting fits and report the resulting RSS. Describe the results obtained.
+
+We fit regression splines with dfs between 3 and 16.
+```{r}
+box <-  NA
+
+for (i in 3:16) {
+  lm.fit <-  lm(nox ~ bs(dis, df = i))
+  box[i] <-  sum(lm.fit$residuals^2)
+}
+
+box[-c(1, 2)]
+```
+
+Train RSS monotonically decreases till $df=14$ and then slightly increases.
+
+#### Q4
+
+This question relates to the `College` dataset from the `ISLR` package.
+
+1. Split the data into a training set and a test set. Using out-of-state tuition as the response and the other variables as the predictors, perform forward stepwise selection on the training set in order to identify a satisfactory model that uses just a subset of the predictors.
+
+```{r, fig.align="center"}
+rm(list = ls())
+set.seed(1)
+library(leaps)
+attach(College)
+
+# train/test split row index numbers
+train <-  sample( length(Outstate), length(Outstate)/2)
+test <-  -train
+
+# actual data split
+College.train <-  College[train, ]
+College.test <-  College[test, ]
+
+# run forward selection
+reg.fit <- regsubsets(Outstate ~ ., data = College.train, nvmax=17, method="forward")
+reg.summary <-  summary(reg.fit)
+
+# split plot window
+par(mfrow=c(1, 3))
+
+# plot 1: cp
+plot(reg.summary$cp,xlab="Number of Variables",ylab="Cp",type='l')
+min.cp <-  min(reg.summary$cp)
+std.cp <-  sd(reg.summary$cp)
+abline(h=min.cp + std.cp, col="red", lty=2)
+
+
+# plot 2: bic
+plot(reg.summary$bic,xlab="Number of Variables",ylab="BIC",type='l')
+min.bic <-  min(reg.summary$bic)
+std.bic <-  sd(reg.summary$bic)
+abline(h = min.bic + std.bic, col="red", lty=2)
+
+# plot 3: adj. R2
+plot(reg.summary$adjr2,xlab="Number of Variables",
+     ylab="Adjusted R2",type='l', ylim=c(0.4, 0.84))
+max.adjr2 <-  max(reg.summary$adjr2)
+std.adjr2 <-  sd(reg.summary$adjr2)
+abline(h=max.adjr2 - std.adjr2, col="red", lty=2)
+```
+
+All cp, BIC and adjr2 scores show that size 6 is the minimum size for the subset. However, according to the 1 standard error rule we would choose the model with 4 predictors.
+
+```{r}
+m5 <-  regsubsets(Outstate ~ . , method = "forward", data = College)
+coefi <-  coef(m5, id = 4)
+names(coefi)
+```
+
+2. Fit a GAM on the training data, using out-of-state tuition as the response and the features selected in the previous step as the predictors. Plot the results, and explain your findings.
+
+```{r}
+library(gam)
+gam.fit <-  gam(Outstate ~ Private + s(Room.Board, df=2) + 
+                  s(PhD, df=2) + s(perc.alumni, df=2) + 
+                  s(Expend, df=5) + s(Grad.Rate, df=2),
+                data=College.train)
+par(mfrow=c(2, 3))
+plot(gam.fit, se=TRUE, col="blue")
+```
+
+3. Evaluate the model obtained on the test set, and explain the results obtained.
+
+```{r}
+gam.pred <-  predict(gam.fit, College.test)
+gam.err <-  mean((College.test$Outstate - gam.pred)^2)
+gam.err
+
+gam.tss <-  mean((College.test$Outstate - mean(College.test$Outstate))^2)
+test.rss <-  1 - gam.err / gam.tss
+test.rss
+```
+
+We obtain a test R-squared of $0.77$ using GAM with 6 predictors. This is a slight improvement over a test RSS of $0.74$ obtained using OLS.
+
+4. For which variables, if any, is there evidence of a non-linear relationship with the response?
+
+```{r}
+summary(gam.fit)
+```
+
+Non-parametric Anova test shows a strong evidence of non-linear relationship between response and Expend, and a moderately strong non-linear relationship (using p value of 0.05) between response and Grad.Rate or PhD.

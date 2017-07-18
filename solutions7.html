@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Philipp Broniecki and Lucas Leemann – Machine Learning 1K" />
+
+
+<title>Solution Day 7 – Polynomial Regression</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Essex 2017 Machine Learning</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 1
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day1.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D1%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions1.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 2
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day2.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D2%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions2.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 3
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day3.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D3%20-%20Classification.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions3.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 4
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day4.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D4%20-%20Resampling.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions4.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 5
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day5.html">Lab</a>
+    </li>
+    <li>
+      <a href="labs/Lab%20Code%205.R">plain R-Code</a>
+    </li>
+    <li>
+      <a href="./slides/D5%20-%20Model%20Selection%20I.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions5.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 6
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day6.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D6%20-%20Model%20Selection%20II.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions6.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 7
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day7.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D7%20-%20Polynomial%20Models.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions7.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 8
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day8.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D8%20-%20Tree-Based%20Methods.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions8.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 9
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day9.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D9%20-%20Unsupervised%20Learning.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions9.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    More
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="simulation.html">Simulation</a>
+    </li>
+    <li>
+      <a href="montecarlo.html">Monte Carlos</a>
+    </li>
+    <li>
+      <a href="MCLassoRidge.html">MC Lasso v. Ridge</a>
+    </li>
+    <li>
+      <a href="splinesCV.html">Splines Cross Validated</a>
+    </li>
+    <li>
+      <a href="./data/titanic.dta">Titanic Data</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Solution Day 7 – Polynomial Regression</h1>
+<h4 class="author"><em>Philipp Broniecki and Lucas Leemann – Machine Learning 1K</em></h4>
+
+</div>
+
+
+<div id="q1" class="section level4">
+<h4>Q1</h4>
+<p>In this exercise, you will further analyze the <code>Wage</code> dataset coming with the <code>ISLR</code> package.</p>
+<ol style="list-style-type: decimal">
+<li>Perform polynomial regression to predict <code>wage</code> using <code>age</code>. Use cross-validation to select the optimal degree for the polynomial. What degree was chosen, and how does this compare to the results of hypothesis testing using <code>ANOVA</code>? Make a plot of the resulting polynomial fit to the data.</li>
+</ol>
+<p>Load Wage dataset. Keep an array of all cross-validation errors. We are performing K-fold cross validation with <span class="math inline">\(K=10\)</span>.</p>
+<pre class="r"><code>rm(list = ls())
+set.seed(1)
+library(ISLR)</code></pre>
+<pre><code>## Warning: package &#39;ISLR&#39; was built under R version 3.4.1</code></pre>
+<pre class="r"><code>library(boot)
+
+# container of test errors
+cv.MSE &lt;- NA
+
+# loop over powers of age
+for (i in 1:15) {
+  glm.fit &lt;-  glm(wage ~ poly(age, i), data = Wage)
+  # we use cv.glm&#39;s cross-validation and keep the vanilla cv test error
+  cv.MSE[i] &lt;-  cv.glm(Wage, glm.fit, K = 10)$delta[1]
+}
+# inspect results object
+cv.MSE</code></pre>
+<pre><code>##  [1] 1675.837 1601.012 1598.801 1594.217 1594.625 1594.888 1595.500
+##  [8] 1595.436 1596.335 1595.835 1595.970 1597.971 1598.713 1599.253
+## [15] 1595.332</code></pre>
+<p>We illustrate the results with a plot of <code>type = &quot;b&quot;</code> where dots are drawn connected by lines. We set the limits of the y-axis automatically as the maximum/minimum cross-validation errors <span class="math inline">\(\pm 1sd\)</span>.</p>
+<pre class="r"><code># illustrate results with a line plot connecting the cv.error dots
+plot( x = 1:15, y = cv.MSE, xlab = &quot;power of age&quot;, ylab = &quot;CV error&quot;, 
+      type = &quot;b&quot;, pch = 19, lwd = 2, bty = &quot;n&quot;, 
+      ylim = c( min(cv.MSE) - sd(cv.MSE), max(cv.MSE) + sd(cv.MSE) ) )
+
+# horizontal line for 1se to less complexity
+abline(h = min(cv.MSE) + sd(cv.MSE) , lty = &quot;dotted&quot;)
+
+# where is the minimum
+points( x = which.min(cv.MSE), y = min(cv.MSE), col = &quot;red&quot;, pch = &quot;X&quot;, cex = 1.5 )</code></pre>
+<p><img src="solutions7_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>We fit the models again successively with higher powers of age to perfom anova.</p>
+<pre class="r"><code># container for the models we will fit
+models &lt;- vector(&quot;list&quot;, length(cv.MSE))
+# fit all 15 models
+for( a in 1:length(cv.MSE)){
+  models[[a]] &lt;- glm(wage ~ poly(age, a), data = Wage)
+}
+# f-test
+anova(models[[1]], models[[2]], models[[3]], models[[4]], models[[5]], models[[6]],
+      models[[7]], models[[8]], models[[9]], models[[10]], models[[11]], models[[12]],
+      models[[13]], models[[14]], models[[15]], test = &quot;F&quot;)</code></pre>
+<pre><code>## Analysis of Deviance Table
+## 
+## Model  1: wage ~ poly(age, a)
+## Model  2: wage ~ poly(age, a)
+## Model  3: wage ~ poly(age, a)
+## Model  4: wage ~ poly(age, a)
+## Model  5: wage ~ poly(age, a)
+## Model  6: wage ~ poly(age, a)
+## Model  7: wage ~ poly(age, a)
+## Model  8: wage ~ poly(age, a)
+## Model  9: wage ~ poly(age, a)
+## Model 10: wage ~ poly(age, a)
+## Model 11: wage ~ poly(age, a)
+## Model 12: wage ~ poly(age, a)
+## Model 13: wage ~ poly(age, a)
+## Model 14: wage ~ poly(age, a)
+## Model 15: wage ~ poly(age, a)
+##    Resid. Df Resid. Dev Df Deviance        F    Pr(&gt;F)    
+## 1       2998    5022216                                   
+## 2       2997    4793430  1   228786 143.5637 &lt; 2.2e-16 ***
+## 3       2996    4777674  1    15756   9.8867  0.001681 ** 
+## 4       2995    4771604  1     6070   3.8090  0.051070 .  
+## 5       2994    4770322  1     1283   0.8048  0.369731    
+## 6       2993    4766389  1     3932   2.4675  0.116329    
+## 7       2992    4763834  1     2555   1.6034  0.205515    
+## 8       2991    4763707  1      127   0.0795  0.778016    
+## 9       2990    4756703  1     7004   4.3952  0.036124 *  
+## 10      2989    4756701  1        3   0.0017  0.967552    
+## 11      2988    4756597  1      103   0.0648  0.799144    
+## 12      2987    4756591  1        7   0.0043  0.947923    
+## 13      2986    4756401  1      190   0.1189  0.730224    
+## 14      2985    4756158  1      243   0.1522  0.696488    
+## 15      2984    4755364  1      795   0.4986  0.480151    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>According to the F-Test we should have chosen the model with age raised to the power of three whereas with cross-validation the most parsimonious model within <span class="math inline">\(1sd\)</span> of the minimum was the model that includes age squared.</p>
+<p>We now plot the results of the polynomial fit.</p>
+<pre class="r"><code>plot(wage ~ age, data = Wage, col = &quot;darkgrey&quot;,  bty = &quot;n&quot;)
+agelims &lt;-  range(Wage$age)
+age.grid &lt;-  seq(from = agelims[1], to = agelims[2])
+lm.fit &lt;-  lm(wage ~ poly(age, 2), data = Wage)
+lm.pred &lt;-  predict(lm.fit, data.frame(age = age.grid), se = TRUE)
+# mean prediction
+lines(x = age.grid , y = lm.pred$fit, col = &quot;blue&quot;, lwd = 2)
+# uncertainty bands
+matlines( x = age.grid, y = cbind( lm.pred$fit + 2*lm.pred$se.fit, lm.pred$fit - 2*lm.pred$se.fit),
+          lty = &quot;dashed&quot;, col = &quot;blue&quot;)</code></pre>
+<p><img src="solutions7_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Fit a step function to predict <code>wage</code> using <code>age</code>, and perform cross-validation to choose the optimal number of cuts. Make a plot of the fit obtained.</li>
+</ol>
+<pre class="r"><code>cv.error &lt;-  NA
+# for each cut perform 10-fold cross-validation
+for (i in 2:15) {
+  Wage$age.cut &lt;-  cut(Wage$age, i)
+  lm.fit &lt;-  glm(wage ~ age.cut, data = Wage)
+  cv.error[i] &lt;-  cv.glm(Wage, lm.fit, K = 10)$delta[1]
+}
+
+
+# the first element of cv.error is NA because we started our loop at 2
+plot(2:15, cv.error[-1], xlab = &quot;Number of cuts&quot;, ylab = &quot;CV error&quot;, 
+     type = &quot;b&quot;, pch = 19, lwd = 2, bty =&quot;n&quot;)
+
+# horizontal line for 1se to less complexity
+abline(h = min(cv.error, na.rm = TRUE) + sd(cv.error, na.rm = TRUE) , lty = &quot;dotted&quot;)
+
+# highlight minimum
+points( x = which.min(cv.error), y = min(cv.error, na.rm = TRUE), col = &quot;red&quot;, pch = &quot;X&quot;, cex = 1.5 )</code></pre>
+<p><img src="solutions7_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>Cross validation approximates that the test error is minimized at <span class="math inline">\(k=8\)</span> knots. The most parsimonious model within <span class="math inline">\(1sd\)</span> of the minimum has <span class="math inline">\(k=4\)</span> knots and, thus, splits the data into 5 distinct regions.</p>
+<p>We now train the entire data with step function using <span class="math inline">\(4\)</span> cuts and plot it.</p>
+<pre class="r"><code>lm.fit &lt;-  glm(wage ~ cut(age, 4), data = Wage)
+agelims &lt;-  range(Wage$age)
+age.grid &lt;-  seq(from = agelims[1], to = agelims[2])
+lm.pred &lt;-  predict(lm.fit, data.frame(age = age.grid), se = TRUE)
+plot(wage ~ age, data = Wage, col = &quot;darkgrey&quot;, bty = &quot;n&quot;)
+lines(age.grid, lm.pred$fit, col = &quot;red&quot;, lwd = 2)
+matlines(age.grid, cbind( lm.pred$fit + 2* lm.pred$se.fit,
+                          lm.pred$fit - 2* lm.pred$se.fit),
+         col = &quot;red&quot;, lty =&quot;dashed&quot;)</code></pre>
+<p><img src="solutions7_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="q2" class="section level4">
+<h4>Q2</h4>
+<p>The <code>Wage</code> data set contains a number of other features that we haven’t yet covered, such as marital status (<code>maritl</code>), job class (<code>jobclass</code>), and others. Explore the relationships between some of these other predictors and <code>wage</code>, and use non-linear fitting techniques in order to fit flexible models to the data. Create plots of the results obtained, and write a summary of your findings.</p>
+<pre class="r"><code>set.seed(1)
+
+# summary stats
+summary(Wage[, c(&quot;maritl&quot;, &quot;jobclass&quot;)] )</code></pre>
+<pre><code>##               maritl               jobclass   
+##  1. Never Married: 648   1. Industrial :1544  
+##  2. Married      :2074   2. Information:1456  
+##  3. Widowed      :  19                        
+##  4. Divorced     : 204                        
+##  5. Separated    :  55</code></pre>
+<pre class="r"><code># boxplots of relationships
+par(mfrow=c(1,2))
+plot(Wage$maritl, Wage$wage, frame.plot = &quot;FALSE&quot;)
+plot(Wage$jobclass, Wage$wage, frame.plot = &quot;FALSE&quot;)</code></pre>
+<p><img src="solutions7_files/figure-html/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>It appears a married couple makes more money on average than other groups. It also appears that Informational jobs are higher-wage than Industrial jobs on average.</p>
+</div>
+<div id="polynomial-and-step-functions" class="section level4">
+<h4>Polynomial and Step functions</h4>
+<pre class="r"><code>m1 &lt;-  lm(wage ~ maritl, data = Wage)
+deviance(m1) # fit (RSS in linear; -2*logLik)</code></pre>
+<pre><code>## [1] 4858941</code></pre>
+<pre class="r"><code>m2 &lt;-  lm(wage ~ jobclass, data = Wage)
+deviance(m2)</code></pre>
+<pre><code>## [1] 4998547</code></pre>
+<pre class="r"><code>m3 &lt;-  lm(wage ~ maritl + jobclass, data = Wage)
+deviance(m3)</code></pre>
+<pre><code>## [1] 4654752</code></pre>
+<p>As expected the in-sample data fit is minimized with the most complex model.</p>
+</div>
+<div id="splines" class="section level4">
+<h4>Splines</h4>
+<p>We can’t fit splines to categorical variables.</p>
+</div>
+<div id="gams" class="section level4">
+<h4>GAMs</h4>
+<p>We can’t fit splines to factors but we can fit a model with a spline one the continuous variable and add the other predictors.</p>
+<pre class="r"><code>library(gam)</code></pre>
+<pre><code>## Warning: package &#39;gam&#39; was built under R version 3.4.1</code></pre>
+<pre><code>## Loading required package: splines</code></pre>
+<pre><code>## Loading required package: foreach</code></pre>
+<pre><code>## Loaded gam 1.14-4</code></pre>
+<pre class="r"><code>m4 &lt;-  gam(wage ~ maritl + jobclass + s(age,4), data = Wage)
+deviance(m4)</code></pre>
+<pre><code>## [1] 4476501</code></pre>
+<pre class="r"><code>anova(m1, m2, m3, m4)</code></pre>
+<pre><code>## Analysis of Variance Table
+## 
+## Model 1: wage ~ maritl
+## Model 2: wage ~ jobclass
+## Model 3: wage ~ maritl + jobclass
+## Model 4: wage ~ maritl + jobclass + s(age, 4)
+##   Res.Df     RSS      Df Sum of Sq      F    Pr(&gt;F)    
+## 1   2995 4858941                                       
+## 2   2998 4998547 -3.0000   -139606 31.082 &lt; 2.2e-16 ***
+## 3   2994 4654752  4.0000    343795 57.408 &lt; 2.2e-16 ***
+## 4   2990 4476501  4.0002    178252 29.764 &lt; 2.2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>The F-Test suggests we get a statistically significant improvement from model four inlcuding the age spline, <code>wage</code>, <code>maritl</code>, and <code>jobclass</code>.</p>
+</div>
+<div id="q3" class="section level4">
+<h4>Q3</h4>
+<p>This question uses the variables <code>dis</code> (the weighted mean of distances to five Boston employment centers) and <code>nox</code> (nitrogen oxides concentration in parts per 10 million) from the <code>Boston</code> data available as part of the <code>MASS</code> package. We will treat <code>dis</code> as the predictor and <code>nox</code> as the response.</p>
+<pre class="r"><code>rm(list = ls())
+set.seed(1)
+library(MASS)
+attach(Boston)</code></pre>
+<ol style="list-style-type: decimal">
+<li>Use the <code>poly()</code> function to fit a cubic polynomial regression to predict <code>nox</code> using <code>dis</code>. Report the regression output, and plot the resulting data and polynomial fits.</li>
+</ol>
+<pre class="r"><code>m1 &lt;-  lm(nox ~ poly(dis, 3))
+summary(m1)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = nox ~ poly(dis, 3))
+## 
+## Residuals:
+##       Min        1Q    Median        3Q       Max 
+## -0.121130 -0.040619 -0.009738  0.023385  0.194904 
+## 
+## Coefficients:
+##                Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)    0.554695   0.002759 201.021  &lt; 2e-16 ***
+## poly(dis, 3)1 -2.003096   0.062071 -32.271  &lt; 2e-16 ***
+## poly(dis, 3)2  0.856330   0.062071  13.796  &lt; 2e-16 ***
+## poly(dis, 3)3 -0.318049   0.062071  -5.124 4.27e-07 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.06207 on 502 degrees of freedom
+## Multiple R-squared:  0.7148, Adjusted R-squared:  0.7131 
+## F-statistic: 419.3 on 3 and 502 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>dislim &lt;-  range(dis)
+dis.grid &lt;-  seq(from = dislim[1], to = dislim[2], length.out = 100)
+lm.pred &lt;-  predict(m1, list(dis = dis.grid), se = TRUE)
+
+plot(nox ~ dis, col = &quot;darkgrey&quot;, bty =&quot;n&quot;, 
+     ylim = c( min(lm.pred$fit) - 2.5* min(lm.pred$se.fit), 
+               max(lm.pred$fit) + 2.5* max(lm.pred$se.fit) ))
+lines(x = dis.grid, y = lm.pred$fit, col = &quot;red&quot;, lwd = 2)
+matlines(x = dis.grid, y = cbind(lm.pred$fit + 2* lm.pred$se.fit,
+                                 lm.pred$fit - 2* lm.pred$se.fit) 
+         , col = &quot;red&quot;, lwd = 1.5, lty = &quot;dashed&quot;)</code></pre>
+<p><img src="solutions7_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>Summary shows that all polynomial terms are significant while predicting <code>nox</code> using <code>dis</code>. Plot shows a smooth curve fitting the data fairly well.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>Plot the polynomial fits for a range of different polynomial degrees (say, from 1 to 10), and report the associated residual sum of squares.</li>
+</ol>
+<p>We plot polynomials of degrees 1 to 10 and save train RSS.</p>
+<pre class="r"><code># container
+train.rss &lt;-  NA
+
+for (i in 1:10) {
+  m2 &lt;-  lm(nox ~ poly(dis, i))
+  train.rss[i] &lt;-  sum(m2$residuals^2)
+}
+
+# show model fit in training set
+train.rss</code></pre>
+<pre><code>##  [1] 2.768563 2.035262 1.934107 1.932981 1.915290 1.878257 1.849484
+##  [8] 1.835630 1.833331 1.832171</code></pre>
+<p>As expected, train RSS monotonically decreases with degree of polynomial.</p>
+<ol start="3" style="list-style-type: decimal">
+<li>Perform cross-validation or another approach to select the optimal degree for the polynomial, and explain your results.</li>
+</ol>
+<p>We perform LLOCV and code it up by hand (slower than the implemented version):</p>
+<pre class="r"><code># container
+cv.error &lt;- matrix(NA, nrow = nrow(Boston), ncol = 10)
+
+for (observation in 1: nrow(Boston)){
+  for ( power in 1:10){
+   m3 &lt;- lm(nox ~ poly(dis, power))
+   # test error
+   y.hat &lt;- predict( m3, newdata = Boston[-observation, ])
+   # mse 
+   cv.error[observation, power] &lt;- mean((y.hat - Boston$nox[-observation] )^2)
+  }
+}
+
+result &lt;- apply(cv.error, 2, mean)
+names(result) &lt;- paste( &quot;^&quot;, 1:10, sep= &quot;&quot; )
+result</code></pre>
+<pre><code>##          ^1          ^2          ^3          ^4          ^5          ^6 
+## 0.005471468 0.004022257 0.003822345 0.003820121 0.003785158 0.003711971 
+##          ^7          ^8          ^9         ^10 
+## 0.003655106 0.003627727 0.003623183 0.003620892</code></pre>
+<pre class="r"><code>plot(result ~ seq(1,10), type = &quot;b&quot;, pch = 19, bty = &quot;n&quot;, xlab = &quot;powers of dist to empl. center&quot;,
+     ylab = &quot;cv error&quot;)
+abline(h = min(cv.error) + sd(cv.error), col = &quot;red&quot;, lty = &quot;dashed&quot;)</code></pre>
+<p><img src="solutions7_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>Depending on how disciplined an approach we take, we would pick either no polynomial or <code>dis</code> squared.</p>
+<ol start="4" style="list-style-type: decimal">
+<li>Use the <code>bs()</code> function to fit a regression spline to predict <code>nox</code> using <code>dis</code>. Report the output for the fit using four degrees of freedom. How did you choose the knots? Plot the resulting fit.</li>
+</ol>
+<p>We see that dis has limits of about 1 and 12 respectively. We split this range in roughly equal 4 intervals and at <span class="math inline">\([3, 6, 9]\)</span>. Note: <code>bs()</code> function in R expects either the <code>df</code> or the <code>knots</code> argument. If both are specified, knots are ignored.</p>
+<pre class="r"><code>library(splines)
+m4 &lt;-  lm(nox ~ bs(dis, knots = c(3, 6, 9)))
+summary(m4)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = nox ~ bs(dis, knots = c(3, 6, 9)))
+## 
+## Residuals:
+##       Min        1Q    Median        3Q       Max 
+## -0.132134 -0.039466 -0.009042  0.025344  0.187258 
+## 
+## Coefficients:
+##                               Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)                   0.709144   0.016099  44.049  &lt; 2e-16 ***
+## bs(dis, knots = c(3, 6, 9))1  0.006631   0.025467   0.260    0.795    
+## bs(dis, knots = c(3, 6, 9))2 -0.258296   0.017759 -14.544  &lt; 2e-16 ***
+## bs(dis, knots = c(3, 6, 9))3 -0.233326   0.027248  -8.563  &lt; 2e-16 ***
+## bs(dis, knots = c(3, 6, 9))4 -0.336530   0.032140 -10.471  &lt; 2e-16 ***
+## bs(dis, knots = c(3, 6, 9))5 -0.269575   0.058799  -4.585 5.75e-06 ***
+## bs(dis, knots = c(3, 6, 9))6 -0.303386   0.062631  -4.844 1.70e-06 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.0612 on 499 degrees of freedom
+## Multiple R-squared:  0.7244, Adjusted R-squared:  0.7211 
+## F-statistic: 218.6 on 6 and 499 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code># plot results
+preds &lt;-  predict(m4, list(dis = dis.grid), se = TRUE)
+plot(nox ~ dis, col = &quot;darkgrey&quot;, bty = &quot;n&quot;, ylim = c(0.3, .8))
+# all lines at once
+matlines( dis.grid,
+          cbind( preds$fit,
+                 preds$fit + 2* preds$se.fit,
+                 preds$fit - 2* preds$se.fit),
+          col = &quot;black&quot;, lwd = 2, lty = c(&quot;solid&quot;, &quot;dashed&quot;, &quot;dashed&quot;))</code></pre>
+<p><img src="solutions7_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>The summary shows that all terms in spline fit are significant except the first. The plot shows that the spline fits data well. The data fit at the extremes, when <span class="math inline">\(dis&gt;9\)</span> is driven by very very few observations.</p>
+<ol start="5" style="list-style-type: decimal">
+<li>Now fit a regression spline for a range of degrees of freedom, and plot the resulting fits and report the resulting RSS. Describe the results obtained.</li>
+</ol>
+<p>We fit regression splines with dfs between 3 and 16.</p>
+<pre class="r"><code>box &lt;-  NA
+
+for (i in 3:16) {
+  lm.fit &lt;-  lm(nox ~ bs(dis, df = i))
+  box[i] &lt;-  sum(lm.fit$residuals^2)
+}
+
+box[-c(1, 2)]</code></pre>
+<pre><code>##  [1] 1.934107 1.922775 1.840173 1.833966 1.829884 1.816995 1.825653
+##  [8] 1.792535 1.796992 1.788999 1.782350 1.781838 1.782798 1.783546</code></pre>
+<p>Train RSS monotonically decreases till <span class="math inline">\(df=14\)</span> and then slightly increases.</p>
+</div>
+<div id="q4" class="section level4">
+<h4>Q4</h4>
+<p>This question relates to the <code>College</code> dataset from the <code>ISLR</code> package.</p>
+<ol style="list-style-type: decimal">
+<li>Split the data into a training set and a test set. Using out-of-state tuition as the response and the other variables as the predictors, perform forward stepwise selection on the training set in order to identify a satisfactory model that uses just a subset of the predictors.</li>
+</ol>
+<pre class="r"><code>rm(list = ls())
+set.seed(1)
+library(leaps)</code></pre>
+<pre><code>## Warning: package &#39;leaps&#39; was built under R version 3.4.1</code></pre>
+<pre class="r"><code>attach(College)
+
+# train/test split row index numbers
+train &lt;-  sample( length(Outstate), length(Outstate)/2)
+test &lt;-  -train
+
+# actual data split
+College.train &lt;-  College[train, ]
+College.test &lt;-  College[test, ]
+
+# run forward selection
+reg.fit &lt;- regsubsets(Outstate ~ ., data = College.train, nvmax=17, method=&quot;forward&quot;)
+reg.summary &lt;-  summary(reg.fit)
+
+# split plot window
+par(mfrow=c(1, 3))
+
+# plot 1: cp
+plot(reg.summary$cp,xlab=&quot;Number of Variables&quot;,ylab=&quot;Cp&quot;,type=&#39;l&#39;)
+min.cp &lt;-  min(reg.summary$cp)
+std.cp &lt;-  sd(reg.summary$cp)
+abline(h=min.cp + std.cp, col=&quot;red&quot;, lty=2)
+
+
+# plot 2: bic
+plot(reg.summary$bic,xlab=&quot;Number of Variables&quot;,ylab=&quot;BIC&quot;,type=&#39;l&#39;)
+min.bic &lt;-  min(reg.summary$bic)
+std.bic &lt;-  sd(reg.summary$bic)
+abline(h = min.bic + std.bic, col=&quot;red&quot;, lty=2)
+
+# plot 3: adj. R2
+plot(reg.summary$adjr2,xlab=&quot;Number of Variables&quot;,
+     ylab=&quot;Adjusted R2&quot;,type=&#39;l&#39;, ylim=c(0.4, 0.84))
+max.adjr2 &lt;-  max(reg.summary$adjr2)
+std.adjr2 &lt;-  sd(reg.summary$adjr2)
+abline(h=max.adjr2 - std.adjr2, col=&quot;red&quot;, lty=2)</code></pre>
+<p><img src="solutions7_files/figure-html/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>All cp, BIC and adjr2 scores show that size 6 is the minimum size for the subset. However, according to the 1 standard error rule we would choose the model with 4 predictors.</p>
+<pre class="r"><code>m5 &lt;-  regsubsets(Outstate ~ . , method = &quot;forward&quot;, data = College)
+coefi &lt;-  coef(m5, id = 4)
+names(coefi)</code></pre>
+<pre><code>## [1] &quot;(Intercept)&quot; &quot;PrivateYes&quot;  &quot;Room.Board&quot;  &quot;perc.alumni&quot; &quot;Expend&quot;</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Fit a GAM on the training data, using out-of-state tuition as the response and the features selected in the previous step as the predictors. Plot the results, and explain your findings.</li>
+</ol>
+<pre class="r"><code>library(gam)
+gam.fit &lt;-  gam(Outstate ~ Private + s(Room.Board, df=2) + 
+                  s(PhD, df=2) + s(perc.alumni, df=2) + 
+                  s(Expend, df=5) + s(Grad.Rate, df=2),
+                data=College.train)
+par(mfrow=c(2, 3))
+plot(gam.fit, se=TRUE, col=&quot;blue&quot;)</code></pre>
+<p><img src="solutions7_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<ol start="3" style="list-style-type: decimal">
+<li>Evaluate the model obtained on the test set, and explain the results obtained.</li>
+</ol>
+<pre class="r"><code>gam.pred &lt;-  predict(gam.fit, College.test)
+gam.err &lt;-  mean((College.test$Outstate - gam.pred)^2)
+gam.err</code></pre>
+<pre><code>## [1] 3745460</code></pre>
+<pre class="r"><code>gam.tss &lt;-  mean((College.test$Outstate - mean(College.test$Outstate))^2)
+test.rss &lt;-  1 - gam.err / gam.tss
+test.rss</code></pre>
+<pre><code>## [1] 0.7696916</code></pre>
+<p>We obtain a test R-squared of <span class="math inline">\(0.77\)</span> using GAM with 6 predictors. This is a slight improvement over a test RSS of <span class="math inline">\(0.74\)</span> obtained using OLS.</p>
+<ol start="4" style="list-style-type: decimal">
+<li>For which variables, if any, is there evidence of a non-linear relationship with the response?</li>
+</ol>
+<pre class="r"><code>summary(gam.fit)</code></pre>
+<pre><code>## 
+## Call: gam(formula = Outstate ~ Private + s(Room.Board, df = 2) + s(PhD, 
+##     df = 2) + s(perc.alumni, df = 2) + s(Expend, df = 5) + s(Grad.Rate, 
+##     df = 2), data = College.train)
+## Deviance Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -4977.74 -1184.52    58.33  1220.04  7688.30 
+## 
+## (Dispersion Parameter for gaussian family taken to be 3300711)
+## 
+##     Null Deviance: 6221998532 on 387 degrees of freedom
+## Residual Deviance: 1231165118 on 373 degrees of freedom
+## AIC: 6941.542 
+## 
+## Number of Local Scoring Iterations: 2 
+## 
+## Anova for Parametric Effects
+##                         Df     Sum Sq    Mean Sq F value    Pr(&gt;F)    
+## Private                  1 1779433688 1779433688 539.106 &lt; 2.2e-16 ***
+## s(Room.Board, df = 2)    1 1221825562 1221825562 370.171 &lt; 2.2e-16 ***
+## s(PhD, df = 2)           1  382472137  382472137 115.876 &lt; 2.2e-16 ***
+## s(perc.alumni, df = 2)   1  328493313  328493313  99.522 &lt; 2.2e-16 ***
+## s(Expend, df = 5)        1  416585875  416585875 126.211 &lt; 2.2e-16 ***
+## s(Grad.Rate, df = 2)     1   55284580   55284580  16.749 5.232e-05 ***
+## Residuals              373 1231165118    3300711                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Anova for Nonparametric Effects
+##                        Npar Df  Npar F     Pr(F)    
+## (Intercept)                                         
+## Private                                             
+## s(Room.Board, df = 2)        1  3.5562   0.06010 .  
+## s(PhD, df = 2)               1  4.3421   0.03786 *  
+## s(perc.alumni, df = 2)       1  1.9158   0.16715    
+## s(Expend, df = 5)            4 16.8636 1.016e-12 ***
+## s(Grad.Rate, df = 2)         1  3.7208   0.05450 .  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>Non-parametric Anova test shows a strong evidence of non-linear relationship between response and Expend, and a moderately strong non-linear relationship (using p value of 0.05) between response and Grad.Rate or PhD.</p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
