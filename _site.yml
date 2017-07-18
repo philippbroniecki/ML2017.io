@@ -87,6 +87,8 @@ navbar:
           href: montecarlo.html
         - text: "MC Lasso v. Ridge"
           href: MCLassoRidge.html
+        - text: "Splines Cross Validated"
+          href: splinesCV.html
         - text: "Titanic Data"
           href: "./data/titanic.dta"
 output:

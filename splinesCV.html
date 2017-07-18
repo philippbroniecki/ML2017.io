@@ -12,7 +12,7 @@
 <meta name="author" content="Philipp Broniecki and Lucas Leemann – Machine Learning 1K" />
 
 
-<title>Lab 2 – Solutions</title>
+<title>Splines Cross-Validated</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -381,154 +381,68 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Lab 2 – Solutions</h1>
+<h1 class="title toc-ignore">Splines Cross-Validated</h1>
 <h4 class="author"><em>Philipp Broniecki and Lucas Leemann – Machine Learning 1K</em></h4>
 
 </div>
 
 
-<div id="solution-lab-2" class="section level3">
-<h3>Solution Lab 2</h3>
-<ol style="list-style-type: decimal">
-<li>Load the immigration dataset <a href="http://philippbroniecki.github.io/ML2017.io/data/communities_immig.csv">dataset</a> and the employment <a href="http://philippbroniecki.github.io/ML2017.io/data/communities_employment.csv">dataset</a> and merge them to the communities dataset from the seminar.
-<ul>
-<li>You can merge using the <code>merge()</code> function.</li>
-</ul></li>
-</ol>
-<pre class="r"><code># clear workspace
-rm(list=ls())
-
-# re-load the communities data set from the lab
-com &lt;- read.csv(&quot;C:/Users/phili/Dropbox/Essex 2017 ML/Day 2/Lab/communities.csv&quot;)
-
-# read in the immigration dataset
-immi &lt;- read.csv(&quot;http://uclspp.github.io/PUBLG100/data/communities_immig.csv&quot;)
-
-# load data set on employment
-empl &lt;- read.csv(&quot;http://uclspp.github.io/PUBLG100/data/communities_employment.csv&quot;)</code></pre>
-<p>The 2 variables that identify an observation are <code>state</code> and <code>communityname</code>. We need these variables in our seperate data sets to merge. We drop other overlapping variables but that is not necessary. If you don’t, R will paste the <code>.x</code> and <code>.y</code> to the variable names. You can drop by looking up which variables overlap and deleting them from one dataset by hand. Below is a way to automate this.</p>
-<pre class="r"><code># the names of the dataset com excluding state and communityname
-ivs.empl &lt;- names(empl)[!names(empl) %in% c(&quot;state&quot;, &quot;communityname&quot;)]
-
-# the names of the dataset com excluding state and communityname
-ivs.com &lt;- names(com)[!names(com) %in% c(&quot;state&quot;, &quot;communityname&quot;)]
-
-# overlaps 
-drop &lt;- ivs.empl[ivs.empl %in% ivs.com]
-
-# drop variables that are in both datasets
-empl[, drop] &lt;- NULL
-
-# 1) merge com and empl:
-com &lt;- merge(com, empl, by = c(&quot;state&quot;, &quot;communityname&quot;))
-
-# 2) merge immi to the data sets
-com &lt;- merge(com, immi, by = c(&quot;state&quot;, &quot;communityname&quot;))
-
-# remove the now unecessary data sets immi and empl
-rm(immi, empl, drop, ivs.com, ivs.empl)</code></pre>
-<ol start="2" style="list-style-type: decimal">
-<li>Rename the <code>PctImmigRec5</code> variable to <code>RecentImmigration5</code>.</li>
-</ol>
-<p>We use <code>select()</code> from <code>dplyr</code> to rename the variables and make the data set a litte bit smaller and easier to deal with.</p>
-<pre class="r"><code>com &lt;- dplyr::select(com,
-                     community = communityname,
-                     unemploymentrate = PctUnemployed,
-                     nohighschool = PctNotHSGrad,
-                     white = racePctWhite,
-                     recentimmigration5 = PctImmigRec5)</code></pre>
-<ol start="3" style="list-style-type: decimal">
-<li>Estimate a model explaining the relationship between unemployment rate and recent immigration over the past 5 years using the variable <code>RecentImmigration5</code>.</li>
-</ol>
-<pre class="r"><code>m_immi &lt;- lm(unemploymentrate ~ recentimmigration5, data = com)
-summary(m_immi)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = unemploymentrate ~ recentimmigration5, data = com)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -0.3772 -0.1461 -0.0397  0.1128  0.6746 
-## 
-## Coefficients:
-##                    Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)        0.325347   0.008917  36.488  &lt; 2e-16 ***
-## recentimmigration5 0.105882   0.021344   4.961 7.62e-07 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.201 on 1992 degrees of freedom
-## Multiple R-squared:  0.0122, Adjusted R-squared:  0.01171 
-## F-statistic: 24.61 on 1 and 1992 DF,  p-value: 7.621e-07</code></pre>
-<ol start="4" style="list-style-type: decimal">
-<li>Plot the regression line of the model.</li>
-</ol>
-<p>We draw a scatterplot using the <code>plot()</code> function and <code>abline()</code> to draw the regression line.</p>
-<pre class="r"><code># the scatterplot
-plot(com$unemploymentrate ~ com$recentimmigration5,
-     xlab = &quot;Recent Immigration&quot;,
-     ylab = &quot;Unemployment Rate&quot;,
-     bty = &quot;n&quot;, pch = 16)
-
-# add the regression line
-abline(m_immi, col = &quot;red&quot;, lwd = 2)</code></pre>
-<p><img src="solutions2_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
-<ol start="5" style="list-style-type: decimal">
-<li>How does this model compare to the models we estimated in the seminar with NoHighSchool and Minority as independent variables? Present your findings by comparing the output of all three models in side-by-side tables using the texreg package.</li>
-</ol>
-<pre class="r"><code>m_edu &lt;- lm(unemploymentrate ~ nohighschool, data = com)
-
-# minority percentage
-com$minority &lt;- 1 - com$white
-m_minority &lt;- lm(unemploymentrate ~ minority, data = com)
-
-texreg::screenreg(list(m_edu, m_minority, m_immi))</code></pre>
-<pre><code>## 
-## =========================================================
-##                     Model 1      Model 2      Model 3    
-## ---------------------------------------------------------
-## (Intercept)            0.08 ***     0.26 ***     0.33 ***
-##                       (0.01)       (0.01)       (0.01)   
-## nohighschool           0.74 ***                          
-##                       (0.01)                             
-## minority                            0.43 ***             
-##                                    (0.02)                
-## recentimmigration5                               0.11 ***
-##                                                 (0.02)   
-## ---------------------------------------------------------
-## R^2                    0.55         0.27         0.01    
-## Adj. R^2               0.55         0.27         0.01    
-## Num. obs.           1994         1994         1994       
-## RMSE                   0.14         0.17         0.20    
-## =========================================================
-## *** p &lt; 0.001, ** p &lt; 0.01, * p &lt; 0.05</code></pre>
-<ol start="6" style="list-style-type: decimal">
-<li>Save your model comparison table to a Microsoft Word document (or another format if you donâ€™t use Word).</li>
-</ol>
-<pre class="r"><code>texreg::htmlreg(list(m_edu, m_minority, m_immi), file = &quot;Lab2_model_comparison.doc&quot;)</code></pre>
-<pre><code>## The table was written to the file &#39;Lab2_model_comparison.doc&#39;.</code></pre>
-<ol start="7" style="list-style-type: decimal">
-<li>Generate predicted values from the fitted model with RecentImmigration5 and plot the confidence interval using <code>Zelig</code>.</li>
-</ol>
-<pre class="r"><code>library(Zelig)</code></pre>
-<pre><code>## Warning: package &#39;Zelig&#39; was built under R version 3.4.1</code></pre>
-<pre class="r"><code>z.out &lt;- zelig(unemploymentrate ~ recentimmigration5, data = com, model = &quot;ls&quot;)</code></pre>
-<pre><code>## How to cite this model in Zelig:
-##   R Core Team. 2007.
-##   ls: Least Squares Regression for Continuous Dependent Variables
-##   in Christine Choirat, Christopher Gandrud, James Honaker, Kosuke Imai, Gary King, and Olivia Lau,
-##   &quot;Zelig: Everyone&#39;s Statistical Software,&quot; http://zeligproject.org/</code></pre>
-<pre class="r"><code>x.out &lt;- setx(z.out, recentimmigration5 = seq(0, 1, 0.1))
-s.out &lt;- sim(z.out, x = x.out, n=1000)</code></pre>
-<ol start="8" style="list-style-type: decimal">
-<li>Save all the plots as graphics files.</li>
-</ol>
-<pre class="r"><code>png(&quot;task8_plot.png&quot;)
-ci.plot(s.out, xlab = &quot;Recent Immigration (last 5 years)&quot;, ci = 95)
-dev.off()</code></pre>
-<pre><code>## png 
-##   2</code></pre>
-</div>
+<p>We setyp the simulation with the number of observations, the number os simulations, the standard deviation of <span class="math inline">\(x\)</span>, and the number of folds.</p>
+<pre class="r"><code>library(splines)
+set.seed(333)
+N &lt;- 5000
+n.sim &lt;- 100
+SD.x &lt;- 4
+fold &lt;- 5</code></pre>
+<p>We set up the true data generating process and plot the relationship between <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>.</p>
+<pre class="r"><code>x &lt;- runif(N,-3,3)
+e &lt;- rnorm(N, sd=SD.x)
+y &lt;-  x + 3* x^2 +.3*x^3 -.3*x^4 +.03*x^5 + 0.003*x^6+ e
+plot(x,y, pch=19, cex=0.7, col=rgb(180,0,180,30, maxColorValue = 255))</code></pre>
+<p><img src="splinesCV_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>We set up the range of degrees of freedom to loop over and a container that holds the MSE’s for each loop iteration.</p>
+<pre class="r"><code>freedom &lt;- c(1:10)
+mse.container &lt;- array(NA,c(n.sim,length(freedom), fold))
+startL &lt;- Sys.time()</code></pre>
+<p>We loop over the different combinations of parameters we vary and simulations.</p>
+<pre class="r"><code>for (j in 1:length(freedom)){
+  for (i in 1:n.sim){
+    x &lt;- runif(N,-3,4)
+    e &lt;- rnorm(N, sd=SD.x)
+    y &lt;-  x + 3* x^2 +.3*x^3 -.3*x^4 +.03*x^5 + 0.003*x^6+ e
+    fold.id &lt;- sample(c(1:fold),N, replace = TRUE)
+    for (k in 1:fold){
+      test.set &lt;- which(fold.id==k)
+      y.test &lt;- y[test.set]
+      y1 &lt;- y[-test.set]
+      x1 &lt;- x[-test.set]
+      mod1 &lt;- lm(y1 ~ ns(x1,df=freedom[j]))  
+      X1 &lt;- (x[test.set])
+      y.hat &lt;- coef(mod1) %*% t(as.matrix(cbind(1,ns(X1,df = freedom[j])))) 
+      mse.container[i,j,k] &lt;- mean((y.test-y.hat)^2)
+      }
+    }
+  print(j)  
+}</code></pre>
+<pre><code>## [1] 1
+## [1] 2
+## [1] 3
+## [1] 4
+## [1] 5
+## [1] 6
+## [1] 7
+## [1] 8
+## [1] 9
+## [1] 10</code></pre>
+<p>we record how much time it took.</p>
+<pre class="r"><code>endL &lt;- Sys.time()
+endL - startL</code></pre>
+<pre><code>## Time difference of 41.85669 secs</code></pre>
+<p>We get MSE and plot it with the degrees of freedom on the <span class="math inline">\(x\)</span>-axis.</p>
+<pre class="r"><code>MSE &lt;- apply(mse.container,c(1,2), mean)
+MSE1 &lt;- colMeans(MSE)
+plot(freedom, MSE1, type=&quot;b&quot;)</code></pre>
+<p><img src="splinesCV_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 
 
 
