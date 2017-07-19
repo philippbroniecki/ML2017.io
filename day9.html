@@ -518,7 +518,7 @@ x[1:25, 2] &lt;- x[1:25, 2] - 4 # offset by -4
 # visualize the data
 plot(x, pch = 16, bty = &quot;n&quot;)</code></pre>
 <p><img src="day9_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
-<p>In the plot we can clearly see the two groups. We perfom k-means clustering with the <code>kmeans()</code> function. The frist argument is the data, the second the amount of clusters, and the third the amount of times we try clustering using different starting points (we could potentially come up with different clusters depending on where we start).</p>
+<p>In the plot we can clearly see the two groups. We perfom k-means clustering with the <code>kmeans()</code> function. The frist argument is the data, the second the amount of clusters, and the third the amount of times we try clustering using different starting points (we could potentially come up with different clusters depending on where we start (similar to a hill-climbing algorithm that may get stuck at a local peak rather than a global one).</p>
 <p>We also check cluster assignment for each observation and color the dots in our plot according to which cluster they have been assigned to.</p>
 <pre class="r"><code># run k-means clustering
 km.out &lt;- kmeans(x, 2, nstart = 20)

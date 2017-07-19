@@ -586,7 +586,14 @@ deviance(m4)</code></pre>
 set.seed(1)
 library(MASS)
 attach(Boston)</code></pre>
-<pre><code>## The following object is masked from Wage:
+<pre><code>## The following object is masked from Wage (pos = 4):
+## 
+##     age</code></pre>
+<pre><code>## The following objects are masked from Boston (pos = 7):
+## 
+##     age, black, chas, crim, dis, indus, lstat, medv, nox, ptratio,
+##     rad, rm, tax, zn</code></pre>
+<pre><code>## The following object is masked from Wage (pos = 18):
 ## 
 ##     age</code></pre>
 <ol style="list-style-type: decimal">
@@ -741,9 +748,13 @@ box[-c(1, 2)]</code></pre>
 <pre class="r"><code>rm(list = ls())
 set.seed(1)
 library(leaps)
-attach(College)
-
-# train/test split row index numbers
+attach(College)</code></pre>
+<pre><code>## The following objects are masked from College (pos = 7):
+## 
+##     Accept, Apps, Books, Enroll, Expend, F.Undergrad, Grad.Rate,
+##     Outstate, P.Undergrad, perc.alumni, Personal, PhD, Private,
+##     Room.Board, S.F.Ratio, Terminal, Top10perc, Top25perc</code></pre>
+<pre class="r"><code># train/test split row index numbers
 train &lt;-  sample( length(Outstate), length(Outstate)/2)
 test &lt;-  -train
 

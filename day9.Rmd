@@ -130,7 +130,7 @@ x[1:25, 2] <- x[1:25, 2] - 4 # offset by -4
 plot(x, pch = 16, bty = "n")
 ```
 
-In the plot we can clearly see the two groups. We perfom k-means clustering with the `kmeans()` function. The frist argument is the data, the second the amount of clusters, and the third the amount of times we try clustering using different starting points (we could potentially come up with different clusters depending on where we start).
+In the plot we can clearly see the two groups. We perfom k-means clustering with the `kmeans()` function. The frist argument is the data, the second the amount of clusters, and the third the amount of times we try clustering using different starting points (we could potentially come up with different clusters depending on where we start (similar to a hill-climbing algorithm that may get stuck at a local peak rather than a global one).
 
 We also check cluster assignment for each observation and color the dots in our plot according to which cluster they have been assigned to.
 

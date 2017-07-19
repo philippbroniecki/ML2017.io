@@ -519,16 +519,8 @@ glm.fit &lt;- glm( IMMBRIT ~ RAge, data = data2)
 lm.fit &lt;- lm( IMMBRIT ~ RAge, data = data2)</code></pre>
 <p>The <code>glm()</code> function can be used with <code>cv.glm()</code> to estimate k-fold cross-validation prediction error.</p>
 <pre class="r"><code># use cv.glm() for k-fold corss-validation on glm
-library(boot)</code></pre>
-<pre><code>## 
-## Attaching package: &#39;boot&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:lattice&#39;:
-## 
-##     melanoma</code></pre>
-<pre><code>## The following object is masked from &#39;package:survival&#39;:
-## 
-##     aml</code></pre>
-<pre class="r"><code>cv.err &lt;- cv.glm(data2, glm.fit)
+library(boot)
+cv.err &lt;- cv.glm(data2, glm.fit)
 # cross-validation error
 cv.err$delta</code></pre>
 <pre><code>## [1] 380.2451 380.2415</code></pre>

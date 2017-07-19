@@ -453,16 +453,8 @@ legend(&quot;topright&quot;, c(&quot;m=p&quot;, &quot;m=p/2&quot;, &quot;m=sqrt(
 <li>Split the data set into a training set and a test set.</li>
 </ol>
 <pre class="r"><code>library(ISLR)
-attach(Carseats)</code></pre>
-<pre><code>## The following objects are masked from Carseats (pos = 22):
-## 
-##     Advertising, Age, CompPrice, Education, Income, Population,
-##     Price, Sales, ShelveLoc, Urban, US</code></pre>
-<pre><code>## The following objects are masked from Carseats (pos = 24):
-## 
-##     Advertising, Age, CompPrice, Education, Income, Population,
-##     Price, Sales, ShelveLoc, Urban, US</code></pre>
-<pre class="r"><code>set.seed(123)
+attach(Carseats)
+set.seed(123)
 
 train &lt;-  sample(nrow(Carseats), nrow(Carseats) / 2)
 Carseats.train &lt;-  Carseats[train, ]
@@ -572,14 +564,8 @@ importance(rf.carseats)</code></pre>
 <li>Create a training set containing a random sample of 800 observations, and a test set containing the remaining observations.</li>
 </ol>
 <pre class="r"><code>library(ISLR)
-attach(OJ)</code></pre>
-<pre><code>## The following objects are masked from OJ (pos = 22):
-## 
-##     DiscCH, DiscMM, ListPriceDiff, LoyalCH, PctDiscCH, PctDiscMM,
-##     PriceCH, PriceDiff, PriceMM, Purchase, SalePriceCH,
-##     SalePriceMM, SpecialCH, SpecialMM, STORE, Store7, StoreID,
-##     WeekofPurchase</code></pre>
-<pre class="r"><code>set.seed(1013)
+attach(OJ)
+set.seed(1013)
 
 train &lt;-  sample(dim(OJ)[1], 800)
 OJ.train &lt;-  OJ[train, ]
