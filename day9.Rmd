@@ -1,0 +1,344 @@
+---
+title: "Lab 9 -- Unsupervised Learning"
+author: "Philipp Broniecki and Lucas Leemann -- Machine Learning 1K"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(global.par = TRUE)
+```
+
+##### (based on James et al. 2013)
+
+We load data on violent crimes by state in the U.S. The dataset is included in the MASS package.
+
+```{r}
+rm(list = ls())
+
+# data on violent crimes by US state
+library(MASS)
+?USArrests
+head(USArrests)
+
+# create a state variable
+states <- row.names(USArrests)
+states
+
+# variable names in the data set
+names(USArrests)
+
+# summary stats mean and variance
+apply(USArrests, 2, mean)
+apply(USArrests, 2, var)
+```
+
+### PCA
+
+Principal Component Analysis is a dimension reduction method. It can be useful to reduce the predictor space or to form a latent variable that is proxied by some variables.
+
+We PCA on the data to capture some underlying measure of violence. To run PCA we use the `prcomp()` function.
+
+```{r}
+# run pca
+pr.out <- prcomp(USArrests, scale = TRUE)
+```
+
+We can check what is in the model object and look at the values it returns.
+
+```{r}
+# check model object
+names(pr.out)
+
+pr.out$center
+pr.out$scale
+
+# "translation from x to z..."
+pr.out$rotation
+
+# dimensions of facorized output
+dim(pr.out$x)
+# the factor scores for each observation
+head(pr.out$x) # this what we could use as IVs
+```
+
+We can illustrate which variable loads on which factor visually. We can also examine the effect of rotation.
+
+```{r}
+# which component picks up most of the variance on the variables
+biplot(pr.out, scale = 0)
+
+# turning things around
+pr.out$rotation <- -pr.out$rotation
+pr.out$x <- -pr.out$x
+biplot(pr.out, scale = 0)
+```
+
+We are really interested in how much of the variance in the data our components capture. So first we get the standard deviation on the new scales and from that estimate the variance. We can then evaluate how much of the total variance is explained by each individual principal component.
+
+```{r}
+# standard deviation on new scales
+pr.out$sdev
+
+# variance
+pr.var <- pr.out$sdev^2
+pr.var
+
+# amount of variance explained by each component
+pve <- pr.var / sum(pr.var)
+pve
+```
+
+We can plot variance explained by each component. The purpose is to determine how many components we need to account for most of the underlying variance. When additional principal components (PC's) do not explain much more of the variance we not rely on them, e.g. as independent variables in a new model. It is common to look for the "elbow". This is not a disciplined approach. Depending on the problem we could use cross-validatiation to determine how many components we need for a prediction problem.
+
+```{r}
+# Finding the ellbow
+plot(pve, xlab = "Principal Component", 
+ylab = "Proportion of Variance Explained ", 
+ylim = c(0, 1), type = "b")
+```
+
+We can also plot the cumulative variance explained using the `cumsum()` function. Which returns the cumulative sums of a vector.
+
+```{r}
+# new command - cumulative sums
+a <- c(1, 2, 8, -3)
+cumsum(a)
+
+# how much variance do we explain with each additional pc? What if # pc's = # vars?
+plot(cumsum(pve), xlab = "Principal Component ",
+ylab = " Cumulative Proportion of Variance Explained ", 
+ylim = c(0, 1), type = "b")
+```
+
+### Clustering
+
+We start out with k-means clustering. We try to dermine whether groups within our data exist that share similar features in the data. The supervised aspect of k-means clustering is that we need to decide ex-ante how many clusters we are looking for.
+
+Below, we first create some fake data and visualize it.
+
+```{r}
+set.seed(2)
+
+# fake data; 2 columns of 50 obs from standard normal
+x <- matrix(rnorm(50 * 2), ncol = 2)
+# adding a systematic offset to first half of col 1 and 2
+x[1:25, 1] <- x[1:25, 1] + 3 # offset by 3
+x[1:25, 2] <- x[1:25, 2] - 4 # offset by -4
+
+# visualize the data
+plot(x, pch = 16, bty = "n")
+```
+
+In the plot we can clearly see the two groups. We perfom k-means clustering with the `kmeans()` function. The frist argument is the data, the second the amount of clusters, and the third the amount of times we try clustering using different starting points (we could potentially come up with different clusters depending on where we start).
+
+We also check cluster assignment for each observation and color the dots in our plot according to which cluster they have been assigned to.
+
+```{r}
+# run k-means clustering
+km.out <- kmeans(x, 2, nstart = 20)
+# for each observation what cluster has it been assigned to?
+km.out$cluster
+
+# how where the observations clustered
+plot(x, col = (km.out$cluster + 1), # plus b/c the first color is black 
+main = "K-Means Clustering Results with K=2", 
+xlab = "", ylab = "", pch = 20, cex = 2, bty = "n")
+```
+
+The first two groups where clearly visible to the naked eye. However, it would be hard to come up with tree groups. We do this an inspect the results.
+
+```{r}
+# k=3
+set.seed(4)
+km.out <- kmeans(x, 3, nstart = 20)
+km.out
+
+# visualize cluster assignment again
+plot(x, col = (km.out$cluster + 1), 
+main = "K-Means Clustering Results with K=3", 
+xlab = "", ylab = "", pch = 20, cex = 2)
+```
+
+We can check what happens when we do not use enough randomly assigned starting points. We could end up with a solution that is far from optimal.
+
+```{r}
+# set nstart large enough
+set.seed(3)
+km.out <- kmeans(x, 3, nstart = 1)
+km.out$tot.withinss
+km.out <- kmeans(x, 3, nstart = 20)
+km.out$tot.withinss
+```
+
+
+#### Hierarchical Clustering
+
+We now move to hierachical clustering where we do not pre-set the number of clusters. Rather this is typically down do determine the amount of clusters but also to check whether clustering will result in somehting that makes substantial sense. 
+
+The function is `hclust()`. We need to specify whether we want to cluster according to distance or correlation or some othe self-defined measure. Consider whehter data measured in different places and over time. Were we to use a correlation based measure, might pick up on common weather changes such as climate change. Were we to use distance we might pick up regional differences.
+
+We also need to decide which method to use to determine which point should be included in the next step of the clustering. "complete" checks for the points outside a cluster what their maximum distance to points within the cluster is. The point with the smalles maximum distance will be included. "Average" takes the mean difference and "single" takes the minimum.
+
+```{r}
+# run clustering
+hc.complete <- hclust(dist(x), method = "complete")
+hc.average <- hclust(dist(x), method = "average")
+hc.single <- hclust(dist(x), method = "single")
+```
+
+The choice of the method is consequential, we end up with different clusterings. The most common choice is "complete" or "average" which tends to produce more balanced dendrograms.
+
+```{r}
+# complete (maximum distance)
+par(mfrow = c(1, 3))
+plot(hc.complete, main = "Complete Linkage", 
+xlab = "", sub = "", cex = 0.9)
+
+# average
+plot(hc.average, main = "Average Linkage", 
+xlab = "", sub = "", cex = 0.9)
+
+# mimimum distance
+plot(hc.single, main = "Single Linkage", 
+xlab = "", sub = "", cex = 0.9)
+```
+
+Based on these dendrograms we have to decide how many clusters make sense in the data. This may be quite difficult without substantial knowledge. We can check cluster assignment given an amount of clusters that we specify with the `cutree()` function.
+
+```{r}
+# cluster assignment for 2 clusters
+cutree(hc.complete, 2)
+cutree(hc.average, 2)
+cutree(hc.single, 2)
+
+# cluster assignment for 4 clusters
+cutree(hc.single, 4)
+```
+
+Just like with k-nearest neighbors, distance based clustering suffers when the variables are measured on different scales. Therefore, we scale our variables and cluster again.
+
+```{r}
+# scaling to get variable on the same scale
+xsc <- scale(x)
+par( mfrow = c(1,1) )
+plot(hclust(dist(xsc), method = "complete"), 
+main = "Hierarchical Clustering with Scaled Features ")
+```
+
+Instead of using distance as our similarity measure, we could use correlation. This makes sense when we are interested to uncover common trends. Climate change could be one example.
+
+```{r}
+# use different similarity measure
+x <- matrix(rnorm(30 * 3), ncol = 3) # new fake data
+dd <- as.dist(1 - cor(t(x) ))
+plot(hclust(dd, method = "complete"), 
+main = "Complete Linkage with Correlation-Based Distance", 
+xlab = "", sub = "")
+```
+
+#### Example with Gene Expression data (from Hastie et al.)
+
+We load the ISLR library and explore the data. 
+
+```{r}
+library(ISLR)
+nci.labs <- NCI60$labs
+nci.data <- NCI60$data
+?NCI60
+dim(nci.data)
+
+# take a look at the data
+nci.data[1:5, 1:5]
+head(nci.labs)
+```
+
+
+#### Dimension Reduction with PCA
+
+We perform PCA on the NCI60 data to reduce the dimensionality of the data.
+
+We write a function that assigns colors continuously and we plot factors 1 and 2 against each other as well as factors 1 and 3.
+
+```{r}
+pr.out <- prcomp(nci.data, scale = TRUE)
+
+# make a nice plot - need a function
+Cols <- function(vec) {
+  cols <- rainbow(length(unique(vec)))
+  return(cols[as.numeric(as.factor(vec))])
+}
+
+# plot
+par(mfrow = c(1, 2))
+plot(pr.out$x[, 1:2], col = Cols(nci.labs), 
+     pch = 19, xlab = "Z1", ylab = "Z2")
+plot(pr.out$x[, c(1, 3)], col = Cols(nci.labs), 
+     pch = 19, xlab = "Z1", ylab = "Z3")
+
+summary(pr.out)
+plot(pr.out)
+```
+
+To get an idea we look at the variance explained per factor and the cumulative variance explained.
+
+```{r}
+pve <- 100 * pr.out$sdev^2 / sum(pr.out$sdev^2)
+par(mfrow = c(1, 2))
+plot(pve, type = "o", ylab = "PVE", 
+     xlab = "Principal Component", col = " blue ")
+plot(cumsum(pve), type = "o", ylab = "Cumulative PVE", 
+     xlab = "Principal Component ", col = " brown3 ")
+```
+
+Choosing the amount of components is hard without substantial knowledge but could look for the elbow in the left-hand plot e.g. The choice is essentially and infomed qualitative decision.
+
+#### Hierarcical clustering with Gene Data
+
+We first ensure that the variables are scale free by normalizing them. We then draw a dendrograms for the different methods to determine cluster assginment: "complete", "average", "single".
+
+```{r}
+sd.data <- scale(nci.data)
+
+par(mfrow = c(1, 3))
+data.dist <- dist(sd.data)
+plot(hclust(data.dist), labels = nci.labs, 
+     main = "Complete Linkage", xlab = "", sub = "", ylab = "")
+plot(hclust(data.dist, method = "average"), 
+     labels = nci.labs, main = "Average Linkage", 
+     xlab = "", sub = "", ylab = "")
+plot(hclust(data.dist, method = "single"), 
+     labels = nci.labs, main = "Single Linkage", 
+     xlab = "", sub = "", ylab = "")
+```
+
+We then explore which group an observation will be assigned to if we decide on four clusters.
+
+```{r}
+# cluster object
+hc.out <- hclust(data.dist)  
+hc.clusters <- cutree(hc.out, 4)
+table(hc.clusters, nci.labs)
+```
+
+We plot the dendrogram and a cutoff line.
+
+```{r}
+# plot dendrogram
+par(mfrow = c(1, 1))
+plot(hc.out, labels = nci.labs)
+abline(h = 139, col = "red")
+```
+
+Finally, we perform k-means clustering with four clusters to determine whether cluster assignment will be similar.
+
+```{r}
+# K-means
+set.seed(2)
+km.out <- kmeans(sd.data, 4, nstart = 20)
+km.clusters <- km.out$cluster
+# do we get the same clusters?
+table(km.clusters, hc.clusters)
+```
+
+We can see that the resulting grouping is quite different. This is where substantial knowledge and interpretation comes in.
