@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Philipp Broniecki and Lucas Leemann – Machine Learning 1K" />
+
+
+<title>Solution Day 8 – Tree based Methods</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Essex 2017 Machine Learning</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 1
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day1.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D1%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions1.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 2
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day2.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D2%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions2.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 3
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day3.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D3%20-%20Classification.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions3.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 4
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day4.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D4%20-%20Resampling.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions4.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 5
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day5.html">Lab</a>
+    </li>
+    <li>
+      <a href="labs/Lab%20Code%205.R">plain R-Code</a>
+    </li>
+    <li>
+      <a href="./slides/D5%20-%20Model%20Selection%20I.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions5.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 6
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day6.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D6%20-%20Model%20Selection%20II.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions6.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 7
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day7.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D7%20-%20Polynomial%20Models.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions7.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 8
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day8.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D8%20-%20Tree-Based%20Methods.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions8.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 9
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day9.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D9%20-%20Unsupervised%20Learning.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions9.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    More
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="simulation.html">Simulation</a>
+    </li>
+    <li>
+      <a href="montecarlo.html">Monte Carlos</a>
+    </li>
+    <li>
+      <a href="MCLassoRidge.html">MC Lasso v. Ridge</a>
+    </li>
+    <li>
+      <a href="splinesCV.html">Splines Cross Validated</a>
+    </li>
+    <li>
+      <a href="./data/titanic.dta">Titanic Data</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Solution Day 8 – Tree based Methods</h1>
+<h4 class="author"><em>Philipp Broniecki and Lucas Leemann – Machine Learning 1K</em></h4>
+
+</div>
+
+
+<div id="q1" class="section level4">
+<h4>Q1</h4>
+<p>We applied random forests for varying <code>mtry</code>. In addition vary the number of trees and create a plot that displays both test error and OOB error.</p>
+<p>First, we reload the dataset and do some pre-processing.</p>
+<pre class="r"><code># clear workspace
+rm(list=ls())
+library(foreign)
+bes &lt;- read.dta(&quot;http://philippbroniecki.github.io/ML2017.io/data/bes.dta&quot;)
+bes &lt;- na.omit(bes)
+
+# clean in_school
+table(bes$in_school)</code></pre>
+<pre><code>## 
+##  -0.405100243979883  -0.286622836951644 -0.0932005119161492 
+##                   1                   1                   1 
+##   -0.08278915151733                   0  0.0403350016659423 
+##                   1                4120                   1 
+##   0.123419680101826   0.247478125358543                   1 
+##                   1                   1                  34</code></pre>
+<pre class="r"><code>bes$in_school &lt;- ifelse (bes$in_school != 1, 0, bes$in_school)
+table(bes$in_school)</code></pre>
+<pre><code>## 
+##    0    1 
+## 4127   34</code></pre>
+<pre class="r"><code># data manipulation
+categcorical &lt;- c(&quot;Turnout&quot;, &quot;Vote2001&quot;, &quot;Gender&quot;, &quot;PartyID&quot;, &quot;Telephone&quot;, &quot;edu15&quot;,
+                  &quot;edu16&quot;, &quot;edu17&quot;, &quot;edu18&quot;, &quot;edu19plus&quot;, &quot;in_school&quot;, &quot;in_uni&quot;)
+# declare factor variables
+bes[, categcorical] &lt;- lapply(bes[, categcorical], factor)</code></pre>
+<p>We tried 10 different values of <code>mtry</code>. We will try three different values, <span class="math inline">\(p\)</span>, <span class="math inline">\(p/2\)</span>, <span class="math inline">\(\sqrt{p}\)</span>, of <code>mtry</code> to speed up the process and vary the number of trees from 1 to 500. We will pass training and test data sets to <code>randomForest()</code> which will then estimate test error on the fly on the test data we specified, so only the training bit will be used for bootstrapping the samles.</p>
+<pre class="r"><code>library(randomForest)
+set.seed(123)
+
+# training/test split
+train &lt;-  sample(nrow(bes), nrow(bes) / 2) # row index numbers
+X.train &lt;-  bes[train, -which(names(bes)==&quot;Income&quot;)]
+X.test &lt;-  bes[-train, -which(names(bes)==&quot;Income&quot;)]
+Y.train &lt;-  bes[train, &quot;Income&quot;]
+Y.test &lt;-  bes[-train, &quot;Income&quot;]
+
+# variables to try per split
+mtry1 &lt;- ncol(bes) -1
+mtry2 &lt;- round(ncol(bes) /2, digits = 0)
+mtry3 &lt;- round( sqrt(ncol(bes)), digits = 0)
+
+# random forest models
+m1 &lt;-  randomForest(X.train, Y.train, xtest=X.test, ytest=Y.test, mtry=mtry1, ntree=500)
+m2 &lt;-  randomForest(X.train, Y.train, xtest=X.test, ytest=Y.test, mtry=mtry2, ntree=500)
+m3 &lt;-  randomForest(X.train, Y.train, xtest=X.test, ytest=Y.test, mtry=mtry3, ntree=500)
+
+plot(1:500, m1$test$mse, col=&quot;green&quot;, type=&quot;l&quot;, 
+     xlab=&quot;Number of Trees&quot;, ylab=&quot;Test MSE&quot;, ylim=c(3, 7), bty = &quot;n&quot;)
+lines(1:500, m2$test$mse, col=&quot;red&quot;, type=&quot;l&quot;)
+lines(1:500, m3$test$mse, col=&quot;blue&quot;, type=&quot;l&quot;)
+legend(&quot;topright&quot;, c(&quot;m=p&quot;, &quot;m=p/2&quot;, &quot;m=sqrt(p)&quot;), 
+       col=c(&quot;green&quot;, &quot;red&quot;, &quot;blue&quot;), cex=1, lty=1, bty = &quot;n&quot;)</code></pre>
+<p><img src="solutions8_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>The plot shows that test MSE for single tree is quite high. It is reduced by adding more trees to the model and stabilizes around 50 trees. Test MSE for including all variables at split is slightly higher as compared to both using half or square-root number of variables. The smallest test error results from using the <span class="math inline">\(\sqrt{p}\)</span>.</p>
+</div>
+<div id="q2" class="section level4">
+<h4>Q2</h4>
+<p>Looking at the Carseats data from the ISLR package we will seek to predict <code>Sales</code> using regression trees and related approaches, treating the response as a quantitative variable.</p>
+<ol style="list-style-type: decimal">
+<li>Split the data set into a training set and a test set.</li>
+</ol>
+<pre class="r"><code>library(ISLR)
+attach(Carseats)</code></pre>
+<pre><code>## The following objects are masked from Carseats (pos = 22):
+## 
+##     Advertising, Age, CompPrice, Education, Income, Population,
+##     Price, Sales, ShelveLoc, Urban, US</code></pre>
+<pre><code>## The following objects are masked from Carseats (pos = 24):
+## 
+##     Advertising, Age, CompPrice, Education, Income, Population,
+##     Price, Sales, ShelveLoc, Urban, US</code></pre>
+<pre class="r"><code>set.seed(123)
+
+train &lt;-  sample(nrow(Carseats), nrow(Carseats) / 2)
+Carseats.train &lt;-  Carseats[train, ]
+Carseats.test &lt;-  Carseats[-train, ]</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Fit a regression tree to the training set. Plot the tree, and interpret the results. What test error rate do you obtain?</li>
+</ol>
+<pre class="r"><code>library(tree)
+tree.carseats &lt;-  tree(Sales~ . , data=Carseats.train)
+summary(tree.carseats)</code></pre>
+<pre><code>## 
+## Regression tree:
+## tree(formula = Sales ~ ., data = Carseats.train)
+## Variables actually used in tree construction:
+## [1] &quot;ShelveLoc&quot;   &quot;Price&quot;       &quot;Advertising&quot; &quot;Population&quot;  &quot;Age&quot;        
+## [6] &quot;CompPrice&quot;  
+## Number of terminal nodes:  15 
+## Residual mean deviance:  2.624 = 485.4 / 185 
+## Distribution of residuals:
+##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## -3.863000 -1.166000  0.000105  0.000000  1.070000  4.177000</code></pre>
+<pre class="r"><code>plot(tree.carseats)
+text(tree.carseats, pretty=0, cex=0.5)</code></pre>
+<p><img src="solutions8_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code>pred.carseats &lt;-  predict(tree.carseats, Carseats.test)
+mean((Carseats.test$Sales - pred.carseats)^2)</code></pre>
+<pre><code>## [1] 4.427724</code></pre>
+<p>The test MSE is about <span class="math inline">\(4.43\)</span>.</p>
+<ol start="3" style="list-style-type: decimal">
+<li>Use cross-validation in order to determine the optimal level of tree complexity. Does pruning the tree improve the test error rate?</li>
+</ol>
+<pre class="r"><code>cv.carseats &lt;-  cv.tree(tree.carseats, FUN=prune.tree)
+par(mfrow=c(1, 2))
+plot(cv.carseats$size, cv.carseats$dev, type=&quot;b&quot;)
+plot(cv.carseats$k, cv.carseats$dev, type=&quot;b&quot;)</code></pre>
+<p><img src="solutions8_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code># Best size = 9
+pruned.carseats &lt;- prune.tree(tree.carseats, best=9)
+par(mfrow=c(1, 1))
+plot(pruned.carseats)
+text(pruned.carseats, pretty=0, cex=0.5)</code></pre>
+<p><img src="solutions8_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
+<pre class="r"><code>pred.pruned &lt;-  predict(pruned.carseats, Carseats.test)
+mean((Carseats.test$Sales - pred.pruned)^2)</code></pre>
+<pre><code>## [1] 5.071392</code></pre>
+<p>Pruning the tree in this case increases the test MSE to <span class="math inline">\(5.07\)</span>.</p>
+<ol start="4" style="list-style-type: decimal">
+<li>Use the bagging approach in order to analyze this data. What test error rate do you obtain? Use the <code>importance()</code> function to determine which variables are most important.</li>
+</ol>
+<pre class="r"><code>library(randomForest)
+bag.carseats &lt;-  randomForest(Sales~ . , data=Carseats.train, 
+                              mtry=10, ntree=500, importance=TRUE)
+bag.pred &lt;-  predict(bag.carseats, Carseats.test)
+mean((Carseats.test$Sales - bag.pred)^2)</code></pre>
+<pre><code>## [1] 2.500485</code></pre>
+<pre class="r"><code>importance(bag.carseats)</code></pre>
+<pre><code>##                %IncMSE IncNodePurity
+## CompPrice   19.2587409    140.828633
+## Income       4.3882311     66.344000
+## Advertising 16.6768251    117.794498
+## Population   0.5382655     75.312674
+## Price       49.6911455    431.909900
+## ShelveLoc   54.6710024    453.406139
+## Age         21.7562791    174.660554
+## Education    3.9003432     43.417283
+## Urban       -0.6565416      9.584521
+## US           1.7945852      7.451886</code></pre>
+<p>Bagging improves the test MSE to <span class="math inline">\(2.50\)</span>. We also see that <code>Price</code>, <code>ShelveLoc</code> and <code>Age</code> are the three most important predictors of <code>Sale</code>.</p>
+<ol start="5" style="list-style-type: decimal">
+<li>Use random forests to analyze this data. What test error rate do you obtain? Use the <code>importance()</code> function to determine which variables are most important. Describe the effect of mm, the number of variables considered at each split, on the error rate obtained.</li>
+</ol>
+<pre class="r"><code>mse.vec &lt;- NA
+for (a in 1:10){
+  rf.carseats &lt;-  randomForest(Sales ~ . , data=Carseats.train, 
+                             mtry=a, ntree=500, importance=TRUE)
+  rf.pred &lt;-  predict(rf.carseats, Carseats.test)
+  mse.vec[a] &lt;- mean((Carseats.test$Sales - rf.pred)^2)
+}
+
+# best model
+which.min(mse.vec)</code></pre>
+<pre><code>## [1] 9</code></pre>
+<pre class="r"><code># test error
+mse.vec[which.min(mse.vec)]</code></pre>
+<pre><code>## [1] 2.523449</code></pre>
+<p>We see that the best model uses 9 variables at each split. That model decreases test error compared to bagging.</p>
+<pre class="r"><code>rf.carseats &lt;-  randomForest(Sales ~ . , data = Carseats, 
+                             mtry=9, ntree=500, importance=TRUE)
+importance(rf.carseats)</code></pre>
+<pre><code>##                %IncMSE IncNodePurity
+## CompPrice   39.4574984     332.47654
+## Income      14.6584232     167.31263
+## Advertising 27.6128855     235.10663
+## Population   0.4294254     102.12359
+## Price       79.5892610     899.10084
+## ShelveLoc   87.8384742     976.91826
+## Age         26.2332341     288.73033
+## Education    1.5410093      82.15934
+## Urban       -1.5312926      13.32068
+## US           1.9808418      17.80844</code></pre>
+<p><code>ShelveLoc</code> is the most important variable. <code>Price</code>, <code>CompPrice</code>, <code>Advertising</code>, and <code>Age</code> are also important predictors of <code>Sale</code>.</p>
+</div>
+<div id="q3" class="section level4">
+<h4>Q3</h4>
+<p>This problem involves the OJ dataset which is part of the ISLR package.</p>
+<ol style="list-style-type: decimal">
+<li>Create a training set containing a random sample of 800 observations, and a test set containing the remaining observations.</li>
+</ol>
+<pre class="r"><code>library(ISLR)
+attach(OJ)</code></pre>
+<pre><code>## The following objects are masked from OJ (pos = 22):
+## 
+##     DiscCH, DiscMM, ListPriceDiff, LoyalCH, PctDiscCH, PctDiscMM,
+##     PriceCH, PriceDiff, PriceMM, Purchase, SalePriceCH,
+##     SalePriceMM, SpecialCH, SpecialMM, STORE, Store7, StoreID,
+##     WeekofPurchase</code></pre>
+<pre class="r"><code>set.seed(1013)
+
+train &lt;-  sample(dim(OJ)[1], 800)
+OJ.train &lt;-  OJ[train, ]
+OJ.test &lt;-  OJ[-train, ]</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Fit a tree to the training data, with <code>Purchase</code> as the response and the other variables except for <code>Buy</code> as predictors. Use the <code>summary()</code> function to produce summary statistics about the tree, and describe the results obtained. What is the training error rate? How many terminal nodes does the tree have?</li>
+</ol>
+<pre class="r"><code>library(tree)
+oj.tree &lt;-  tree(Purchase ~ . , data=OJ.train)
+summary(oj.tree)</code></pre>
+<pre><code>## 
+## Classification tree:
+## tree(formula = Purchase ~ ., data = OJ.train)
+## Variables actually used in tree construction:
+## [1] &quot;LoyalCH&quot;   &quot;PriceDiff&quot;
+## Number of terminal nodes:  7 
+## Residual mean deviance:  0.7517 = 596.1 / 793 
+## Misclassification error rate: 0.155 = 124 / 800</code></pre>
+<p>The tree only uses two variables: <code>LoyalCH</code> and <code>PriceDiff</code>. It has <span class="math inline">\(7\)</span> terminal nodes. Training error rate (misclassification error) for the tree is <span class="math inline">\(0.155\)</span></p>
+<ol start="3" style="list-style-type: decimal">
+<li>Type in the name of the tree object in order to get a detailed text output. Pick one of the terminal nodes, and interpret the information displayed.</li>
+</ol>
+<pre class="r"><code>oj.tree</code></pre>
+<pre><code>## node), split, n, deviance, yval, (yprob)
+##       * denotes terminal node
+## 
+##  1) root 800 1075.00 CH ( 0.60250 0.39750 )  
+##    2) LoyalCH &lt; 0.5036 359  422.80 MM ( 0.27577 0.72423 )  
+##      4) LoyalCH &lt; 0.276142 170  119.10 MM ( 0.11176 0.88824 ) *
+##      5) LoyalCH &gt; 0.276142 189  257.50 MM ( 0.42328 0.57672 )  
+##       10) PriceDiff &lt; 0.05 79   76.79 MM ( 0.18987 0.81013 ) *
+##       11) PriceDiff &gt; 0.05 110  148.80 CH ( 0.59091 0.40909 ) *
+##    3) LoyalCH &gt; 0.5036 441  343.30 CH ( 0.86848 0.13152 )  
+##      6) LoyalCH &lt; 0.764572 186  210.30 CH ( 0.74731 0.25269 )  
+##       12) PriceDiff &lt; -0.165 29   34.16 MM ( 0.27586 0.72414 ) *
+##       13) PriceDiff &gt; -0.165 157  140.90 CH ( 0.83439 0.16561 )  
+##         26) PriceDiff &lt; 0.265 82   95.37 CH ( 0.73171 0.26829 ) *
+##         27) PriceDiff &gt; 0.265 75   31.23 CH ( 0.94667 0.05333 ) *
+##      7) LoyalCH &gt; 0.764572 255   90.67 CH ( 0.95686 0.04314 ) *</code></pre>
+<p>Letâ€™s pick terminal node labeled “10)”. The splitting variable at this node is <code>PriceDiff</code>. The splitting value of this node is <span class="math inline">\(0.05\)</span>. There are <span class="math inline">\(79\)</span> observations in the subtree below this node. The deviance for all points contained in the region below this node is <span class="math inline">\(76.79\)</span>. A star in the line denotes that this is a terminal node. The prediction at this node is <code>Sales</code> = MM. About <span class="math inline">\(19\%\)</span> of the observations in this node have CH as value of <code>Sales</code>. The remaining <span class="math inline">\(81\%\)</span> points have MM as value of <code>Sales</code>.</p>
+<ol start="4" style="list-style-type: decimal">
+<li>Create a plot of the tree, and interpret the results.</li>
+</ol>
+<pre class="r"><code>plot(oj.tree)
+text(oj.tree, pretty=0, cex = 0.5)</code></pre>
+<p><img src="solutions8_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p><code>LoyalCH</code> is the most important variable of the tree, the top 3 nodes contain <code>LoyalCH</code>. If <code>LoyalCH</code> <span class="math inline">\(&lt;0.27\)</span>, the tree predicts MM. If <code>LoyalCH</code> <span class="math inline">\(&gt;0.76\)</span>, the tree predicts CH. For intermediate values of <code>LoyalCH</code>, the decision also depends on the value of <code>PriceDiff</code>.</p>
+<ol start="5" style="list-style-type: decimal">
+<li>Predict the response on the test data, and produce a confusion matrix comparing the test labels to the predicted test labels. What is the test error rate?</li>
+</ol>
+<pre class="r"><code>oj.pred &lt;-  predict(oj.tree, OJ.test, type=&quot;class&quot;)
+table(OJ.test$Purchase, oj.pred)</code></pre>
+<pre><code>##     oj.pred
+##       CH  MM
+##   CH 152  19
+##   MM  32  67</code></pre>
+<pre class="r"><code>mean( OJ.test$Purchase == oj.pred)</code></pre>
+<pre><code>## [1] 0.8111111</code></pre>
+<p>We correctly classify <span class="math inline">\(81\%\)</span> of the observations.</p>
+<ol start="6" style="list-style-type: decimal">
+<li>Produce a plot with tree size on the <span class="math inline">\(x\)</span>-axis and cross-validated classification error rate on the <span class="math inline">\(y\)</span>-axis.</li>
+</ol>
+<pre class="r"><code>cv.oj &lt;-  cv.tree(oj.tree, FUN=prune.tree)
+plot(cv.oj$size, cv.oj$dev, 
+     type=&quot;b&quot;, xlab=&quot;Tree Size&quot;, ylab=&quot;Deviance&quot;)</code></pre>
+<p><img src="solutions8_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<ol start="7" style="list-style-type: decimal">
+<li>Which tree size corresponds to the lowest cross-validated classification error rate?</li>
+</ol>
+<p>A tree size of 6 gives the lowest cross-validation error.</p>
+<ol start="8" style="list-style-type: decimal">
+<li>Produce a pruned tree corresponding to the optimal tree size obtained using cross-validation. If cross-validation does not lead to selection of a pruned tree, then create a pruned tree with five terminal nodes.</li>
+</ol>
+<pre class="r"><code>oj.pruned &lt;-  prune.tree(oj.tree, best=6)</code></pre>
+<ol start="9" style="list-style-type: decimal">
+<li>Compare the training error rates between the pruned and unpruned trees. Which is higher?</li>
+</ol>
+<pre class="r"><code>summary(oj.tree) </code></pre>
+<pre><code>## 
+## Classification tree:
+## tree(formula = Purchase ~ ., data = OJ.train)
+## Variables actually used in tree construction:
+## [1] &quot;LoyalCH&quot;   &quot;PriceDiff&quot;
+## Number of terminal nodes:  7 
+## Residual mean deviance:  0.7517 = 596.1 / 793 
+## Misclassification error rate: 0.155 = 124 / 800</code></pre>
+<pre class="r"><code>summary(oj.pruned)</code></pre>
+<pre><code>## 
+## Classification tree:
+## snip.tree(tree = oj.tree, nodes = 13L)
+## Variables actually used in tree construction:
+## [1] &quot;LoyalCH&quot;   &quot;PriceDiff&quot;
+## Number of terminal nodes:  6 
+## Residual mean deviance:  0.7689 = 610.5 / 794 
+## Misclassification error rate: 0.155 = 124 / 800</code></pre>
+<p>The training misclassification rate is the same in both trees: <span class="math inline">\(15.5\%\)</span></p>
+<ol start="10" style="list-style-type: decimal">
+<li>Compare the test error rates between the pruned and unpruned trees. Which is higher?</li>
+</ol>
+<pre class="r"><code>pred.unpruned &lt;-  predict(oj.tree, OJ.test, type=&quot;class&quot;)
+misclass.unpruned &lt;-  sum(OJ.test$Purchase != pred.unpruned)
+misclass.unpruned / length(pred.unpruned)</code></pre>
+<pre><code>## [1] 0.1888889</code></pre>
+<pre class="r"><code>pred.pruned &lt;-  predict(oj.pruned, OJ.test, type=&quot;class&quot;)
+misclass.pruned &lt;-  sum(OJ.test$Purchase != pred.pruned)
+misclass.pruned / length(pred.pruned)</code></pre>
+<pre><code>## [1] 0.1888889</code></pre>
+<p>Pruned and unpruned trees have same test error rate of <span class="math inline">\(0.189\)</span>.</p>
+</div>
+<div id="q4" class="section level4">
+<h4>Q4</h4>
+<p>We now use boosting to predict <code>Salary</code> in the Hitters dataset, which is part of the ISLR package.</p>
+<ol style="list-style-type: decimal">
+<li>Remove the observations for whom the salary information is unknown, and then log-transform the salaries.</li>
+</ol>
+<pre class="r"><code>library(ISLR)
+sum(is.na(Hitters$Salary))</code></pre>
+<pre><code>## [1] 59</code></pre>
+<pre class="r"><code>Hitters &lt;-  Hitters[-which(is.na(Hitters$Salary)), ]
+sum(is.na(Hitters$Salary))</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>Hitters$Salary &lt;-  log(Hitters$Salary)</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Create a training set consisting of the first 200 observations, and a test set consisting of the remaining observations.</li>
+</ol>
+<pre class="r"><code>train &lt;-  1:200
+Hitters.train &lt;-  Hitters[train, ]
+Hitters.test &lt;-  Hitters[-train, ]</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Perform boosting on the training set with <span class="math inline">\(1,000\)</span> trees for a range of values of the shrinkage parameter <span class="math inline">\(\lambda\)</span>. Produce a plot with different shrinkage values on the <span class="math inline">\(x\)</span>-axis and the corresponding training set MSE on the <span class="math inline">\(y\)</span>-axis.</li>
+</ol>
+<pre class="r"><code>library(gbm)
+
+set.seed(103)
+pows &lt;-  seq(-10, -0.2, by=0.1)
+lambdas &lt;-  10 ^ pows
+length.lambdas &lt;-  length(lambdas)
+train.errors &lt;-  rep(NA, length.lambdas)
+test.errors &lt;-  rep(NA, length.lambdas)
+
+for (i in 1:length.lambdas) {
+  boost.hitters &lt;-  gbm(Salary ~ . , data=Hitters.train,
+                        distribution=&quot;gaussian&quot;,
+                        n.trees=1000,
+                        shrinkage=lambdas[i])
+  train.pred &lt;-  predict(boost.hitters, Hitters.train, n.trees=1000)
+  test.pred &lt;-  predict(boost.hitters, Hitters.test, n.trees=1000)
+  train.errors[i] &lt;-  mean((Hitters.train$Salary - train.pred)^2)
+  test.errors[i] &lt;-  mean((Hitters.test$Salary - test.pred)^2)
+}
+
+plot(lambdas, train.errors, type=&quot;b&quot;, 
+     xlab=&quot;Shrinkage&quot;, ylab=&quot;Train MSE&quot;, 
+     col=&quot;blue&quot;, pch=20, bty = &quot;n&quot;)</code></pre>
+<p><img src="solutions8_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<ol start="4" style="list-style-type: decimal">
+<li>Produce a plot with different shrinkage values on the <span class="math inline">\(x\)</span>-axis and the corresponding test set MSE on the <span class="math inline">\(y\)</span>-axis.</li>
+</ol>
+<pre class="r"><code>plot(lambdas, test.errors, type=&quot;b&quot;, 
+     xlab=&quot;Shrinkage&quot;, ylab=&quot;Test MSE&quot;, 
+     col=&quot;red&quot;, pch=20)</code></pre>
+<p><img src="solutions8_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+<pre class="r"><code>min(test.errors)</code></pre>
+<pre><code>## [1] 0.2560507</code></pre>
+<pre class="r"><code>lambdas[which.min(test.errors)]</code></pre>
+<pre><code>## [1] 0.05011872</code></pre>
+<p>Minimum test error is obtained at <span class="math inline">\(\lambda=0.05\)</span>.</p>
+<ol start="5" style="list-style-type: decimal">
+<li>Compare the test MSE of boosting to the test MSE that results from applying two of the regression approaches seen in our discussions of regression models.</li>
+</ol>
+<pre class="r"><code>lm.fit &lt;-  lm(Salary ~ . , data=Hitters.train)
+lm.pred &lt;-  predict(lm.fit, Hitters.test)
+mean((Hitters.test$Salary - lm.pred)^2)</code></pre>
+<pre><code>## [1] 0.4917959</code></pre>
+<pre class="r"><code>library(glmnet)
+set.seed(134)
+
+x &lt;-  model.matrix(Salary ~ . , data=Hitters.train)
+y &lt;-  Hitters.train$Salary
+x.test &lt;-  model.matrix(Salary ~ . , data=Hitters.test)
+lasso.fit &lt;-  glmnet(x, y, alpha=1)
+lasso.pred &lt;-  predict(lasso.fit, s=0.01, newx=x.test)
+mean((Hitters.test$Salary - lasso.pred)^2)</code></pre>
+<pre><code>## [1] 0.4700537</code></pre>
+<p>Both linear model and regularization like Lasso have higher test MSE than boosting.</p>
+<ol start="6" style="list-style-type: decimal">
+<li>Which variables appear to be the most important predictors in the boosted model?</li>
+</ol>
+<pre class="r"><code>boost.best &lt;-  gbm(Salary ~ . , data=Hitters.train,
+                   distribution=&quot;gaussian&quot;, n.trees=1000,
+                   shrinkage=lambdas[which.min(test.errors)])
+summary(boost.best)</code></pre>
+<p><img src="solutions8_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+<pre><code>##                 var    rel.inf
+## CAtBat       CAtBat 22.7562681
+## CWalks       CWalks 10.4279674
+## CHits         CHits  8.6198109
+## PutOuts     PutOuts  6.6159325
+## Years         Years  6.4611683
+## Walks         Walks  6.2331148
+## CRBI           CRBI  6.0926744
+## CHmRun       CHmRun  5.1076104
+## RBI             RBI  4.5321678
+## CRuns         CRuns  4.4728132
+## Assists     Assists  3.8366575
+## HmRun         HmRun  3.1554038
+## Hits           Hits  3.1229284
+## AtBat         AtBat  2.4338530
+## Errors       Errors  2.4324185
+## Runs           Runs  2.1425481
+## Division   Division  0.7041949
+## NewLeague NewLeague  0.6675446
+## League       League  0.1849234</code></pre>
+<p><code>CAtBat</code>, <code>CRBI</code> and <code>CWalks</code> are three most important variables in that order.</p>
+<ol start="7" style="list-style-type: decimal">
+<li>Now apply bagging to the training set. What is the test set MSE for this approach?</li>
+</ol>
+<pre class="r"><code>library(randomForest)
+set.seed(21)
+rf.hitters &lt;-  randomForest(Salary ~ . , data=Hitters.train, 
+                            ntree=500, mtry=19)
+rf.pred &lt;-  predict(rf.hitters, Hitters.test)
+mean((Hitters.test$Salary - rf.pred)^2)</code></pre>
+<pre><code>## [1] 0.231884</code></pre>
+<p>Test MSE for bagging is about <span class="math inline">\(0.23\)</span>, which is slightly better than the best test MSE for boosting.</p>
+</div>
+<div id="q5" class="section level4">
+<h4>Q5</h4>
+<p>This question uses the <code>Caravan</code> dataset, part of the ISRL package.</p>
+<ol style="list-style-type: decimal">
+<li>Create a training set consisting of the first 1,000 observations, and a test set consisting of the remaining observations.</li>
+</ol>
+<pre class="r"><code>library(ISLR)
+train &lt;-  1:1000
+Caravan$Purchase &lt;-  ifelse(Caravan$Purchase == &quot;Yes&quot;, 1, 0)
+Caravan.train &lt;-  Caravan[train, ]
+Caravan.test &lt;-  Caravan[-train, ]</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Fit a boosting model to the training set with <code>Purchase</code> as the response and the other variables as predictors. Use 1,000 trees, and a shrinkage value of 0.01. Which predictors appear to be the most important?</li>
+</ol>
+<pre class="r"><code>library(gbm)
+set.seed(342)
+boost.caravan &lt;-  gbm(Purchase ~ . , 
+                      data=Caravan.train, 
+                      n.trees=1000, shrinkage=0.01,
+                      distribution=&quot;bernoulli&quot;)</code></pre>
+<pre><code>## Warning in gbm.fit(x, y, offset = offset, distribution = distribution, w =
+## w, : variable 50: PVRAAUT has no variation.</code></pre>
+<pre><code>## Warning in gbm.fit(x, y, offset = offset, distribution = distribution, w =
+## w, : variable 71: AVRAAUT has no variation.</code></pre>
+<pre class="r"><code>summary(boost.caravan)</code></pre>
+<p><img src="solutions8_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
+<pre><code>##               var     rel.inf
+## PPERSAUT PPERSAUT 15.15534009
+## MKOOPKLA MKOOPKLA  9.23499526
+## MOPLHOOG MOPLHOOG  8.67017024
+## MBERMIDD MBERMIDD  5.39403655
+## MGODGE     MGODGE  5.03047673
+## PBRAND     PBRAND  4.83740038
+## MINK3045 MINK3045  3.94305387
+## ABRAND     ABRAND  3.69692919
+## MOSTYPE   MOSTYPE  3.38768960
+## PWAPART   PWAPART  2.51970169
+## MGODPR     MGODPR  2.43689096
+## MSKC         MSKC  2.34594774
+## MAUT2       MAUT2  2.30973409
+## MFWEKIND MFWEKIND  2.27959503
+## MBERARBG MBERARBG  2.08245286
+## MSKA         MSKA  1.90020973
+## PBYSTAND PBYSTAND  1.69481877
+## MGODOV     MGODOV  1.61147668
+## MAUT1       MAUT1  1.59879109
+## MBERHOOG MBERHOOG  1.56791308
+## MINK7512 MINK7512  1.36255296
+## MSKB1       MSKB1  1.35071475
+## MINKGEM   MINKGEM  1.34913011
+## MRELGE     MRELGE  1.28204167
+## MAUT0       MAUT0  1.19929798
+## MHHUUR     MHHUUR  1.19158719
+## MFGEKIND MFGEKIND  0.84203310
+## MRELOV     MRELOV  0.78554535
+## MZPART     MZPART  0.72191139
+## MINK4575 MINK4575  0.70935967
+## MSKB2       MSKB2  0.66694112
+## APERSAUT APERSAUT  0.64644681
+## MGODRK     MGODRK  0.62380797
+## MSKD         MSKD  0.58168337
+## MINKM30   MINKM30  0.54392696
+## PMOTSCO   PMOTSCO  0.52708603
+## MOPLMIDD MOPLMIDD  0.52091706
+## MGEMOMV   MGEMOMV  0.44231264
+## MZFONDS   MZFONDS  0.43037800
+## PLEVEN     PLEVEN  0.39901552
+## MHKOOP     MHKOOP  0.37672230
+## MBERARBO MBERARBO  0.36653424
+## MBERBOER MBERBOER  0.35290257
+## MINK123M MINK123M  0.33559225
+## MGEMLEEF MGEMLEEF  0.24937634
+## MFALLEEN MFALLEEN  0.14898856
+## MOSHOOFD MOSHOOFD  0.13265308
+## MOPLLAAG MOPLLAAG  0.05654615
+## MBERZELF MBERZELF  0.05589282
+## MAANTHUI MAANTHUI  0.05047841
+## MRELSA     MRELSA  0.00000000
+## PWABEDR   PWABEDR  0.00000000
+## PWALAND   PWALAND  0.00000000
+## PBESAUT   PBESAUT  0.00000000
+## PVRAAUT   PVRAAUT  0.00000000
+## PAANHANG PAANHANG  0.00000000
+## PTRACTOR PTRACTOR  0.00000000
+## PWERKT     PWERKT  0.00000000
+## PBROM       PBROM  0.00000000
+## PPERSONG PPERSONG  0.00000000
+## PGEZONG   PGEZONG  0.00000000
+## PWAOREG   PWAOREG  0.00000000
+## PZEILPL   PZEILPL  0.00000000
+## PPLEZIER PPLEZIER  0.00000000
+## PFIETS     PFIETS  0.00000000
+## PINBOED   PINBOED  0.00000000
+## AWAPART   AWAPART  0.00000000
+## AWABEDR   AWABEDR  0.00000000
+## AWALAND   AWALAND  0.00000000
+## ABESAUT   ABESAUT  0.00000000
+## AMOTSCO   AMOTSCO  0.00000000
+## AVRAAUT   AVRAAUT  0.00000000
+## AAANHANG AAANHANG  0.00000000
+## ATRACTOR ATRACTOR  0.00000000
+## AWERKT     AWERKT  0.00000000
+## ABROM       ABROM  0.00000000
+## ALEVEN     ALEVEN  0.00000000
+## APERSONG APERSONG  0.00000000
+## AGEZONG   AGEZONG  0.00000000
+## AWAOREG   AWAOREG  0.00000000
+## AZEILPL   AZEILPL  0.00000000
+## APLEZIER APLEZIER  0.00000000
+## AFIETS     AFIETS  0.00000000
+## AINBOED   AINBOED  0.00000000
+## ABYSTAND ABYSTAND  0.00000000</code></pre>
+<p><code>PPERSAUT</code>, <code>MKOOPKLA</code> and <code>MOPLHOOG</code> are three most important variables in that order.</p>
+<ol start="3" style="list-style-type: decimal">
+<li>Use the boosting model to predict the response on the test data. Predict that a person will make a purchase if the estimated probability of purchase is greater than 20%. Form a confusion matrix. What fraction of the people predicted to make a purchase do in fact make one? How does this compare with the results obtained from applying KNN or logistic regression to this data set?</li>
+</ol>
+<pre class="r"><code>boost.prob &lt;-  predict(boost.caravan, Caravan.test, n.trees=1000,
+                       type=&quot;response&quot;)
+boost.pred &lt;-  ifelse(boost.prob &gt;0.2, 1, 0)
+table(Caravan.test$Purchase, boost.pred)</code></pre>
+<pre><code>##    boost.pred
+##        0    1
+##   0 4396  137
+##   1  255   34</code></pre>
+<pre class="r"><code>34 / (137 + 34)</code></pre>
+<pre><code>## [1] 0.1988304</code></pre>
+<p>About <span class="math inline">\(20\%\)</span> of people predicted to make purchase actually end up making one.</p>
+<pre class="r"><code>lm.caravan &lt;-  glm(Purchase ~ . , data=Caravan.train, family=binomial)</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre class="r"><code>lm.prob &lt;-  predict(lm.caravan, Caravan.test, type=&quot;response&quot;)</code></pre>
+<pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
+## ifelse(type == : prediction from a rank-deficient fit may be misleading</code></pre>
+<pre class="r"><code>lm.pred &lt;-  ifelse(lm.prob &gt; 0.2, 1, 0)
+table(Caravan.test$Purchase, lm.pred)</code></pre>
+<pre><code>##    lm.pred
+##        0    1
+##   0 4183  350
+##   1  231   58</code></pre>
+<pre class="r"><code>58 / (350 + 58)</code></pre>
+<pre><code>## [1] 0.1421569</code></pre>
+<p>About <span class="math inline">\(14\%\)</span> of people predicted to make purchase using logistic regression actually end up making one. This is lower than boosting.</p>
+</div>
+<div id="optional-exercise" class="section level3">
+<h3>Optional Exercise</h3>
+<p>Apply boosting, bagging, and random forests to a data set of your choice. Be sure to fit the models on a training set and to evaluate their performance on a test set. How accurate are the results compared to simple methods like linear or logistic regression? Which of these approaches yields the best performance?</p>
+<p>In this exercise we examine the Weekly stock market data from the ISLR package.</p>
+<pre class="r"><code>set.seed(1)
+library(ISLR)
+summary(Weekly)</code></pre>
+<pre><code>##       Year           Lag1               Lag2               Lag3         
+##  Min.   :1990   Min.   :-18.1950   Min.   :-18.1950   Min.   :-18.1950  
+##  1st Qu.:1995   1st Qu.: -1.1540   1st Qu.: -1.1540   1st Qu.: -1.1580  
+##  Median :2000   Median :  0.2410   Median :  0.2410   Median :  0.2410  
+##  Mean   :2000   Mean   :  0.1506   Mean   :  0.1511   Mean   :  0.1472  
+##  3rd Qu.:2005   3rd Qu.:  1.4050   3rd Qu.:  1.4090   3rd Qu.:  1.4090  
+##  Max.   :2010   Max.   : 12.0260   Max.   : 12.0260   Max.   : 12.0260  
+##       Lag4               Lag5              Volume       
+##  Min.   :-18.1950   Min.   :-18.1950   Min.   :0.08747  
+##  1st Qu.: -1.1580   1st Qu.: -1.1660   1st Qu.:0.33202  
+##  Median :  0.2380   Median :  0.2340   Median :1.00268  
+##  Mean   :  0.1458   Mean   :  0.1399   Mean   :1.57462  
+##  3rd Qu.:  1.4090   3rd Qu.:  1.4050   3rd Qu.:2.05373  
+##  Max.   : 12.0260   Max.   : 12.0260   Max.   :9.32821  
+##      Today          Direction 
+##  Min.   :-18.1950   Down:484  
+##  1st Qu.: -1.1540   Up  :605  
+##  Median :  0.2410             
+##  Mean   :  0.1499             
+##  3rd Qu.:  1.4050             
+##  Max.   : 12.0260</code></pre>
+<pre class="r"><code>train &lt;-  sample(nrow(Weekly), 2/3 * nrow(Weekly))
+test &lt;-  -train</code></pre>
+<p><strong>Logistic regression</strong></p>
+<pre class="r"><code>glm.fit &lt;-  glm(Direction ~ . -Year-Today, 
+                data=Weekly[train,], 
+                family=&quot;binomial&quot;)
+
+glm.probs &lt;-  predict(glm.fit, newdata=Weekly[test, ], 
+                      type = &quot;response&quot;)
+glm.pred &lt;-  rep(&quot;Down&quot;, length(glm.probs))
+glm.pred[glm.probs &gt; 0.5] &lt;-  &quot;Up&quot;
+table(glm.pred, Weekly$Direction[test])</code></pre>
+<pre><code>##         
+## glm.pred Down  Up
+##     Down    3   2
+##     Up    176 182</code></pre>
+<pre class="r"><code>mean(glm.pred != Weekly$Direction[test])</code></pre>
+<pre><code>## [1] 0.4903581</code></pre>
+<p><strong>Boosting</strong></p>
+<pre class="r"><code>library(gbm)
+Weekly$BinomialDirection &lt;-  ifelse(Weekly$Direction == &quot;Up&quot;, 1, 0)
+
+boost.weekly &lt;-  gbm(BinomialDirection~.-Year-Today-Direction,
+                     data=Weekly[train,], 
+                     distribution=&quot;bernoulli&quot;, 
+                     n.trees=5000)
+
+yhat.boost &lt;-  predict(boost.weekly, 
+                       newdata=Weekly[test,], 
+                       n.trees=5000)
+
+yhat.pred &lt;-  rep(0, length(yhat.boost))
+yhat.pred[yhat.boost &gt; 0.5] &lt;-  1
+table(yhat.pred, Weekly$BinomialDirection[test])</code></pre>
+<pre><code>##          
+## yhat.pred   0   1
+##         0 144 134
+##         1  35  50</code></pre>
+<pre class="r"><code>mean(yhat.pred != Weekly$BinomialDirection[test])</code></pre>
+<pre><code>## [1] 0.4655647</code></pre>
+<p><strong>Bagging</strong></p>
+<pre class="r"><code>Weekly &lt;-  Weekly[,!(names(Weekly) %in% c(&quot;BinomialDirection&quot;))]
+
+library(randomForest)
+
+bag.weekly &lt;-  randomForest(Direction~.-Year-Today, 
+                            data=Weekly, 
+                            subset=train, 
+                            mtry=6)
+
+yhat.bag &lt;-  predict(bag.weekly, newdata=Weekly[test,])
+table(yhat.bag, Weekly$Direction[test])</code></pre>
+<pre><code>##         
+## yhat.bag Down  Up
+##     Down   52  53
+##     Up    127 131</code></pre>
+<pre class="r"><code>mean(yhat.bag != Weekly$Direction[test])</code></pre>
+<pre><code>## [1] 0.4958678</code></pre>
+<p><strong>Random forests</strong></p>
+<pre class="r"><code>rf.weekly &lt;-  randomForest(Direction ~ . -Year-Today, 
+                           data=Weekly, 
+                           subset=train, 
+                           mtry=2)
+
+yhat.bag &lt;-  predict(rf.weekly, newdata=Weekly[test,])
+table(yhat.bag, Weekly$Direction[test])</code></pre>
+<pre><code>##         
+## yhat.bag Down  Up
+##     Down   49  45
+##     Up    130 139</code></pre>
+<pre class="r"><code>mean(yhat.bag != Weekly$Direction[test])</code></pre>
+<pre><code>## [1] 0.4820937</code></pre>
+<p><strong>Best performance summary: Boosting resulted in the lowest validation set test error rate.</strong></p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

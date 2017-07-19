@@ -1,0 +1,503 @@
+---
+title: "Solution Day 8  -- Tree based Methods"
+author: "Philipp Broniecki and Lucas Leemann -- Machine Learning 1K"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(global.par = TRUE)
+```
+
+#### Q1 
+
+We applied random forests for varying `mtry`. In addition vary the number of trees and create a plot that displays both test error and OOB error. 
+
+First, we reload the dataset and do some pre-processing.
+
+```{r}
+# clear workspace
+rm(list=ls())
+library(foreign)
+bes <- read.dta("http://philippbroniecki.github.io/ML2017.io/data/bes.dta")
+bes <- na.omit(bes)
+
+# clean in_school
+table(bes$in_school)
+bes$in_school <- ifelse (bes$in_school != 1, 0, bes$in_school)
+table(bes$in_school)
+
+# data manipulation
+categcorical <- c("Turnout", "Vote2001", "Gender", "PartyID", "Telephone", "edu15",
+                  "edu16", "edu17", "edu18", "edu19plus", "in_school", "in_uni")
+# declare factor variables
+bes[, categcorical] <- lapply(bes[, categcorical], factor)
+``` 
+
+We tried 10 different values of `mtry`. We will try three different values, $p$, $p/2$, $\sqrt{p}$, of `mtry` to speed up the process and vary the number of trees from 1 to 500. We will pass training and test data sets to `randomForest()` which will then estimate test error on the fly on the test data we specified, so only the training bit will be used for bootstrapping the samles.
+
+```{r}
+library(randomForest)
+set.seed(123)
+
+# training/test split
+train <-  sample(nrow(bes), nrow(bes) / 2) # row index numbers
+X.train <-  bes[train, -which(names(bes)=="Income")]
+X.test <-  bes[-train, -which(names(bes)=="Income")]
+Y.train <-  bes[train, "Income"]
+Y.test <-  bes[-train, "Income"]
+
+# variables to try per split
+mtry1 <- ncol(bes) -1
+mtry2 <- round(ncol(bes) /2, digits = 0)
+mtry3 <- round( sqrt(ncol(bes)), digits = 0)
+
+# random forest models
+m1 <-  randomForest(X.train, Y.train, xtest=X.test, ytest=Y.test, mtry=mtry1, ntree=500)
+m2 <-  randomForest(X.train, Y.train, xtest=X.test, ytest=Y.test, mtry=mtry2, ntree=500)
+m3 <-  randomForest(X.train, Y.train, xtest=X.test, ytest=Y.test, mtry=mtry3, ntree=500)
+
+plot(1:500, m1$test$mse, col="green", type="l", 
+     xlab="Number of Trees", ylab="Test MSE", ylim=c(3, 7), bty = "n")
+lines(1:500, m2$test$mse, col="red", type="l")
+lines(1:500, m3$test$mse, col="blue", type="l")
+legend("topright", c("m=p", "m=p/2", "m=sqrt(p)"), 
+       col=c("green", "red", "blue"), cex=1, lty=1, bty = "n")
+```
+
+The plot shows that test MSE for single tree is quite high. It is reduced by adding more trees to the model and stabilizes around 50 trees. Test MSE for including all variables at split is slightly higher as compared to both using half or square-root number of variables. The smallest test error results from using the $\sqrt{p}$.
+
+#### Q2
+
+Looking at the Carseats data from the ISLR package we will seek to predict `Sales` using regression trees and related approaches, treating the response as a quantitative variable.
+
+1. Split the data set into a training set and a test set.
+
+```{r}
+library(ISLR)
+attach(Carseats)
+set.seed(123)
+
+train <-  sample(nrow(Carseats), nrow(Carseats) / 2)
+Carseats.train <-  Carseats[train, ]
+Carseats.test <-  Carseats[-train, ]
+```
+
+2. Fit a regression tree to the training set. Plot the tree, and interpret the results. What test error rate do you obtain?
+
+```{r}
+library(tree)
+tree.carseats <-  tree(Sales~ . , data=Carseats.train)
+summary(tree.carseats)
+
+plot(tree.carseats)
+text(tree.carseats, pretty=0, cex=0.5)
+
+pred.carseats <-  predict(tree.carseats, Carseats.test)
+mean((Carseats.test$Sales - pred.carseats)^2)
+```
+
+The test MSE is about $4.43$.
+
+3. Use cross-validation in order to determine the optimal level of tree complexity. Does pruning the tree improve the test error rate?
+
+```{r}
+cv.carseats <-  cv.tree(tree.carseats, FUN=prune.tree)
+par(mfrow=c(1, 2))
+plot(cv.carseats$size, cv.carseats$dev, type="b")
+plot(cv.carseats$k, cv.carseats$dev, type="b")
+
+# Best size = 9
+pruned.carseats <- prune.tree(tree.carseats, best=9)
+par(mfrow=c(1, 1))
+plot(pruned.carseats)
+text(pruned.carseats, pretty=0, cex=0.5)
+
+pred.pruned <-  predict(pruned.carseats, Carseats.test)
+mean((Carseats.test$Sales - pred.pruned)^2)
+```
+
+Pruning the tree in this case increases the test MSE to $5.07$.
+
+4. Use the bagging approach in order to analyze this data. What test error rate do you obtain? Use the `importance()` function to determine which variables are most important.
+
+```{r}
+library(randomForest)
+bag.carseats <-  randomForest(Sales~ . , data=Carseats.train, 
+                              mtry=10, ntree=500, importance=TRUE)
+bag.pred <-  predict(bag.carseats, Carseats.test)
+mean((Carseats.test$Sales - bag.pred)^2)
+importance(bag.carseats)
+```
+
+Bagging improves the test MSE to $2.50$. We also see that `Price`, `ShelveLoc` and `Age` are the three most important predictors of `Sale`.
+
+5. Use random forests to analyze this data. What test error rate do you obtain? Use the `importance()` function to determine which variables are most important. Describe the effect of mm, the number of variables considered at each split, on the error rate obtained.
+
+```{r}
+mse.vec <- NA
+for (a in 1:10){
+  rf.carseats <-  randomForest(Sales ~ . , data=Carseats.train, 
+                             mtry=a, ntree=500, importance=TRUE)
+  rf.pred <-  predict(rf.carseats, Carseats.test)
+  mse.vec[a] <- mean((Carseats.test$Sales - rf.pred)^2)
+}
+
+# best model
+which.min(mse.vec)
+# test error
+mse.vec[which.min(mse.vec)]
+
+```
+
+We see that the best model uses 9 variables at each split. That model decreases test error compared to bagging.
+
+```{r}
+rf.carseats <-  randomForest(Sales ~ . , data = Carseats, 
+                             mtry=9, ntree=500, importance=TRUE)
+importance(rf.carseats)
+```
+
+`ShelveLoc` is the most important variable. `Price`, `CompPrice`, `Advertising`, and `Age` are also important predictors of `Sale`.
+
+#### Q3
+
+This problem involves the OJ dataset which is part of the ISLR package.
+
+1. Create a training set containing a random sample of 800 observations, and a test set containing the remaining observations.
+
+```{r}
+library(ISLR)
+attach(OJ)
+set.seed(1013)
+
+train <-  sample(dim(OJ)[1], 800)
+OJ.train <-  OJ[train, ]
+OJ.test <-  OJ[-train, ]
+```
+
+2. Fit a tree to the training data, with `Purchase` as the response and the other variables except for `Buy` as predictors. Use the `summary()` function to produce summary statistics about the tree, and describe the results obtained. What is the training error rate? How many terminal nodes does the tree have?
+
+```{r}
+library(tree)
+oj.tree <-  tree(Purchase ~ . , data=OJ.train)
+summary(oj.tree)
+```
+
+The tree only uses two variables: `LoyalCH` and `PriceDiff`. It has $7$ terminal nodes. Training error rate (misclassification error) for the tree is $0.155$
+
+3. Type in the name of the tree object in order to get a detailed text output. Pick one of the terminal nodes, and interpret the information displayed.
+
+```{r}
+oj.tree
+```
+
+Let’s pick terminal node labeled "10)". The splitting variable at this node is `PriceDiff`. The splitting value of this node is $0.05$. There are $79$ observations in the subtree below this node. The deviance for all points contained in the region below this node is $76.79$. A star in the line denotes that this is a terminal node. The prediction at this node is `Sales` = MM. About $19\%$ of the observations in this node have CH as value of `Sales`. The remaining $81\%$ points have MM as value of `Sales`.
+
+4. Create a plot of the tree, and interpret the results.
+
+```{r}
+plot(oj.tree)
+text(oj.tree, pretty=0, cex = 0.5)
+```
+
+`LoyalCH` is the most important variable of the tree, the top 3 nodes contain `LoyalCH`. If `LoyalCH` $<0.27$, the tree predicts MM. If  `LoyalCH` $>0.76$, the tree predicts CH. For intermediate values of `LoyalCH`, the decision also depends on the value of `PriceDiff`.
+
+5. Predict the response on the test data, and produce a confusion matrix comparing the test labels to the predicted test labels. What is the test error rate?
+
+```{r}
+oj.pred <-  predict(oj.tree, OJ.test, type="class")
+table(OJ.test$Purchase, oj.pred)
+mean( OJ.test$Purchase == oj.pred)
+
+```
+
+We correctly classify $81\%$ of the observations.
+
+6. Produce a plot with tree size on the $x$-axis and cross-validated classification error rate on the $y$-axis.
+
+```{r}
+cv.oj <-  cv.tree(oj.tree, FUN=prune.tree)
+plot(cv.oj$size, cv.oj$dev, 
+     type="b", xlab="Tree Size", ylab="Deviance")
+```
+
+7. Which tree size corresponds to the lowest cross-validated classification error rate?
+
+A tree size of 6 gives the lowest cross-validation error.
+
+8. Produce a pruned tree corresponding to the optimal tree size obtained using cross-validation. If cross-validation does not lead to selection of a pruned tree, then create a pruned tree with five terminal nodes.
+
+```{r}
+oj.pruned <-  prune.tree(oj.tree, best=6)
+```
+
+9. Compare the training error rates between the pruned and unpruned trees. Which is higher?
+
+```{r}
+summary(oj.tree) 
+summary(oj.pruned)
+```
+
+The training misclassification rate is the same in both trees: $15.5\%$
+
+10. Compare the test error rates between the pruned and unpruned trees. Which is higher?
+
+```{r}
+pred.unpruned <-  predict(oj.tree, OJ.test, type="class")
+misclass.unpruned <-  sum(OJ.test$Purchase != pred.unpruned)
+misclass.unpruned / length(pred.unpruned)
+
+pred.pruned <-  predict(oj.pruned, OJ.test, type="class")
+misclass.pruned <-  sum(OJ.test$Purchase != pred.pruned)
+misclass.pruned / length(pred.pruned)
+```
+
+Pruned and unpruned trees have same test error rate of $0.189$.
+
+
+#### Q4
+
+We now use boosting to predict `Salary` in the Hitters dataset, which is part of the ISLR package.
+
+1. Remove the observations for whom the salary information is unknown, and then log-transform the salaries.
+
+```{r}
+library(ISLR)
+sum(is.na(Hitters$Salary))
+Hitters <-  Hitters[-which(is.na(Hitters$Salary)), ]
+sum(is.na(Hitters$Salary))
+Hitters$Salary <-  log(Hitters$Salary)
+```
+
+2. Create a training set consisting of the first 200 observations, and a test set consisting of the remaining observations.
+
+```{r}
+train <-  1:200
+Hitters.train <-  Hitters[train, ]
+Hitters.test <-  Hitters[-train, ]
+```
+
+3. Perform boosting on the training set with $1,000$ trees for a range of values of the shrinkage parameter $\lambda$. Produce a plot with different shrinkage values on the $x$-axis and the corresponding training set MSE on the $y$-axis.
+
+```{r}
+library(gbm)
+
+set.seed(103)
+pows <-  seq(-10, -0.2, by=0.1)
+lambdas <-  10 ^ pows
+length.lambdas <-  length(lambdas)
+train.errors <-  rep(NA, length.lambdas)
+test.errors <-  rep(NA, length.lambdas)
+
+for (i in 1:length.lambdas) {
+  boost.hitters <-  gbm(Salary ~ . , data=Hitters.train,
+                        distribution="gaussian",
+                        n.trees=1000,
+                        shrinkage=lambdas[i])
+  train.pred <-  predict(boost.hitters, Hitters.train, n.trees=1000)
+  test.pred <-  predict(boost.hitters, Hitters.test, n.trees=1000)
+  train.errors[i] <-  mean((Hitters.train$Salary - train.pred)^2)
+  test.errors[i] <-  mean((Hitters.test$Salary - test.pred)^2)
+}
+
+plot(lambdas, train.errors, type="b", 
+     xlab="Shrinkage", ylab="Train MSE", 
+     col="blue", pch=20, bty = "n")
+```
+
+4. Produce a plot with different shrinkage values on the $x$-axis and the corresponding test set MSE on the $y$-axis.
+
+```{r}
+plot(lambdas, test.errors, type="b", 
+     xlab="Shrinkage", ylab="Test MSE", 
+     col="red", pch=20)
+```
+
+```{r}
+min(test.errors)
+lambdas[which.min(test.errors)]
+```
+
+Minimum test error is obtained at $\lambda=0.05$.
+
+5. Compare the test MSE of boosting to the test MSE that results from applying two of the regression approaches seen in our discussions of regression models.
+
+
+```{r}
+lm.fit <-  lm(Salary ~ . , data=Hitters.train)
+lm.pred <-  predict(lm.fit, Hitters.test)
+mean((Hitters.test$Salary - lm.pred)^2)
+```
+
+```{r}
+library(glmnet)
+set.seed(134)
+
+x <-  model.matrix(Salary ~ . , data=Hitters.train)
+y <-  Hitters.train$Salary
+x.test <-  model.matrix(Salary ~ . , data=Hitters.test)
+lasso.fit <-  glmnet(x, y, alpha=1)
+lasso.pred <-  predict(lasso.fit, s=0.01, newx=x.test)
+mean((Hitters.test$Salary - lasso.pred)^2)
+```
+
+Both linear model and regularization like Lasso have higher test MSE than boosting.
+
+6. Which variables appear to be the most important predictors in the boosted model?
+
+```{r}
+boost.best <-  gbm(Salary ~ . , data=Hitters.train,
+                   distribution="gaussian", n.trees=1000,
+                   shrinkage=lambdas[which.min(test.errors)])
+summary(boost.best)
+```
+
+`CAtBat`, `CRBI` and `CWalks` are three most important variables in that order.
+
+7. Now apply bagging to the training set. What is the test set MSE for this approach?
+
+```{r}
+library(randomForest)
+set.seed(21)
+rf.hitters <-  randomForest(Salary ~ . , data=Hitters.train, 
+                            ntree=500, mtry=19)
+rf.pred <-  predict(rf.hitters, Hitters.test)
+mean((Hitters.test$Salary - rf.pred)^2)
+```
+
+Test MSE for bagging is about $0.23$, which is slightly better than the best test MSE for boosting.
+
+#### Q5
+
+
+This question uses the `Caravan` dataset, part of the ISRL package.
+
+1. Create a training set consisting of the first 1,000 observations, and a test set consisting of the remaining observations.
+
+```{r}
+library(ISLR)
+train <-  1:1000
+Caravan$Purchase <-  ifelse(Caravan$Purchase == "Yes", 1, 0)
+Caravan.train <-  Caravan[train, ]
+Caravan.test <-  Caravan[-train, ]
+```
+
+2. Fit a boosting model to the training set with `Purchase` as the response and the other variables as predictors. Use 1,000 trees, and a shrinkage value of 0.01. Which predictors appear to be the most important?
+
+```{r}
+library(gbm)
+set.seed(342)
+boost.caravan <-  gbm(Purchase ~ . , 
+                      data=Caravan.train, 
+                      n.trees=1000, shrinkage=0.01,
+                      distribution="bernoulli")
+
+summary(boost.caravan)
+```
+
+`PPERSAUT`, `MKOOPKLA` and `MOPLHOOG` are three most important variables in that order.
+
+3. Use the boosting model to predict the response on the test data. Predict that a person will make a purchase if the estimated probability of purchase is greater than 20%. Form a confusion matrix. What fraction of the people predicted to make a purchase do in fact make one? How does this compare with the results obtained from applying KNN or logistic regression to this data set?
+
+```{r}
+boost.prob <-  predict(boost.caravan, Caravan.test, n.trees=1000,
+                       type="response")
+boost.pred <-  ifelse(boost.prob >0.2, 1, 0)
+table(Caravan.test$Purchase, boost.pred)
+34 / (137 + 34)
+```
+
+About $20\%$ of people predicted to make purchase actually end up making one.
+
+```{r}
+lm.caravan <-  glm(Purchase ~ . , data=Caravan.train, family=binomial)
+lm.prob <-  predict(lm.caravan, Caravan.test, type="response")
+lm.pred <-  ifelse(lm.prob > 0.2, 1, 0)
+table(Caravan.test$Purchase, lm.pred)
+58 / (350 + 58)
+```
+
+About $14\%$ of people predicted to make purchase using logistic regression actually end up making one. This is lower than boosting.
+
+### Optional Exercise
+Apply boosting, bagging, and random forests to a data set of your choice. Be sure to fit the models on a training set and to evaluate their performance on a test set. How accurate are the results compared to simple methods like linear or logistic regression? Which of these approaches yields the best performance?
+
+In this exercise we examine the Weekly stock market data from the ISLR package.
+
+```{r}
+set.seed(1)
+library(ISLR)
+summary(Weekly)
+train <-  sample(nrow(Weekly), 2/3 * nrow(Weekly))
+test <-  -train
+```
+
+**Logistic regression**
+
+```{r}
+glm.fit <-  glm(Direction ~ . -Year-Today, 
+                data=Weekly[train,], 
+                family="binomial")
+
+glm.probs <-  predict(glm.fit, newdata=Weekly[test, ], 
+                      type = "response")
+glm.pred <-  rep("Down", length(glm.probs))
+glm.pred[glm.probs > 0.5] <-  "Up"
+table(glm.pred, Weekly$Direction[test])
+mean(glm.pred != Weekly$Direction[test])
+```
+
+**Boosting**
+
+```{r}
+library(gbm)
+Weekly$BinomialDirection <-  ifelse(Weekly$Direction == "Up", 1, 0)
+
+boost.weekly <-  gbm(BinomialDirection~.-Year-Today-Direction,
+                     data=Weekly[train,], 
+                     distribution="bernoulli", 
+                     n.trees=5000)
+
+yhat.boost <-  predict(boost.weekly, 
+                       newdata=Weekly[test,], 
+                       n.trees=5000)
+
+yhat.pred <-  rep(0, length(yhat.boost))
+yhat.pred[yhat.boost > 0.5] <-  1
+table(yhat.pred, Weekly$BinomialDirection[test])
+mean(yhat.pred != Weekly$BinomialDirection[test])
+```
+
+**Bagging**
+
+```{r}
+Weekly <-  Weekly[,!(names(Weekly) %in% c("BinomialDirection"))]
+
+library(randomForest)
+
+bag.weekly <-  randomForest(Direction~.-Year-Today, 
+                            data=Weekly, 
+                            subset=train, 
+                            mtry=6)
+
+yhat.bag <-  predict(bag.weekly, newdata=Weekly[test,])
+table(yhat.bag, Weekly$Direction[test])
+
+mean(yhat.bag != Weekly$Direction[test])
+```
+
+**Random forests**
+
+```{r}
+rf.weekly <-  randomForest(Direction ~ . -Year-Today, 
+                           data=Weekly, 
+                           subset=train, 
+                           mtry=2)
+
+yhat.bag <-  predict(rf.weekly, newdata=Weekly[test,])
+table(yhat.bag, Weekly$Direction[test])
+mean(yhat.bag != Weekly$Direction[test])
+```
+
+**Best performance summary: Boosting resulted in the lowest validation set test error rate.**
