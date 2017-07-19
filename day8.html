@@ -389,11 +389,11 @@ $(document).ready(function () {
 
 <div id="based-on-james-et-al.-2013" class="section level5">
 <h5>(based on James et al. 2013)</h5>
-<p>We load post-election survey data from the 2004 British Election Survey.</p>
+<p>We load post-election survey data from the 2004 British Election Survey. The data is available <a href="http://philippbroniecki.github.io/ML2017.io/data/bes.dta">here</a>.</p>
 <pre class="r"><code># clear workspace
 rm(list=ls())
 library(foreign)
-bes &lt;- read.dta(&quot;./data/bes.dta&quot;)
+bes &lt;- read.dta(&quot;http://philippbroniecki.github.io/ML2017.io/data/bes.dta&quot;)
 bes &lt;- na.omit(bes)
 
 # clean in_school

@@ -11,13 +11,13 @@ knitr::opts_knit$set(global.par = TRUE)
 
 ##### (based on James et al. 2013)
 
-We load post-election survey data from the 2004 British Election Survey.
+We load post-election survey data from the 2004 British Election Survey. The data is available [here](http://philippbroniecki.github.io/ML2017.io/data/bes.dta).
 
 ```{r}
 # clear workspace
 rm(list=ls())
 library(foreign)
-bes <- read.dta("./data/bes.dta")
+bes <- read.dta("http://philippbroniecki.github.io/ML2017.io/data/bes.dta")
 bes <- na.omit(bes)
 
 # clean in_school
