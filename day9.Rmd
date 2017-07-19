@@ -50,10 +50,11 @@ We can check what is in the model object and look at the values it returns.
 # check model object
 names(pr.out)
 
+# means and standard deviations used for scaling prior to pc
 pr.out$center
 pr.out$scale
 
-# "translation from x to z..."
+# "translation from x to z..." - the factor loadings
 pr.out$rotation
 
 # dimensions of facorized output

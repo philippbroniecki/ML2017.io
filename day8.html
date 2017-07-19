@@ -419,9 +419,9 @@ bes[, categcorical] &lt;- lapply(bes[, categcorical], factor)</code></pre>
 <div id="classification-trees" class="section level3">
 <h3>Classification Trees</h3>
 <p>We use trees to classifyrespondents into voters and non-voters.</p>
-<pre class="r"><code>library(tree)
-
-# build classification tree (- in formula language means except)
+<pre class="r"><code>library(tree)</code></pre>
+<pre><code>## Warning: package &#39;tree&#39; was built under R version 3.4.1</code></pre>
+<pre class="r"><code># build classification tree (- in formula language means except)
 t1 &lt;- tree( Turnout ~ . -CivicDutyScores, data = bes)
 summary(t1)</code></pre>
 <pre><code>## 
@@ -618,8 +618,10 @@ mean((yhat - bes.test$Income)^2)</code></pre>
 <p>We now apply bagging and random forests to improve our prediction. Bagging is the idea that the high variance of a single bushy tree can be reduced by bootstapping samples and averaging over trees that were grown on the samples.</p>
 <p>Note: Bagging gets an estimate of the test error for free as it always leaves out some observations when a tree is fit. The reported out-of-bag MSE is thus an estimate of test error. We also estimate test error separately on a test set. This is one particular test set, so the test error may vary.</p>
 <p>In our run below the OOB MSE may be a better estimate of test error. It is reported to be lower than our test error estimate.</p>
-<pre class="r"><code>library(randomForest)
-bag1 &lt;- randomForest(Income ~ . , mtry = 19, data = bes, subset = train, importance = TRUE)
+<pre class="r"><code>library(randomForest)</code></pre>
+<pre><code>## randomForest 4.6-12</code></pre>
+<pre><code>## Type rfNews() to see new features/changes/bug fixes.</code></pre>
+<pre class="r"><code>bag1 &lt;- randomForest(Income ~ . , mtry = 19, data = bes, subset = train, importance = TRUE)
 bag1</code></pre>
 <pre><code>## 
 ## Call:
@@ -722,8 +724,22 @@ varImpPlot(rf1)</code></pre>
 </div>
 <div id="boosting" class="section level4">
 <h4>Boosting</h4>
-<pre class="r"><code>library(gbm)
-set.seed(1234)</code></pre>
+<pre class="r"><code>library(gbm)</code></pre>
+<pre><code>## Loading required package: survival</code></pre>
+<pre><code>## 
+## Attaching package: &#39;survival&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:boot&#39;:
+## 
+##     aml</code></pre>
+<pre><code>## Loading required package: lattice</code></pre>
+<pre><code>## 
+## Attaching package: &#39;lattice&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:boot&#39;:
+## 
+##     melanoma</code></pre>
+<pre><code>## Loading required package: parallel</code></pre>
+<pre><code>## Loaded gbm 2.1.3</code></pre>
+<pre class="r"><code>set.seed(1234)</code></pre>
 <p>We run gradient boosting. The tuning parameters are the tree size. Tree size is directly related to the second tuning parameter: the learning rate. When the learning rate is smaller, we need more trees. The third tuning parameter interaction.depth determines how bushy the tree is. Common choices are 1, 2, 4, 8. When interaction depth is 1, each tree is a stump. If we increase to two we can get bivariate interactions with 2 splits and so. A final parameter that is related to the complexity of the tree could be minimum number of observations in the terminal node which defaults to 10.</p>
 <pre class="r"><code># gradient boosting
 gb1 &lt;- gbm(Income ~ ., data = bes[train, ], 

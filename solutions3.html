@@ -425,14 +425,7 @@ summary(Auto)</code></pre>
 ##  chevrolet chevette:  4  
 ##  (Other)           :365</code></pre>
 <pre class="r"><code>attach(Auto)</code></pre>
-<pre><code>## The following object is masked from Wage (pos = 3):
-## 
-##     year</code></pre>
-<pre><code>## The following objects are masked from Auto (pos = 7):
-## 
-##     acceleration, cylinders, displacement, horsepower, mpg, name,
-##     origin, weight, year</code></pre>
-<pre><code>## The following object is masked from Wage (pos = 17):
+<pre><code>## The following object is masked from Wage:
 ## 
 ##     year</code></pre>
 <pre class="r"><code>mpg01 &lt;- ifelse( mpg &gt; median(mpg), yes = 1, no = 0)

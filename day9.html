@@ -440,13 +440,14 @@ pr.out &lt;- prcomp(USArrests, scale = TRUE)</code></pre>
 <pre class="r"><code># check model object
 names(pr.out)</code></pre>
 <pre><code>## [1] &quot;sdev&quot;     &quot;rotation&quot; &quot;center&quot;   &quot;scale&quot;    &quot;x&quot;</code></pre>
-<pre class="r"><code>pr.out$center</code></pre>
+<pre class="r"><code># means and standard deviations used for scaling prior to pc
+pr.out$center</code></pre>
 <pre><code>##   Murder  Assault UrbanPop     Rape 
 ##    7.788  170.760   65.540   21.232</code></pre>
 <pre class="r"><code>pr.out$scale</code></pre>
 <pre><code>##    Murder   Assault  UrbanPop      Rape 
 ##  4.355510 83.337661 14.474763  9.366385</code></pre>
-<pre class="r"><code># &quot;translation from x to z...&quot;
+<pre class="r"><code># &quot;translation from x to z...&quot; - the factor loadings
 pr.out$rotation</code></pre>
 <pre><code>##                 PC1        PC2        PC3         PC4
 ## Murder   -0.5358995  0.4181809 -0.3412327  0.64922780

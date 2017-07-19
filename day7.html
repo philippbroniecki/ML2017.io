@@ -607,8 +607,10 @@ legend(&quot;topright&quot;, legend = c(&quot;Span=0.2&quot;, &quot;Span=0.5&quo
 <p>For splines, we can fit a GAM with <code>lm()</code> when an appropriate basis functions can be used.</p>
 <pre class="r"><code>gam1 &lt;- lm(wage ~ bs(year, 4) + bs(age, 5) + education, data = Wage)</code></pre>
 <p>However, the <code>gam</code> package offers a general solution to fitting GAMs and is especially useful when splines cannot be easily expressed in terms of basis functions. Here, we fit natural splines on age and year. Something that could not easily be expressed as a basis function.</p>
-<pre class="r"><code>library(gam)
-# gam with natural splines for year and age
+<pre class="r"><code>library(gam)</code></pre>
+<pre><code>## Warning: package &#39;gam&#39; was built under R version 3.4.1</code></pre>
+<pre><code>## Loaded gam 1.14-4</code></pre>
+<pre class="r"><code># gam with natural splines for year and age
 gam.m3 &lt;- gam(wage ~ ns(year, 4) + ns(age, 5) + education, data = Wage)</code></pre>
 <p>We can use the <code>plot()</code> function as well as <code>plot.gam()</code> to plot our results. The difference between cubic splines and natural splines fit to age and education is very small.</p>
 <pre class="r"><code>par(mfrow = c(1, 3), mar = c(4.5, 4.5, 1, 1), oma = c(0, 0, 4, 0))
