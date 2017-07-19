@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Philipp Broniecki and Lucas Leemann – Machine Learning 1K" />
+
+
+<title>Lab 9 – Unsupervised Learning</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Essex 2017 Machine Learning</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 1
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day1.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D1%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions1.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 2
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day2.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D2%20-%20Intro%20ML.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions2.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 3
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day3.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D3%20-%20Classification.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions3.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 4
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day4.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D4%20-%20Resampling.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions4.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 5
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day5.html">Lab</a>
+    </li>
+    <li>
+      <a href="labs/Lab%20Code%205.R">plain R-Code</a>
+    </li>
+    <li>
+      <a href="./slides/D5%20-%20Model%20Selection%20I.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions5.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 6
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day6.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D6%20-%20Model%20Selection%20II.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions6.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 7
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day7.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D7%20-%20Polynomial%20Models.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions7.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 8
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day8.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D8%20-%20Tree-Based%20Methods.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions8.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Day 9
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="day9.html">Lab</a>
+    </li>
+    <li>
+      <a href="./slides/D9%20-%20Unsupervised%20Learning.pdf">Slides</a>
+    </li>
+    <li>
+      <a href="solutions9.html">Solutions</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    More
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="simulation.html">Simulation</a>
+    </li>
+    <li>
+      <a href="montecarlo.html">Monte Carlos</a>
+    </li>
+    <li>
+      <a href="MCLassoRidge.html">MC Lasso v. Ridge</a>
+    </li>
+    <li>
+      <a href="splinesCV.html">Splines Cross Validated</a>
+    </li>
+    <li>
+      <a href="./data/titanic.dta">Titanic Data</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Lab 9 – Unsupervised Learning</h1>
+<h4 class="author"><em>Philipp Broniecki and Lucas Leemann – Machine Learning 1K</em></h4>
+
+</div>
+
+
+<div id="based-on-james-et-al.-2013" class="section level5">
+<h5>(based on James et al. 2013)</h5>
+<p>We load data on violent crimes by state in the U.S. The dataset is included in the MASS package.</p>
+<pre class="r"><code>rm(list = ls())
+
+# data on violent crimes by US state
+library(MASS)
+?USArrests
+head(USArrests)</code></pre>
+<pre><code>##            Murder Assault UrbanPop Rape
+## Alabama      13.2     236       58 21.2
+## Alaska       10.0     263       48 44.5
+## Arizona       8.1     294       80 31.0
+## Arkansas      8.8     190       50 19.5
+## California    9.0     276       91 40.6
+## Colorado      7.9     204       78 38.7</code></pre>
+<pre class="r"><code># create a state variable
+states &lt;- row.names(USArrests)
+states</code></pre>
+<pre><code>##  [1] &quot;Alabama&quot;        &quot;Alaska&quot;         &quot;Arizona&quot;        &quot;Arkansas&quot;      
+##  [5] &quot;California&quot;     &quot;Colorado&quot;       &quot;Connecticut&quot;    &quot;Delaware&quot;      
+##  [9] &quot;Florida&quot;        &quot;Georgia&quot;        &quot;Hawaii&quot;         &quot;Idaho&quot;         
+## [13] &quot;Illinois&quot;       &quot;Indiana&quot;        &quot;Iowa&quot;           &quot;Kansas&quot;        
+## [17] &quot;Kentucky&quot;       &quot;Louisiana&quot;      &quot;Maine&quot;          &quot;Maryland&quot;      
+## [21] &quot;Massachusetts&quot;  &quot;Michigan&quot;       &quot;Minnesota&quot;      &quot;Mississippi&quot;   
+## [25] &quot;Missouri&quot;       &quot;Montana&quot;        &quot;Nebraska&quot;       &quot;Nevada&quot;        
+## [29] &quot;New Hampshire&quot;  &quot;New Jersey&quot;     &quot;New Mexico&quot;     &quot;New York&quot;      
+## [33] &quot;North Carolina&quot; &quot;North Dakota&quot;   &quot;Ohio&quot;           &quot;Oklahoma&quot;      
+## [37] &quot;Oregon&quot;         &quot;Pennsylvania&quot;   &quot;Rhode Island&quot;   &quot;South Carolina&quot;
+## [41] &quot;South Dakota&quot;   &quot;Tennessee&quot;      &quot;Texas&quot;          &quot;Utah&quot;          
+## [45] &quot;Vermont&quot;        &quot;Virginia&quot;       &quot;Washington&quot;     &quot;West Virginia&quot; 
+## [49] &quot;Wisconsin&quot;      &quot;Wyoming&quot;</code></pre>
+<pre class="r"><code># variable names in the data set
+names(USArrests)</code></pre>
+<pre><code>## [1] &quot;Murder&quot;   &quot;Assault&quot;  &quot;UrbanPop&quot; &quot;Rape&quot;</code></pre>
+<pre class="r"><code># summary stats mean and variance
+apply(USArrests, 2, mean)</code></pre>
+<pre><code>##   Murder  Assault UrbanPop     Rape 
+##    7.788  170.760   65.540   21.232</code></pre>
+<pre class="r"><code>apply(USArrests, 2, var)</code></pre>
+<pre><code>##     Murder    Assault   UrbanPop       Rape 
+##   18.97047 6945.16571  209.51878   87.72916</code></pre>
+</div>
+<div id="pca" class="section level3">
+<h3>PCA</h3>
+<p>Principal Component Analysis is a dimension reduction method. It can be useful to reduce the predictor space or to form a latent variable that is proxied by some variables.</p>
+<p>We PCA on the data to capture some underlying measure of violence. To run PCA we use the <code>prcomp()</code> function.</p>
+<pre class="r"><code># run pca
+pr.out &lt;- prcomp(USArrests, scale = TRUE)</code></pre>
+<p>We can check what is in the model object and look at the values it returns.</p>
+<pre class="r"><code># check model object
+names(pr.out)</code></pre>
+<pre><code>## [1] &quot;sdev&quot;     &quot;rotation&quot; &quot;center&quot;   &quot;scale&quot;    &quot;x&quot;</code></pre>
+<pre class="r"><code>pr.out$center</code></pre>
+<pre><code>##   Murder  Assault UrbanPop     Rape 
+##    7.788  170.760   65.540   21.232</code></pre>
+<pre class="r"><code>pr.out$scale</code></pre>
+<pre><code>##    Murder   Assault  UrbanPop      Rape 
+##  4.355510 83.337661 14.474763  9.366385</code></pre>
+<pre class="r"><code># &quot;translation from x to z...&quot;
+pr.out$rotation</code></pre>
+<pre><code>##                 PC1        PC2        PC3         PC4
+## Murder   -0.5358995  0.4181809 -0.3412327  0.64922780
+## Assault  -0.5831836  0.1879856 -0.2681484 -0.74340748
+## UrbanPop -0.2781909 -0.8728062 -0.3780158  0.13387773
+## Rape     -0.5434321 -0.1673186  0.8177779  0.08902432</code></pre>
+<pre class="r"><code># dimensions of facorized output
+dim(pr.out$x)</code></pre>
+<pre><code>## [1] 50  4</code></pre>
+<pre class="r"><code># the factor scores for each observation
+head(pr.out$x) # this what we could use as IVs</code></pre>
+<pre><code>##                   PC1        PC2         PC3          PC4
+## Alabama    -0.9756604  1.1220012 -0.43980366  0.154696581
+## Alaska     -1.9305379  1.0624269  2.01950027 -0.434175454
+## Arizona    -1.7454429 -0.7384595  0.05423025 -0.826264240
+## Arkansas    0.1399989  1.1085423  0.11342217 -0.180973554
+## California -2.4986128 -1.5274267  0.59254100 -0.338559240
+## Colorado   -1.4993407 -0.9776297  1.08400162  0.001450164</code></pre>
+<p>We can illustrate which variable loads on which factor visually. We can also examine the effect of rotation.</p>
+<pre class="r"><code># which component picks up most of the variance on the variables
+biplot(pr.out, scale = 0)</code></pre>
+<p><img src="day9_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code># turning things around
+pr.out$rotation &lt;- -pr.out$rotation
+pr.out$x &lt;- -pr.out$x
+biplot(pr.out, scale = 0)</code></pre>
+<p><img src="day9_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
+<p>We are really interested in how much of the variance in the data our components capture. So first we get the standard deviation on the new scales and from that estimate the variance. We can then evaluate how much of the total variance is explained by each individual principal component.</p>
+<pre class="r"><code># standard deviation on new scales
+pr.out$sdev</code></pre>
+<pre><code>## [1] 1.5748783 0.9948694 0.5971291 0.4164494</code></pre>
+<pre class="r"><code># variance
+pr.var &lt;- pr.out$sdev^2
+pr.var</code></pre>
+<pre><code>## [1] 2.4802416 0.9897652 0.3565632 0.1734301</code></pre>
+<pre class="r"><code># amount of variance explained by each component
+pve &lt;- pr.var / sum(pr.var)
+pve</code></pre>
+<pre><code>## [1] 0.62006039 0.24744129 0.08914080 0.04335752</code></pre>
+<p>We can plot variance explained by each component. The purpose is to determine how many components we need to account for most of the underlying variance. When additional principal components (PC’s) do not explain much more of the variance we not rely on them, e.g. as independent variables in a new model. It is common to look for the “elbow”. This is not a disciplined approach. Depending on the problem we could use cross-validatiation to determine how many components we need for a prediction problem.</p>
+<pre class="r"><code># Finding the ellbow
+plot(pve, xlab = &quot;Principal Component&quot;, 
+ylab = &quot;Proportion of Variance Explained &quot;, 
+ylim = c(0, 1), type = &quot;b&quot;)</code></pre>
+<p><img src="day9_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>We can also plot the cumulative variance explained using the <code>cumsum()</code> function. Which returns the cumulative sums of a vector.</p>
+<pre class="r"><code># new command - cumulative sums
+a &lt;- c(1, 2, 8, -3)
+cumsum(a)</code></pre>
+<pre><code>## [1]  1  3 11  8</code></pre>
+<pre class="r"><code># how much variance do we explain with each additional pc? What if # pc&#39;s = # vars?
+plot(cumsum(pve), xlab = &quot;Principal Component &quot;,
+ylab = &quot; Cumulative Proportion of Variance Explained &quot;, 
+ylim = c(0, 1), type = &quot;b&quot;)</code></pre>
+<p><img src="day9_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+<div id="clustering" class="section level3">
+<h3>Clustering</h3>
+<p>We start out with k-means clustering. We try to dermine whether groups within our data exist that share similar features in the data. The supervised aspect of k-means clustering is that we need to decide ex-ante how many clusters we are looking for.</p>
+<p>Below, we first create some fake data and visualize it.</p>
+<pre class="r"><code>set.seed(2)
+
+# fake data; 2 columns of 50 obs from standard normal
+x &lt;- matrix(rnorm(50 * 2), ncol = 2)
+# adding a systematic offset to first half of col 1 and 2
+x[1:25, 1] &lt;- x[1:25, 1] + 3 # offset by 3
+x[1:25, 2] &lt;- x[1:25, 2] - 4 # offset by -4
+
+# visualize the data
+plot(x, pch = 16, bty = &quot;n&quot;)</code></pre>
+<p><img src="day9_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>In the plot we can clearly see the two groups. We perfom k-means clustering with the <code>kmeans()</code> function. The frist argument is the data, the second the amount of clusters, and the third the amount of times we try clustering using different starting points (we could potentially come up with different clusters depending on where we start).</p>
+<p>We also check cluster assignment for each observation and color the dots in our plot according to which cluster they have been assigned to.</p>
+<pre class="r"><code># run k-means clustering
+km.out &lt;- kmeans(x, 2, nstart = 20)
+# for each observation what cluster has it been assigned to?
+km.out$cluster</code></pre>
+<pre><code>##  [1] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1
+## [36] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</code></pre>
+<pre class="r"><code># how where the observations clustered
+plot(x, col = (km.out$cluster + 1), # plus b/c the first color is black 
+main = &quot;K-Means Clustering Results with K=2&quot;, 
+xlab = &quot;&quot;, ylab = &quot;&quot;, pch = 20, cex = 2, bty = &quot;n&quot;)</code></pre>
+<p><img src="day9_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>The first two groups where clearly visible to the naked eye. However, it would be hard to come up with tree groups. We do this an inspect the results.</p>
+<pre class="r"><code># k=3
+set.seed(4)
+km.out &lt;- kmeans(x, 3, nstart = 20)
+km.out</code></pre>
+<pre><code>## K-means clustering with 3 clusters of sizes 10, 23, 17
+## 
+## Cluster means:
+##         [,1]        [,2]
+## 1  2.3001545 -2.69622023
+## 2 -0.3820397 -0.08740753
+## 3  3.7789567 -4.56200798
+## 
+## Clustering vector:
+##  [1] 3 1 3 1 3 3 3 1 3 1 3 1 3 1 3 1 3 3 3 3 3 1 3 3 3 2 2 2 2 2 2 2 2 2 2
+## [36] 2 2 2 2 2 2 2 2 1 2 1 2 2 2 2
+## 
+## Within cluster sum of squares by cluster:
+## [1] 19.56137 52.67700 25.74089
+##  (between_SS / total_SS =  79.3 %)
+## 
+## Available components:
+## 
+## [1] &quot;cluster&quot;      &quot;centers&quot;      &quot;totss&quot;        &quot;withinss&quot;    
+## [5] &quot;tot.withinss&quot; &quot;betweenss&quot;    &quot;size&quot;         &quot;iter&quot;        
+## [9] &quot;ifault&quot;</code></pre>
+<pre class="r"><code># visualize cluster assignment again
+plot(x, col = (km.out$cluster + 1), 
+main = &quot;K-Means Clustering Results with K=3&quot;, 
+xlab = &quot;&quot;, ylab = &quot;&quot;, pch = 20, cex = 2)</code></pre>
+<p><img src="day9_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>We can check what happens when we do not use enough randomly assigned starting points. We could end up with a solution that is far from optimal.</p>
+<pre class="r"><code># set nstart large enough
+set.seed(3)
+km.out &lt;- kmeans(x, 3, nstart = 1)
+km.out$tot.withinss</code></pre>
+<pre><code>## [1] 104.3319</code></pre>
+<pre class="r"><code>km.out &lt;- kmeans(x, 3, nstart = 20)
+km.out$tot.withinss</code></pre>
+<pre><code>## [1] 97.97927</code></pre>
+<div id="hierarchical-clustering" class="section level4">
+<h4>Hierarchical Clustering</h4>
+<p>We now move to hierachical clustering where we do not pre-set the number of clusters. Rather this is typically down do determine the amount of clusters but also to check whether clustering will result in somehting that makes substantial sense.</p>
+<p>The function is <code>hclust()</code>. We need to specify whether we want to cluster according to distance or correlation or some othe self-defined measure. Consider whehter data measured in different places and over time. Were we to use a correlation based measure, might pick up on common weather changes such as climate change. Were we to use distance we might pick up regional differences.</p>
+<p>We also need to decide which method to use to determine which point should be included in the next step of the clustering. “complete” checks for the points outside a cluster what their maximum distance to points within the cluster is. The point with the smalles maximum distance will be included. “Average” takes the mean difference and “single” takes the minimum.</p>
+<pre class="r"><code># run clustering
+hc.complete &lt;- hclust(dist(x), method = &quot;complete&quot;)
+hc.average &lt;- hclust(dist(x), method = &quot;average&quot;)
+hc.single &lt;- hclust(dist(x), method = &quot;single&quot;)</code></pre>
+<p>The choice of the method is consequential, we end up with different clusterings. The most common choice is “complete” or “average” which tends to produce more balanced dendrograms.</p>
+<pre class="r"><code># complete (maximum distance)
+par(mfrow = c(1, 3))
+plot(hc.complete, main = &quot;Complete Linkage&quot;, 
+xlab = &quot;&quot;, sub = &quot;&quot;, cex = 0.9)
+
+# average
+plot(hc.average, main = &quot;Average Linkage&quot;, 
+xlab = &quot;&quot;, sub = &quot;&quot;, cex = 0.9)
+
+# mimimum distance
+plot(hc.single, main = &quot;Single Linkage&quot;, 
+xlab = &quot;&quot;, sub = &quot;&quot;, cex = 0.9)</code></pre>
+<p><img src="day9_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p>Based on these dendrograms we have to decide how many clusters make sense in the data. This may be quite difficult without substantial knowledge. We can check cluster assignment given an amount of clusters that we specify with the <code>cutree()</code> function.</p>
+<pre class="r"><code># cluster assignment for 2 clusters
+cutree(hc.complete, 2)</code></pre>
+<pre><code>##  [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2
+## [36] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2</code></pre>
+<pre class="r"><code>cutree(hc.average, 2)</code></pre>
+<pre><code>##  [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 1 2 2
+## [36] 2 2 2 2 2 2 2 2 1 2 1 2 2 2 2</code></pre>
+<pre class="r"><code>cutree(hc.single, 2)</code></pre>
+<pre><code>##  [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+## [36] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</code></pre>
+<pre class="r"><code># cluster assignment for 4 clusters
+cutree(hc.single, 4)</code></pre>
+<pre><code>##  [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 1 1 1 1 1 1 1 1 1 3 3 3 3 3 3 3 3 3 3
+## [36] 3 3 3 3 3 3 4 3 3 3 3 3 3 3 3</code></pre>
+<p>Just like with k-nearest neighbors, distance based clustering suffers when the variables are measured on different scales. Therefore, we scale our variables and cluster again.</p>
+<pre class="r"><code># scaling to get variable on the same scale
+xsc &lt;- scale(x)
+par( mfrow = c(1,1) )
+plot(hclust(dist(xsc), method = &quot;complete&quot;), 
+main = &quot;Hierarchical Clustering with Scaled Features &quot;)</code></pre>
+<p><img src="day9_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>Instead of using distance as our similarity measure, we could use correlation. This makes sense when we are interested to uncover common trends. Climate change could be one example.</p>
+<pre class="r"><code># use different similarity measure
+x &lt;- matrix(rnorm(30 * 3), ncol = 3) # new fake data
+dd &lt;- as.dist(1 - cor(t(x) ))
+plot(hclust(dd, method = &quot;complete&quot;), 
+main = &quot;Complete Linkage with Correlation-Based Distance&quot;, 
+xlab = &quot;&quot;, sub = &quot;&quot;)</code></pre>
+<p><img src="day9_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+</div>
+<div id="example-with-gene-expression-data-from-hastie-et-al." class="section level4">
+<h4>Example with Gene Expression data (from Hastie et al.)</h4>
+<p>We load the ISLR library and explore the data.</p>
+<pre class="r"><code>library(ISLR)
+nci.labs &lt;- NCI60$labs
+nci.data &lt;- NCI60$data
+?NCI60
+dim(nci.data)</code></pre>
+<pre><code>## [1]   64 6830</code></pre>
+<pre class="r"><code># take a look at the data
+nci.data[1:5, 1:5]</code></pre>
+<pre><code>##           1         2         3         4         5
+## V1 0.300000  1.180000  0.550000  1.140000 -0.265000
+## V2 0.679961  1.289961  0.169961  0.379961  0.464961
+## V3 0.940000 -0.040000 -0.170000 -0.040000 -0.605000
+## V4 0.280000 -0.310000  0.680000 -0.810000  0.625000
+## V5 0.485000 -0.465000  0.395000  0.905000  0.200000</code></pre>
+<pre class="r"><code>head(nci.labs)</code></pre>
+<pre><code>## [1] &quot;CNS&quot;    &quot;CNS&quot;    &quot;CNS&quot;    &quot;RENAL&quot;  &quot;BREAST&quot; &quot;CNS&quot;</code></pre>
+</div>
+<div id="dimension-reduction-with-pca" class="section level4">
+<h4>Dimension Reduction with PCA</h4>
+<p>We perform PCA on the NCI60 data to reduce the dimensionality of the data.</p>
+<p>We write a function that assigns colors continuously and we plot factors 1 and 2 against each other as well as factors 1 and 3.</p>
+<pre class="r"><code>pr.out &lt;- prcomp(nci.data, scale = TRUE)
+
+# make a nice plot - need a function
+Cols &lt;- function(vec) {
+  cols &lt;- rainbow(length(unique(vec)))
+  return(cols[as.numeric(as.factor(vec))])
+}
+
+# plot
+par(mfrow = c(1, 2))
+plot(pr.out$x[, 1:2], col = Cols(nci.labs), 
+     pch = 19, xlab = &quot;Z1&quot;, ylab = &quot;Z2&quot;)
+plot(pr.out$x[, c(1, 3)], col = Cols(nci.labs), 
+     pch = 19, xlab = &quot;Z1&quot;, ylab = &quot;Z3&quot;)</code></pre>
+<p><img src="day9_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<pre class="r"><code>summary(pr.out)</code></pre>
+<pre><code>## Importance of components%s:
+##                            PC1      PC2      PC3      PC4      PC5
+## Standard deviation     27.8535 21.48136 19.82046 17.03256 15.97181
+## Proportion of Variance  0.1136  0.06756  0.05752  0.04248  0.03735
+## Cumulative Proportion   0.1136  0.18115  0.23867  0.28115  0.31850
+##                             PC6      PC7      PC8      PC9     PC10
+## Standard deviation     15.72108 14.47145 13.54427 13.14400 12.73860
+## Proportion of Variance  0.03619  0.03066  0.02686  0.02529  0.02376
+## Cumulative Proportion   0.35468  0.38534  0.41220  0.43750  0.46126
+##                            PC11     PC12     PC13     PC14     PC15
+## Standard deviation     12.68672 12.15769 11.83019 11.62554 11.43779
+## Proportion of Variance  0.02357  0.02164  0.02049  0.01979  0.01915
+## Cumulative Proportion   0.48482  0.50646  0.52695  0.54674  0.56590
+##                            PC16     PC17     PC18     PC19    PC20
+## Standard deviation     11.00051 10.65666 10.48880 10.43518 10.3219
+## Proportion of Variance  0.01772  0.01663  0.01611  0.01594  0.0156
+## Cumulative Proportion   0.58361  0.60024  0.61635  0.63229  0.6479
+##                            PC21    PC22    PC23    PC24    PC25    PC26
+## Standard deviation     10.14608 10.0544 9.90265 9.64766 9.50764 9.33253
+## Proportion of Variance  0.01507  0.0148 0.01436 0.01363 0.01324 0.01275
+## Cumulative Proportion   0.66296  0.6778 0.69212 0.70575 0.71899 0.73174
+##                           PC27   PC28    PC29    PC30    PC31    PC32
+## Standard deviation     9.27320 9.0900 8.98117 8.75003 8.59962 8.44738
+## Proportion of Variance 0.01259 0.0121 0.01181 0.01121 0.01083 0.01045
+## Cumulative Proportion  0.74433 0.7564 0.76824 0.77945 0.79027 0.80072
+##                           PC33    PC34    PC35    PC36    PC37    PC38
+## Standard deviation     8.37305 8.21579 8.15731 7.97465 7.90446 7.82127
+## Proportion of Variance 0.01026 0.00988 0.00974 0.00931 0.00915 0.00896
+## Cumulative Proportion  0.81099 0.82087 0.83061 0.83992 0.84907 0.85803
+##                           PC39    PC40    PC41   PC42    PC43   PC44
+## Standard deviation     7.72156 7.58603 7.45619 7.3444 7.10449 7.0131
+## Proportion of Variance 0.00873 0.00843 0.00814 0.0079 0.00739 0.0072
+## Cumulative Proportion  0.86676 0.87518 0.88332 0.8912 0.89861 0.9058
+##                           PC45   PC46    PC47    PC48    PC49    PC50
+## Standard deviation     6.95839 6.8663 6.80744 6.64763 6.61607 6.40793
+## Proportion of Variance 0.00709 0.0069 0.00678 0.00647 0.00641 0.00601
+## Cumulative Proportion  0.91290 0.9198 0.92659 0.93306 0.93947 0.94548
+##                           PC51    PC52    PC53    PC54    PC55    PC56
+## Standard deviation     6.21984 6.20326 6.06706 5.91805 5.91233 5.73539
+## Proportion of Variance 0.00566 0.00563 0.00539 0.00513 0.00512 0.00482
+## Cumulative Proportion  0.95114 0.95678 0.96216 0.96729 0.97241 0.97723
+##                           PC57   PC58    PC59    PC60    PC61    PC62
+## Standard deviation     5.47261 5.2921 5.02117 4.68398 4.17567 4.08212
+## Proportion of Variance 0.00438 0.0041 0.00369 0.00321 0.00255 0.00244
+## Cumulative Proportion  0.98161 0.9857 0.98940 0.99262 0.99517 0.99761
+##                           PC63      PC64
+## Standard deviation     4.04124 2.148e-14
+## Proportion of Variance 0.00239 0.000e+00
+## Cumulative Proportion  1.00000 1.000e+00</code></pre>
+<pre class="r"><code>plot(pr.out)</code></pre>
+<p><img src="day9_files/figure-html/unnamed-chunk-18-2.png" width="672" /></p>
+<p>To get an idea we look at the variance explained per factor and the cumulative variance explained.</p>
+<pre class="r"><code>pve &lt;- 100 * pr.out$sdev^2 / sum(pr.out$sdev^2)
+par(mfrow = c(1, 2))
+plot(pve, type = &quot;o&quot;, ylab = &quot;PVE&quot;, 
+     xlab = &quot;Principal Component&quot;, col = &quot; blue &quot;)
+plot(cumsum(pve), type = &quot;o&quot;, ylab = &quot;Cumulative PVE&quot;, 
+     xlab = &quot;Principal Component &quot;, col = &quot; brown3 &quot;)</code></pre>
+<p><img src="day9_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p>Choosing the amount of components is hard without substantial knowledge but could look for the elbow in the left-hand plot e.g. The choice is essentially and infomed qualitative decision.</p>
+</div>
+<div id="hierarcical-clustering-with-gene-data" class="section level4">
+<h4>Hierarcical clustering with Gene Data</h4>
+<p>We first ensure that the variables are scale free by normalizing them. We then draw a dendrograms for the different methods to determine cluster assginment: “complete”, “average”, “single”.</p>
+<pre class="r"><code>sd.data &lt;- scale(nci.data)
+
+par(mfrow = c(1, 3))
+data.dist &lt;- dist(sd.data)
+plot(hclust(data.dist), labels = nci.labs, 
+     main = &quot;Complete Linkage&quot;, xlab = &quot;&quot;, sub = &quot;&quot;, ylab = &quot;&quot;)
+plot(hclust(data.dist, method = &quot;average&quot;), 
+     labels = nci.labs, main = &quot;Average Linkage&quot;, 
+     xlab = &quot;&quot;, sub = &quot;&quot;, ylab = &quot;&quot;)
+plot(hclust(data.dist, method = &quot;single&quot;), 
+     labels = nci.labs, main = &quot;Single Linkage&quot;, 
+     xlab = &quot;&quot;, sub = &quot;&quot;, ylab = &quot;&quot;)</code></pre>
+<p><img src="day9_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<p>We then explore which group an observation will be assigned to if we decide on four clusters.</p>
+<pre class="r"><code># cluster object
+hc.out &lt;- hclust(data.dist)  
+hc.clusters &lt;- cutree(hc.out, 4)
+table(hc.clusters, nci.labs)</code></pre>
+<pre><code>##            nci.labs
+## hc.clusters BREAST CNS COLON K562A-repro K562B-repro LEUKEMIA MCF7A-repro
+##           1      2   3     2           0           0        0           0
+##           2      3   2     0           0           0        0           0
+##           3      0   0     0           1           1        6           0
+##           4      2   0     5           0           0        0           1
+##            nci.labs
+## hc.clusters MCF7D-repro MELANOMA NSCLC OVARIAN PROSTATE RENAL UNKNOWN
+##           1           0        8     8       6        2     8       1
+##           2           0        0     1       0        0     1       0
+##           3           0        0     0       0        0     0       0
+##           4           1        0     0       0        0     0       0</code></pre>
+<p>We plot the dendrogram and a cutoff line.</p>
+<pre class="r"><code># plot dendrogram
+par(mfrow = c(1, 1))
+plot(hc.out, labels = nci.labs)
+abline(h = 139, col = &quot;red&quot;)</code></pre>
+<p><img src="day9_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p>Finally, we perform k-means clustering with four clusters to determine whether cluster assignment will be similar.</p>
+<pre class="r"><code># K-means
+set.seed(2)
+km.out &lt;- kmeans(sd.data, 4, nstart = 20)
+km.clusters &lt;- km.out$cluster
+# do we get the same clusters?
+table(km.clusters, hc.clusters)</code></pre>
+<pre><code>##            hc.clusters
+## km.clusters  1  2  3  4
+##           1 11  0  0  9
+##           2  0  0  8  0
+##           3  9  0  0  0
+##           4 20  7  0  0</code></pre>
+<p>We can see that the resulting grouping is quite different. This is where substantial knowledge and interpretation comes in.</p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

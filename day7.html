@@ -680,7 +680,7 @@ plot(gam.lr, se = TRUE, col = &quot;green&quot;)</code></pre>
 <p>Based on this we exclude the lowest education category from our model.</p>
 <pre class="r"><code>gam.lr.s &lt;- gam(I(wage &gt; 250) ~ year + ns(age, df = 5) + education, family = binomial, data = Wage, subset = (education != &quot;1. &lt; HS Grad&quot;))
 plot(gam.lr.s, se = TRUE, col = &quot;green&quot;)</code></pre>
-<p><img src="day7_files/figure-html/unnamed-chunk-32-1.png" width="672" /><img src="day7_files/figure-html/unnamed-chunk-32-2.png" width="672" /><img src="day7_files/figure-html/unnamed-chunk-32-3.png" width="672" /></p>
+<p><img src="day7_files/figure-html/unnamed-chunk-32-1.png" width="672" /></p>
 </div>
 <div id="exercises" class="section level3">
 <h3>Exercises</h3>
