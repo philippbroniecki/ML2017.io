@@ -782,6 +782,39 @@ table(km.clusters, hc.clusters)</code></pre>
 <p>We can see that the resulting grouping is quite different. This is where substantial knowledge and interpretation comes in.</p>
 </div>
 </div>
+<div id="exercises" class="section level3">
+<h3>Exercises</h3>
+<div id="q1" class="section level4">
+<h4>Q1</h4>
+<p>We use the USArrests data for this exercise and perform hierarchical clustering on the states.</p>
+<ol style="list-style-type: decimal">
+<li>Using hierarchical clustering with complete linkage and Euclidean distance, cluster the states.</li>
+<li>Cut the dendrogram at a height that results in three distinct clusters. Which states belong to which clusters?</li>
+<li>Hierarchically cluster the states using complete linkage and Euclidean distance, after scaling the variables to have standard deviation one.</li>
+<li>What effect does scaling the variables have on the hierarchical clustering obtained? In your opinion, should the variables be scaled before the inter-observation dissimilarities are computed? Provide a justification for your answer.</li>
+</ol>
+</div>
+<div id="q2" class="section level4">
+<h4>Q2</h4>
+<ol style="list-style-type: decimal">
+<li>Generate a simulated data set with 20 observations in each of three classes (i.e. 60 observations total), and 50 variables. Hint: There are a number of functions that you can use to generate data. One example is the <code>rnorm()</code> function; <code>runif()</code> is another option. Be sure to add a mean shift to the observations in each class so that there are three distinct classes.</li>
+<li>Perform PCA on the 60 observations and plot the first two principal component score vectors. Use a different color to indicate the observations in each of the three classes. If the three classes appear separated in this plot, then continue on to part (3.). If not, then return to part (1.) and modify the simulation so that there is greater separation between the three classes. Do not continue to part (3.) until the three classes show at least some separation in the first two principal component score vectors.</li>
+<li>Perform <span class="math inline">\(K\)</span>-means clustering of the observations with <span class="math inline">\(K=3\)</span>. How well do the clusters that you obtained in <span class="math inline">\(K\)</span>-means clustering compare to the true class labels? Hint: You can use the <code>table()</code> function in R to compare the true class labels to the class labels obtained by clustering. Be careful how you interpret the results: <span class="math inline">\(K\)</span>-means clustering will arbitrarily number the clusters, so you cannot simply check whether the true class labels and clustering labels are the same.</li>
+<li>Perform <span class="math inline">\(K\)</span>-means clustering with <span class="math inline">\(K=2\)</span>. Describe your results.</li>
+<li>Now perform <span class="math inline">\(K\)</span>-means clustering with <span class="math inline">\(K=4\)</span>, and describe your results.</li>
+<li>Now perform <span class="math inline">\(K\)</span>-means clustering with <span class="math inline">\(K=3\)</span> on the first two principal component score vectors, rather than on the raw data. That is, perform <span class="math inline">\(K\)</span>-means clustering on the <span class="math inline">\(60Ã—2\)</span> matrix of which the first column is the first principal component score vector, and the second column is the second principal component score vector. Comment on the results.</li>
+<li>Using the <code>scale()</code> function, perform <span class="math inline">\(K\)</span>-means clustering with <span class="math inline">\(K=3\)</span> on the data after scaling each variable to have standard deviation one. How do these results compare to those obtained in (2.)? Explain.</li>
+</ol>
+</div>
+<div id="q3" class="section level4">
+<h4>Q3</h4>
+<ol style="list-style-type: decimal">
+<li>Load in the data using <code>read.csv()</code>. You will need to select <code>header=FALSE</code>.</li>
+<li>Apply hierarchical clustering to the samples using correlation-based distance, and plot the dendrogram. Do the genes separate the samples into the two groups? Do your results depend on the type of linkage used?</li>
+<li>Your collaborator wants to know which genes differ the most across the two groups. Suggest a way to answer this question, and apply it here.</li>
+</ol>
+</div>
+</div>
 
 
 
