@@ -579,9 +579,9 @@ lines( x = seq(1,7), y = cv.error.10, col = &quot;red&quot;, lty = &quot;dashed&
 <div id="the-bootstrap" class="section level3">
 <h3>The Bootstrap</h3>
 <p>In order to perform bootstrap analysis, we first create an <code>alpha.fn()</code> for estimating <span class="math inline">\(\alpha\)</span> You can think of <span class="math inline">\(\alpha\)</span> as a proxy for investment risk (see p. 187 for more details).</p>
-<pre class="r"><code>library(ISLR)</code></pre>
-<pre><code>## Warning: package &#39;ISLR&#39; was built under R version 3.4.1</code></pre>
-<pre class="r"><code># function on investment risk
+<pre class="r"><code>library(ISLR)
+
+# function on investment risk
 alpha.fn &lt;- function(data, index){
   X &lt;- data$X[index]
   Y &lt;- data$Y[index]

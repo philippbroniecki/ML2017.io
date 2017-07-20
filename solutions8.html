@@ -417,8 +417,10 @@ categcorical &lt;- c(&quot;Turnout&quot;, &quot;Vote2001&quot;, &quot;Gender&quo
 # declare factor variables
 bes[, categcorical] &lt;- lapply(bes[, categcorical], factor)</code></pre>
 <p>We tried 10 different values of <code>mtry</code>. We will try three different values, <span class="math inline">\(p\)</span>, <span class="math inline">\(p/2\)</span>, <span class="math inline">\(\sqrt{p}\)</span>, of <code>mtry</code> to speed up the process and vary the number of trees from 1 to 500. We will pass training and test data sets to <code>randomForest()</code> which will then estimate test error on the fly on the test data we specified, so only the training bit will be used for bootstrapping the samles.</p>
-<pre class="r"><code>library(randomForest)
-set.seed(123)
+<pre class="r"><code>library(randomForest)</code></pre>
+<pre><code>## randomForest 4.6-12</code></pre>
+<pre><code>## Type rfNews() to see new features/changes/bug fixes.</code></pre>
+<pre class="r"><code>set.seed(123)
 
 # training/test split
 train &lt;-  sample(nrow(bes), nrow(bes) / 2) # row index numbers
@@ -462,8 +464,9 @@ Carseats.test &lt;-  Carseats[-train, ]</code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>Fit a regression tree to the training set. Plot the tree, and interpret the results. What test error rate do you obtain?</li>
 </ol>
-<pre class="r"><code>library(tree)
-tree.carseats &lt;-  tree(Sales~ . , data=Carseats.train)
+<pre class="r"><code>library(tree)</code></pre>
+<pre><code>## Warning: package &#39;tree&#39; was built under R version 3.4.1</code></pre>
+<pre class="r"><code>tree.carseats &lt;-  tree(Sales~ . , data=Carseats.train)
 summary(tree.carseats)</code></pre>
 <pre><code>## 
 ## Regression tree:
@@ -697,9 +700,22 @@ Hitters.test &lt;-  Hitters[-train, ]</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li>Perform boosting on the training set with <span class="math inline">\(1,000\)</span> trees for a range of values of the shrinkage parameter <span class="math inline">\(\lambda\)</span>. Produce a plot with different shrinkage values on the <span class="math inline">\(x\)</span>-axis and the corresponding training set MSE on the <span class="math inline">\(y\)</span>-axis.</li>
 </ol>
-<pre class="r"><code>library(gbm)
-
-set.seed(103)
+<pre class="r"><code>library(gbm)</code></pre>
+<pre><code>## Loading required package: survival</code></pre>
+<pre><code>## 
+## Attaching package: &#39;survival&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:boot&#39;:
+## 
+##     aml</code></pre>
+<pre><code>## Loading required package: lattice</code></pre>
+<pre><code>## 
+## Attaching package: &#39;lattice&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:boot&#39;:
+## 
+##     melanoma</code></pre>
+<pre><code>## Loading required package: parallel</code></pre>
+<pre><code>## Loaded gbm 2.1.3</code></pre>
+<pre class="r"><code>set.seed(103)
 pows &lt;-  seq(-10, -0.2, by=0.1)
 lambdas &lt;-  10 ^ pows
 length.lambdas &lt;-  length(lambdas)

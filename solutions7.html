@@ -559,8 +559,11 @@ deviance(m3)</code></pre>
 <div id="gams" class="section level4">
 <h4>GAMs</h4>
 <p>We can’t fit splines to factors but we can fit a model with a spline one the continuous variable and add the other predictors.</p>
-<pre class="r"><code>library(gam)
-m4 &lt;-  gam(wage ~ maritl + jobclass + s(age,4), data = Wage)
+<pre class="r"><code>library(gam)</code></pre>
+<pre><code>## Warning: package &#39;gam&#39; was built under R version 3.4.1</code></pre>
+<pre><code>## Loading required package: splines</code></pre>
+<pre><code>## Loaded gam 1.14-4</code></pre>
+<pre class="r"><code>m4 &lt;-  gam(wage ~ maritl + jobclass + s(age,4), data = Wage)
 deviance(m4)</code></pre>
 <pre><code>## [1] 4476501</code></pre>
 <pre class="r"><code>anova(m1, m2, m3, m4)</code></pre>
@@ -586,9 +589,6 @@ deviance(m4)</code></pre>
 set.seed(1)
 library(MASS)
 attach(Boston)</code></pre>
-<pre><code>## The following object is masked from Wage:
-## 
-##     age</code></pre>
 <ol style="list-style-type: decimal">
 <li>Use the <code>poly()</code> function to fit a cubic polynomial regression to predict <code>nox</code> using <code>dis</code>. Report the regression output, and plot the resulting data and polynomial fits.</li>
 </ol>

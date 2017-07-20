@@ -419,8 +419,14 @@ mean((College.test[, &quot;Apps&quot;] - lm.pred)^2)</code></pre>
 <li>Fit a ridge regression model on the training set, with <span class="math inline">\(\lambda\)</span> chosen by cross-validation. Report the test error obtained.</li>
 </ol>
 <p><strong>Pick <span class="math inline">\(\lambda\)</span> using College.train and report error on College.test</strong></p>
-<pre class="r"><code>library(glmnet)
-train.mat &lt;-  model.matrix(Apps ~ . -1 , data = College.train)
+<pre class="r"><code>library(glmnet)</code></pre>
+<pre><code>## Loading required package: Matrix</code></pre>
+<pre><code>## Loading required package: foreach</code></pre>
+<pre><code>## foreach: simple, scalable parallel programming from Revolution Analytics
+## Use Revolution R for scalability, fault tolerance and more.
+## http://www.revolutionanalytics.com</code></pre>
+<pre><code>## Loaded glmnet 2.0-10</code></pre>
+<pre class="r"><code>train.mat &lt;-  model.matrix(Apps ~ . -1 , data = College.train)
 test.mat &lt;-  model.matrix(Apps ~ . -1, data = College.test)
 grid &lt;-  10 ^ seq(4, -2, length = 100)
 mod.ridge &lt;-  cv.glmnet(train.mat, College.train[, &quot;Apps&quot;], 
