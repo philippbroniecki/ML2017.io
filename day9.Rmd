@@ -65,14 +65,14 @@ head(pr.out$x) # this what we could use as IVs
 
 We can illustrate which variable loads on which factor visually. We can also examine the effect of rotation.
 
-```{r}
+```{r, fig.width=9}
 # which component picks up most of the variance on the variables
-biplot(pr.out, scale = 0)
+biplot(pr.out, scale = 0, cex = .8)
 
 # turning things around
 pr.out$rotation <- -pr.out$rotation
 pr.out$x <- -pr.out$x
-biplot(pr.out, scale = 0)
+biplot(pr.out, scale = 0, cex = .8)
 ```
 
 We are really interested in how much of the variance in the data our components capture. So first we get the standard deviation on the new scales and from that estimate the variance. We can then evaluate how much of the total variance is explained by each individual principal component.
@@ -363,7 +363,7 @@ We use the USArrests data for this exercise and perform hierarchical clustering 
 3. Perform $K$-means clustering of the observations with $K=3$. How well do the clusters that you obtained in $K$-means clustering compare to the true class labels? Hint: You can use the `table()` function in R to compare the true class labels to the class labels obtained by clustering. Be careful how you interpret the results: $K$-means clustering will arbitrarily number the clusters, so you cannot simply check whether the true class labels and clustering labels are the same.
 4. Perform $K$-means clustering with $K=2$. Describe your results.
 5. Now perform $K$-means clustering with $K=4$, and describe your results.
-6. Now perform $K$-means clustering with $K=3$ on the first two principal component score vectors, rather than on the raw data. That is, perform $K$-means clustering on the $60×2$ matrix of which the first column is the first principal component score vector, and the second column is the second principal component score vector. Comment on the results.
+6. Now perform $K$-means clustering with $K=3$ on the first two principal component score vectors, rather than on the raw data. That is, perform $K$-means clustering on the $6$x$2$ matrix of which the first column is the first principal component score vector, and the second column is the second principal component score vector. Comment on the results.
 7. Using the `scale()` function, perform $K$-means clustering with $K=3$ on the data after scaling each variable to have standard deviation one. How do these results compare to those obtained in (2.)? Explain.
 
 #### Q3

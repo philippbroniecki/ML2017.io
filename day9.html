@@ -468,13 +468,13 @@ head(pr.out$x) # this what we could use as IVs</code></pre>
 ## Colorado   -1.4993407 -0.9776297  1.08400162  0.001450164</code></pre>
 <p>We can illustrate which variable loads on which factor visually. We can also examine the effect of rotation.</p>
 <pre class="r"><code># which component picks up most of the variance on the variables
-biplot(pr.out, scale = 0)</code></pre>
-<p><img src="day9_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+biplot(pr.out, scale = 0, cex = .8)</code></pre>
+<p><img src="day9_files/figure-html/unnamed-chunk-4-1.png" width="864" /></p>
 <pre class="r"><code># turning things around
 pr.out$rotation &lt;- -pr.out$rotation
 pr.out$x &lt;- -pr.out$x
-biplot(pr.out, scale = 0)</code></pre>
-<p><img src="day9_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
+biplot(pr.out, scale = 0, cex = .8)</code></pre>
+<p><img src="day9_files/figure-html/unnamed-chunk-4-2.png" width="864" /></p>
 <p>We are really interested in how much of the variance in the data our components capture. So first we get the standard deviation on the new scales and from that estimate the variance. We can then evaluate how much of the total variance is explained by each individual principal component.</p>
 <pre class="r"><code># standard deviation on new scales
 pr.out$sdev</code></pre>
@@ -629,9 +629,8 @@ xlab = &quot;&quot;, sub = &quot;&quot;)</code></pre>
 <div id="example-with-gene-expression-data-from-hastie-et-al." class="section level4">
 <h4>Example with Gene Expression data (from Hastie et al.)</h4>
 <p>We load the ISLR library and explore the data.</p>
-<pre class="r"><code>library(ISLR)</code></pre>
-<pre><code>## Warning: package &#39;ISLR&#39; was built under R version 3.4.1</code></pre>
-<pre class="r"><code>nci.labs &lt;- NCI60$labs
+<pre class="r"><code>library(ISLR)
+nci.labs &lt;- NCI60$labs
 nci.data &lt;- NCI60$data
 ?NCI60
 dim(nci.data)</code></pre>
@@ -803,7 +802,7 @@ table(km.clusters, hc.clusters)</code></pre>
 <li>Perform <span class="math inline">\(K\)</span>-means clustering of the observations with <span class="math inline">\(K=3\)</span>. How well do the clusters that you obtained in <span class="math inline">\(K\)</span>-means clustering compare to the true class labels? Hint: You can use the <code>table()</code> function in R to compare the true class labels to the class labels obtained by clustering. Be careful how you interpret the results: <span class="math inline">\(K\)</span>-means clustering will arbitrarily number the clusters, so you cannot simply check whether the true class labels and clustering labels are the same.</li>
 <li>Perform <span class="math inline">\(K\)</span>-means clustering with <span class="math inline">\(K=2\)</span>. Describe your results.</li>
 <li>Now perform <span class="math inline">\(K\)</span>-means clustering with <span class="math inline">\(K=4\)</span>, and describe your results.</li>
-<li>Now perform <span class="math inline">\(K\)</span>-means clustering with <span class="math inline">\(K=3\)</span> on the first two principal component score vectors, rather than on the raw data. That is, perform <span class="math inline">\(K\)</span>-means clustering on the <span class="math inline">\(60Ã—2\)</span> matrix of which the first column is the first principal component score vector, and the second column is the second principal component score vector. Comment on the results.</li>
+<li>Now perform <span class="math inline">\(K\)</span>-means clustering with <span class="math inline">\(K=3\)</span> on the first two principal component score vectors, rather than on the raw data. That is, perform <span class="math inline">\(K\)</span>-means clustering on the <span class="math inline">\(6\)</span>x<span class="math inline">\(2\)</span> matrix of which the first column is the first principal component score vector, and the second column is the second principal component score vector. Comment on the results.</li>
 <li>Using the <code>scale()</code> function, perform <span class="math inline">\(K\)</span>-means clustering with <span class="math inline">\(K=3\)</span> on the data after scaling each variable to have standard deviation one. How do these results compare to those obtained in (2.)? Explain.</li>
 </ol>
 </div>

@@ -424,8 +424,12 @@ summary(Auto)</code></pre>
 ##  amc hornet        :  4  
 ##  chevrolet chevette:  4  
 ##  (Other)           :365</code></pre>
-<pre class="r"><code>attach(Auto)
-mpg01 &lt;- ifelse( mpg &gt; median(mpg), yes = 1, no = 0)
+<pre class="r"><code>attach(Auto)</code></pre>
+<pre><code>## The following objects are masked from Auto (pos = 22):
+## 
+##     acceleration, cylinders, displacement, horsepower, mpg, name,
+##     origin, weight, year</code></pre>
+<pre class="r"><code>mpg01 &lt;- ifelse( mpg &gt; median(mpg), yes = 1, no = 0)
 Auto &lt;- data.frame(Auto, mpg01)</code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>Explore the data graphically in order to investigate the association between <code>mpg01</code> and the other features. Which of the other features seem most likely to be useful in predicting <code>mpg01</code>? Scatterplots and boxplots may be useful tools to answer this question. Describe your findings.</li>

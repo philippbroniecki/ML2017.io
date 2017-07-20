@@ -404,9 +404,8 @@ eps &lt;-  rnorm(100)</code></pre>
 <li>Use the <code>regsubsets()</code> function to perform best subset selection in order to choose the best model containing the predictors <span class="math inline">\(X,X^2,\ldots,X^{10}\)</span>. What is the best model obtained according to <span class="math inline">\(C_{p}\)</span>, <span class="math inline">\(BIC\)</span>, and adjusted <span class="math inline">\(R^2\)</span> Show some plots to provide evidence for your answer, and report the coefficients of the best model obtained. Note you will need to use the <code>data.frame()</code> function to create a single data set containing both <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>.</li>
 </ol>
 <p>In the <span class="math inline">\(poly()\)</span> function we set the argument <span class="math inline">\(raw=TRUE\)</span>. This uses the raw polynomials. Otherwise orthogonal polynomials are used. Orthogonal polynomials are usually preferrable because they solve the problem that higher orders of <span class="math inline">\(X\)</span> are highly correlated. In addition, they keep the numbers from growing astronomically. One downside is that they are somewhat abstract. We know the true data generating process and thus the true coefficients. We want to compare the our estimates to those values. Thus, we do not want to use orthogonal polynomials.</p>
-<pre class="r"><code>library(leaps)</code></pre>
-<pre><code>## Warning: package &#39;leaps&#39; was built under R version 3.4.1</code></pre>
-<pre class="r"><code>data.full &lt;-  data.frame(&quot;y&quot; = y_hat, &quot;x&quot; = X)
+<pre class="r"><code>library(leaps)
+data.full &lt;-  data.frame(&quot;y&quot; = y_hat, &quot;x&quot; = X)
 mod.full &lt;-  regsubsets(y ~ poly(x, 10, raw=TRUE), data = data.full, nvmax = 10)
 mod.summary &lt;-  summary(mod.full)
 
